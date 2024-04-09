@@ -3,12 +3,16 @@ package router
 import (
 	"net/http"
 
+	"github.com/camelhr/camelhr-api/internal/domains/organization"
 	customMiddleware "github.com/camelhr/camelhr-api/internal/router/middleware"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
 
 func SetupRoutes() http.Handler {
+	// initialize dependencies
+	orgHandler := organization.NewOrganizationHandler()
+
 	// create a default router
 	r := chi.NewRouter()
 
@@ -25,6 +29,20 @@ func SetupRoutes() http.Handler {
 	v1.Group(func(r chi.Router) {
 		r.Get("/status", func(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte("OK"))
+		})
+	})
+
+	// protected routes. auth required
+	v1.Group(func(r chi.Router) {
+		// TODO: add auth middleware
+
+		r.Route("/organizations", func(r chi.Router) {
+			r.Post("/", orgHandler.CreateOrganization)
+			r.Route("/{orgID:[0-9]+}", func(r chi.Router) {
+				r.Get("/", orgHandler.GetOrganization)
+				r.Put("/", orgHandler.UpdateOrganization)
+				r.Delete("/", orgHandler.DeleteOrganization)
+			})
 		})
 	})
 
