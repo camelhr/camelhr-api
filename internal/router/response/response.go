@@ -8,6 +8,7 @@ import (
 	"github.com/camelhr/log"
 )
 
+// JSON writes a JSON response with the given status code and value
 func JSON(w http.ResponseWriter, status int, v any) {
 	buf := &bytes.Buffer{}
 	enc := json.NewEncoder(buf)
