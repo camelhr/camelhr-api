@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:16.2-alpine
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: camelhr_dev_db
+    volumes:
+      - camelhr-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -q -d camelhr_dev_db -U postgres"]
+      timeout: 10s
+      interval: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DB_CONN: host=localhost user=postgres password=postgres dbname=camelhr_dev_db sslmode=disable
+      LOG_LEVEL: DEBUG
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+
+volumes:
+  camelhr-db-data:

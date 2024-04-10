@@ -24,7 +24,7 @@ func init() {
 	viper.SetDefault("http_address", "0.0.0.0:8080")
 
 	// database configs
-	viper.SetDefault("db_conn", "host=localhost port=5433 dbname=camelhr_api_dev sslmode=disable user=postgres")
+	viper.SetDefault("db_conn", "host=localhost port=5433 dbname=camelhr_db sslmode=disable user=postgres")
 	viper.SetDefault("db_max_idle", 4)
 	viper.SetDefault("db_max_open", 4)
 	viper.SetDefault("db_max_read_queue", 10)
