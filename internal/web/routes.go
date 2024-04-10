@@ -1,10 +1,10 @@
-package router
+package web
 
 import (
 	"net/http"
 
 	"github.com/camelhr/camelhr-api/internal/domains/organization"
-	customMiddleware "github.com/camelhr/camelhr-api/internal/router/middleware"
+	customMiddleware "github.com/camelhr/camelhr-api/internal/web/middleware"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )

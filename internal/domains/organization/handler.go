@@ -3,8 +3,8 @@ package organization
 import (
 	"net/http"
 
-	"github.com/camelhr/camelhr-api/internal/router/request"
-	"github.com/camelhr/camelhr-api/internal/router/response"
+	"github.com/camelhr/camelhr-api/internal/web/request"
+	"github.com/camelhr/camelhr-api/internal/web/response"
 )
 
 type (

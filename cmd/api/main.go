@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/camelhr/camelhr-api/internal/config"
-	"github.com/camelhr/camelhr-api/internal/router"
+	"github.com/camelhr/camelhr-api/internal/web"
 	"github.com/camelhr/log"
 )
 
@@ -18,7 +18,7 @@ func main() {
 	log.InitGlobalLogger("api", config.LogLevel)
 	log.Info("config loaded successfully")
 
-	handler := router.SetupRoutes()
+	handler := web.SetupRoutes()
 	server := &http.Server{
 		Addr:              config.HTTPAddress,
 		Handler:           handler,
