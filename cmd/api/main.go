@@ -16,6 +16,7 @@ import (
 func main() {
 	config := config.LoadConfig()
 	log.InitGlobalLogger("api", config.LogLevel)
+	log.Debug("debug logging enabled") // printed only if log level is set to debug
 	log.Info("config loaded successfully")
 
 	handler := web.SetupRoutes()

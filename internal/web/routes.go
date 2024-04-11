@@ -28,7 +28,7 @@ func SetupRoutes() http.Handler {
 	// open routes. no auth required
 	v1.Group(func(r chi.Router) {
 		r.Get("/status", func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte("OK"))
+			w.Write([]byte("OK")) //nolint:errcheck
 		})
 	})
 
