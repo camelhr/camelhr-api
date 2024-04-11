@@ -1,4 +1,4 @@
-.PHONY: up down nuke run build test lint clean goose-up
+.PHONY: up down nuke run build test lint clean goose-up migrate-up
 
 export PGHOST ?= localhost
 export PGPORT ?= 5432
@@ -31,5 +31,5 @@ lint:
 clean:
 	rm -rf bin
 
-goose-up:
-	goose -dir db/migrations postgres postgres://${PGUSER}:${PGPASSWORD}@${PGHOST}:5432/${PGDATABASE}?sslmode=${PGSSLMODE} up
+migrate-up:
+	go run ./cmd/dbmigrator/main.go -db_conn=postgres://${PGUSER}:${PGPASSWORD}@${PGHOST}:5432/${PGDATABASE}?sslmode=${PGSSLMODE} up
