@@ -22,7 +22,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: /app/dbmigrator -db_conn="user=${PGUSER?} password=${PGPASSWORD?} dbname=${PGDATABASE?} host=${PGHOST} port=${PGPORT?} sslmode=${PGSSLMODE}" up
+    environment:
+      DB_CONN: "user=${PGUSER?} password=${PGPASSWORD?} dbname=${PGDATABASE?} host=${PGHOST} port=${PGPORT?} sslmode=${PGSSLMODE}"
+    command: /app/dbmigrator up
     depends_on:
       db:
         condition: service_healthy

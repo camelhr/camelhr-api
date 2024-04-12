@@ -21,9 +21,16 @@ func main() {
 	log.InitGlobalLogger("goose", "info")
 
 	gooseFlagSet.Parse(os.Args[1:])
+
+	// if db connection string is provided as a flag then use it
+	// otherwise, check if it is provided as an environment variable
+	// if it is not provided in either of the ways then exit the program
 	if dbConn == nil || *dbConn == "" {
-		gooseFlagSet.Usage()
-		log.Fatal("db_conn flag is mandatory")
+		envDBConn := os.Getenv("DB_CONN")
+		if envDBConn == "" {
+			log.Fatal("db connection string is required")
+		}
+		dbConn = &envDBConn
 	}
 	args := gooseFlagSet.Args()
 
