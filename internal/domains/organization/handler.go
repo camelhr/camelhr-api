@@ -8,14 +8,13 @@ import (
 )
 
 type (
-	organizationHandler struct {
-	}
+	organizationHandler struct{}
 
-	OrganizationRequest struct {
+	Request struct {
 		Name string `json:"name"`
 	}
 
-	OrganizationResponse struct {
+	Response struct {
 		ID   int64  `json:"id"`
 		Name string `json:"name"`
 	}
@@ -27,7 +26,7 @@ func NewOrganizationHandler() *organizationHandler {
 
 func (h *organizationHandler) GetOrganization(w http.ResponseWriter, r *http.Request) {
 	// TODO: implement
-	response.JSON(w, http.StatusOK, &OrganizationResponse{
+	response.JSON(w, http.StatusOK, &Response{
 		ID:   int64(1),
 		Name: "Test Organization",
 	})
@@ -35,12 +34,13 @@ func (h *organizationHandler) GetOrganization(w http.ResponseWriter, r *http.Req
 
 func (h *organizationHandler) CreateOrganization(w http.ResponseWriter, r *http.Request) {
 	// TODO: implement
-	var reqPayload OrganizationRequest
+	var reqPayload Request
 	if err := request.DecodeJSON(r.Body, &reqPayload); err != nil {
 		response.JSON(w, http.StatusBadRequest, map[string]string{"error": "invalid request payload"})
 		return
 	}
-	response.JSON(w, http.StatusCreated, &OrganizationResponse{
+
+	response.JSON(w, http.StatusCreated, &Response{
 		ID:   int64(1),
 		Name: reqPayload.Name,
 	})

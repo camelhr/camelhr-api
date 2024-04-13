@@ -1,4 +1,4 @@
-package organization
+package organization_test
 
 import (
 	"net/http"
@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/camelhr/camelhr-api/internal/domains/organization"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -16,14 +17,14 @@ func TestCreateOrganization(t *testing.T) {
 		t.Parallel()
 		// create a new request with a JSON payload
 		payload := `{"name": "Test Organization"}`
-		req, err := http.NewRequest("POST", "/organizations", strings.NewReader(payload))
-		assert.NoError(t, err)
+		req, err := http.NewRequest(http.MethodPost, "/organizations", strings.NewReader(payload))
+		require.NoError(t, err)
 
 		// create a response recorder to capture the response
 		rr := httptest.NewRecorder()
 
 		// create a new organization handler
-		handler := NewOrganizationHandler()
+		handler := organization.NewOrganizationHandler()
 
 		// call the CreateOrganization function
 		handler.CreateOrganization(rr, req)

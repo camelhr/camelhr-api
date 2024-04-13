@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -42,32 +43,43 @@ Commands:
 `
 )
 
-var (
-	flagSet                     = flag.NewFlagSet("dbmigrator", flag.ExitOnError)
-	dir                         = flagSet.String("dir", "migrations", "directory with migration files")
-	dbConn                      = flagSet.String("db_conn", "", "database connection string")
-	allowedCommands             = []string{"up", "up-by-one", "up-to", "down", "down-to", "redo", "status", "version", "create"}
-	dbConnectionNotNeedCommands = []string{"create"}
-)
-
 func main() {
 	ctx := context.Background()
-	log.InitGlobalLogger("dbmigrator", "info")
-	flagSet.Usage = usage      // override the default usage function
-	flagSet.Parse(os.Args[1:]) // nolint:errcheck
 
+	flagSet := flag.NewFlagSet("dbmigrator", flag.ExitOnError)
+	flagSet.Usage = func() {
+		fmt.Print(usagePrefix) //nolint:forbidigo // structured logger is not needed here
+		flagSet.PrintDefaults()
+		fmt.Print(usageCommands) //nolint:forbidigo // structured logger is not needed here
+	}
+	dir := flagSet.String("dir", "migrations", "directory with migration files")
+	dbConn := flagSet.String("db_conn", "", "database connection string")
+
+	args := flagSet.Args()
+	allowedCommands := []string{"up", "up-by-one", "up-to", "down", "down-to", "redo", "status", "version", "create"}
+	dbConnectionNotNeedCommands := []string{"create"}
+
+	flagSet.Parse(os.Args[1:]) //nolint:errcheck // flag.ExitOnError will exit on error
+	log.InitGlobalLogger("dbmigrator", "info")
 	log.Info("migration started")
 
-	// if db connection string is provided as a flag then use it
-	// otherwise, get it from the environment variable
+	command, err := extractCommand(args, allowedCommands)
+	if err != nil {
+		flagSet.Usage()
+		log.Fatal("failed to extract command: %v", err)
+	}
+
+	// if db connection string is provided as a flag then use it.
+	// otherwise, get it from the environment variable.
 	if dbConn == nil || *dbConn == "" {
 		envDBConn := os.Getenv("DB_CONN")
 		dbConn = &envDBConn
 	}
 
-	args := flagSet.Args()
-	command := extractCommand(args)
-	validateDBConnectionString(*dbConn, command)
+	if err := validateDBConnectionString(*dbConn, command, dbConnectionNotNeedCommands); err != nil {
+		flagSet.Usage()
+		log.Fatal("failed to validate db connection string: %v", err)
+	}
 
 	db, err := goose.OpenDBWithDriver(driver, *dbConn)
 	if err != nil {
@@ -86,47 +98,42 @@ func main() {
 	}
 
 	if err := goose.RunContext(ctx, command, db, *dir, arguments...); err != nil {
-		log.Fatal("failed to execute migration with goose %v: %v", command, err)
+		log.Error("failed to execute migration with goose %v: %v", command, err)
+		return
 	}
 
 	log.Info("migration completed successfully")
 }
 
-func usage() {
-	fmt.Print(usagePrefix)
-	flagSet.PrintDefaults()
-	fmt.Print(usageCommands)
-}
-
-// extractCommand extracts the command from the arguments
-// validates it against the allowed commands and returns the command
-// it exits the program with an error message if the command is invalid
-func extractCommand(args []string) string {
+// extractCommand extracts the command from the arguments,
+// validates it against the allowed commands and returns the command.
+// it returns an error if the command is invalid.
+func extractCommand(args []string, allowedCommands []string) (string, error) {
 	if len(args) < 1 {
-		flagSet.Usage()
-		log.Fatal("command argument is required")
+		return "", errors.New("command argument is required")
 	}
 
 	command := args[0]
 	if !contains(allowedCommands, strings.ToLower(command)) {
-		flagSet.Usage()
-		log.Fatal("invalid command: %s", command)
+		return "", fmt.Errorf("invalid command: %s", command)
 	}
 
-	return command
+	return command, nil
 }
 
-// validateDBConnectionString ensures that the db connection string is not empty for the commands that require it
-// it exits the program with an error message if db connection string is missing for the required commands
-func validateDBConnectionString(dbConn string, command string) {
+// validateDBConnectionString ensures that the db connection string is not empty for the commands that require it.
+// it returns error if db connection string is missing for the required commands.
+func validateDBConnectionString(dbConn string, command string, dbConnectionNotNeedCommands []string) error {
 	if dbConn == "" {
 		// if the command does not require a db connection string then return
 		if contains(dbConnectionNotNeedCommands, command) {
-			return
+			return nil
 		}
-		flagSet.Usage()
-		log.Fatal("db_conn flag or DB_CONN environment variable is required for '%s' command", command)
+
+		return fmt.Errorf("db_conn flag or DB_CONN environment variable is required for '%s' command", command)
 	}
+
+	return nil
 }
 
 func contains(s []string, e string) bool {
@@ -135,5 +142,6 @@ func contains(s []string, e string) bool {
 			return true
 		}
 	}
+
 	return false
 }

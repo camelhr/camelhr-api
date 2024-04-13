@@ -1,4 +1,4 @@
-package middlewares
+package middleware
 
 import (
 	"net/http"
@@ -9,7 +9,7 @@ import (
 )
 
 // ChiRequestLoggerMiddleware returns a middleware that logs the start and end of each request,
-// along with some useful request and response information
+// along with some useful request and response information.
 func ChiRequestLoggerMiddleware() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
@@ -42,6 +42,7 @@ func ChiRequestLoggerMiddleware() func(next http.Handler) http.Handler {
 
 			next.ServeHTTP(ww, r)
 		}
+
 		return http.HandlerFunc(fn)
 	}
 }
