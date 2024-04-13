@@ -50,12 +50,6 @@ linters-settings:
     block-size: 2
   wsl:
     allow-separated-leading-comment: true
-  revive:
-    rules:
-      - name: "unused-parameter"
-        disabled: true
-  gocritic:
-    enable-all: true
   gofmt:
     simplify: true
   nakedret:
@@ -66,3 +60,68 @@ linters-settings:
     min-function-lines: 15
   gocyclo:
     min-complexity: 10
+  revive:
+    rules:
+      - name: use-any
+        disabled: false
+      - name: import-alias-naming
+        disabled: false
+      - name: import-shadowing
+        disabled: false
+      - name: unused-parameter
+        disabled: true
+      - name: early-return
+        disabled: false
+  gocritic:
+    enabled-checks:
+      - appendAssign
+      - argOrder
+      - assignOp
+      - badCall
+      - badCond
+      - boolExprSimplify
+      - builtinShadow
+      - captLocal
+      - caseOrder
+      - codegenComment
+      - commentedOutCode
+      - commentedOutImport
+      - commentFormatting
+      - defaultCaseOrder
+      - deprecatedComment
+      - docStub
+      - dupArg
+      - dupBranchBody
+      - dupCase
+      - dupImport
+      - dupSubExpr
+      - elseif
+      - emptyFallthrough
+      - emptyStringTest
+      - exitAfterDefer
+      - flagDeref
+      - flagName
+      - ifElseChain
+      - importShadow
+      - mapKey
+      - nestingReduce
+      - newDeref
+      - offBy1
+      - ptrToRefParam
+      - regexpMust
+      - singleCaseSwitch
+      - sloppyLen
+      - sloppyTypeAssert
+      - stringXbytes
+      - switchTrue
+      - truncateCmp
+      - typeAssertChain
+      - typeSwitchVar
+      - underef
+      - unlambda
+      - unnecessaryBlock
+      - unslice
+      - valSwap
+      - whyNoLint
+      - wrapperFunc
+      - yodaStyleExpr
