@@ -1,0 +1,23 @@
+name: Feature Request
+description: Suggest an idea to help us improve
+title: '[Feature]: '
+labels: ['enhancement']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this feature request report!
+  - type: checkboxes
+    attributes:
+      label: Is there an existing issue for this?
+      description: Please [search](https://github.com/camelhr/camelhr-api/issues) to see if an issue already exists for your feature request.
+      options:
+        - label: I have searched the existing issues
+          required: true
+  - type: textarea
+    attributes:
+      label: Description
+      description: |
+        A clear and concise description of the feature you're interested in.
+    validations:
+      required: true
