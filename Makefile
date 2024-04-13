@@ -1,4 +1,4 @@
-.PHONY: up down nuke run build test lint clean goose-up migrate-up
+.PHONY: up down nuke run build test lint lint-fix clean goose-up migrate-up
 
 export PGHOST ?= localhost
 export PGPORT ?= 5432
@@ -23,10 +23,13 @@ build:
 	go build -o bin/ ./...
 
 test:
-	go test -v -cover ./...
+	go test -v -cover -race ./...
 
 lint:
 	golangci-lint run
+
+lint-fix:
+	golangci-lint run --fix
 
 clean:
 	rm -rf bin
