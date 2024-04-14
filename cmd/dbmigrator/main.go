@@ -55,13 +55,14 @@ func main() {
 	dir := flagSet.String("dir", "migrations", "directory with migration files")
 	dbConn := flagSet.String("db_conn", "", "database connection string")
 
-	args := flagSet.Args()
 	allowedCommands := []string{"up", "up-by-one", "up-to", "down", "down-to", "redo", "status", "version", "create"}
 	dbConnectionNotNeedCommands := []string{"create"}
 
 	flagSet.Parse(os.Args[1:]) //nolint:errcheck // flag.ExitOnError will exit on error
 	log.InitGlobalLogger("dbmigrator", "info")
 	log.Info("migration started")
+
+	args := flagSet.Args()
 
 	command, err := extractCommand(args, allowedCommands)
 	if err != nil {
