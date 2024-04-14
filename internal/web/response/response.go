@@ -62,7 +62,7 @@ func Empty(w http.ResponseWriter, status int) {
 
 // Text writes a text response with the given status code and value.
 func Text(w http.ResponseWriter, status int, v string) {
-	w.Header().Set("Content-Type", "text/plain")
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(status)
 
 	if _, err := w.Write([]byte(v)); err != nil {
