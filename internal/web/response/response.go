@@ -60,12 +60,6 @@ func Empty(w http.ResponseWriter, status int) {
 	w.WriteHeader(status)
 }
 
-// Redirect writes a redirect response with the given status code and location.
-func Redirect(w http.ResponseWriter, status int, location string) {
-	w.Header().Set("Location", location)
-	w.WriteHeader(status)
-}
-
 // Text writes a text response with the given status code and value.
 func Text(w http.ResponseWriter, status int, v string) {
 	w.Header().Set("Content-Type", "text/plain")
