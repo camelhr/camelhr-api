@@ -3,9 +3,11 @@ module github.com/camelhr/camelhr-api
 go 1.22.1
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/camelhr/log v0.0.0-20240407124612-9cf516c92fe4
 	github.com/go-chi/chi/v5 v5.0.12
 	github.com/jackc/pgx/v5 v5.5.5
+	github.com/jmoiron/sqlx v1.3.5
 	github.com/pressly/goose/v3 v3.19.2
 	github.com/spf13/viper v1.18.2
 	github.com/stretchr/testify v1.9.0
@@ -33,6 +35,7 @@ require (
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.22.0 // indirect

@@ -2,6 +2,8 @@
 
 run:
   deadline: 2m
+  skip-files:
+    - ".*_mock.go$" # skipping generated mock files
 
 issues:
   max-issues-per-linter: 0
@@ -20,6 +22,7 @@ linters:
     - wrapcheck
     - godox
     - exhaustruct
+    - ireturn # disabling as it is opinionated
     - sloglint # disabling since we are using different logger
     - zerologlint # disabling since we are using custom logger based on zerolog
     - gochecknoinits # disabling as init functions are required in some cases

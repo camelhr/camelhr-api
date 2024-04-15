@@ -3,6 +3,7 @@ package web
 import (
 	"net/http"
 
+	"github.com/camelhr/camelhr-api/internal/database"
 	"github.com/camelhr/camelhr-api/internal/domains/organization"
 	"github.com/camelhr/camelhr-api/internal/web/middleware"
 	"github.com/camelhr/camelhr-api/internal/web/response"
@@ -10,7 +11,7 @@ import (
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
 )
 
-func SetupRoutes() http.Handler {
+func SetupRoutes(db database.Database) http.Handler {
 	// initialize dependencies
 	orgHandler := organization.NewOrganizationHandler()
 

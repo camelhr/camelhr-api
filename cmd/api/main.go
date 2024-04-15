@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -9,8 +10,11 @@ import (
 	"time"
 
 	"github.com/camelhr/camelhr-api/internal/config"
+	"github.com/camelhr/camelhr-api/internal/database"
 	"github.com/camelhr/camelhr-api/internal/web"
 	"github.com/camelhr/log"
+	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/jmoiron/sqlx"
 )
 
 const (
@@ -27,7 +31,14 @@ func main() {
 	log.Debug("debug logging enabled") // printed only if log level is set to debug
 	log.Info("config loaded successfully")
 
-	handler := web.SetupRoutes()
+	// connect to the database, set configurations and check if the connection is successful
+	db, err := connectToDatabase(configs)
+	if err != nil {
+		log.Fatal("failed to connect to database: %v", err)
+	}
+
+	// setup routes and start the server
+	handler := web.SetupRoutes(db)
 	server := &http.Server{
 		Addr:              configs.HTTPAddress,
 		Handler:           handler,
@@ -53,6 +64,24 @@ func main() {
 			log.Error("failed to gracefully shutdown server: %v", err)
 		}
 	})
+}
+
+func connectToDatabase(configs config.Config) (database.Database, error) {
+	db, err := sqlx.Open("pgx", configs.DBConn)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open database: %w", err)
+	}
+
+	db.SetMaxOpenConns(configs.DBMaxOpen)
+	db.SetMaxIdleConns(configs.DBMaxIdle)
+	db.SetConnMaxIdleTime(time.Duration(configs.DBMaxIdleConnTime) * time.Minute)
+	db.SetConnMaxLifetime(0)
+
+	if err = db.Ping(); err != nil {
+		return nil, fmt.Errorf("failed to ping database: %w", err)
+	}
+
+	return database.NewPostgresDatabase(db), nil
 }
 
 func trapTerminateSignal(onTerminate func()) {

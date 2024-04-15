@@ -11,14 +11,16 @@ type Config struct {
 
 	HTTPAddress string `mapstructure:"http_address"`
 
-	DBConn    string `mapstructure:"db_conn"`
-	DBMaxIdle int    `mapstructure:"db_max_idle"`
-	DBMaxOpen int    `mapstructure:"db_max_open"`
+	DBConn            string `mapstructure:"db_conn"`
+	DBMaxOpen         int    `mapstructure:"db_max_open"`
+	DBMaxIdle         int    `mapstructure:"db_max_idle"`
+	DBMaxIdleConnTime int    `mapstructure:"db_max_idle_conn_time"`
 }
 
 const (
-	DefaultDBMaxIdle = 4
-	DefaultDBMaxOpen = 4
+	defaultDBMaxOpen         = 4
+	defaultDBMaxIdle         = 4
+	defaultDBMaxIdleConnTime = 4
 )
 
 func init() {
@@ -34,8 +36,9 @@ func init() {
 
 	// database configs
 	viper.SetDefault("db_conn", "") // secret value. should be set in the environment.
-	viper.SetDefault("db_max_idle", DefaultDBMaxIdle)
-	viper.SetDefault("db_max_open", DefaultDBMaxOpen)
+	viper.SetDefault("db_max_open", defaultDBMaxOpen)
+	viper.SetDefault("db_max_idle", defaultDBMaxIdle)
+	viper.SetDefault("db_max_idle_conn_time", defaultDBMaxIdleConnTime) // in minutes
 
 	// override default values with environment variables.
 	viper.AutomaticEnv()
