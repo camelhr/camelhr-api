@@ -15,7 +15,7 @@ import (
 func TestExec(t *testing.T) {
 	t.Parallel()
 
-	t.Run("should call the Exec method", func(t *testing.T) {
+	t.Run("should call underlying ExecContext when dest is nil", func(t *testing.T) {
 		t.Parallel()
 
 		mockDB, mock, err := sqlmock.New()
@@ -30,8 +30,129 @@ func TestExec(t *testing.T) {
 			WithArgs("John Doe", 30).
 			WillReturnResult(sqlmock.NewResult(1, 1))
 
-		_, err = pgDB.Exec(context.TODO(), "INSERT INTO users (name, age) VALUES ($1, $2)", "John Doe", 30)
-		assert.NoError(t, err)
+		err = pgDB.Exec(context.TODO(), nil, "INSERT INTO users (name, age) VALUES ($1, $2)", "John Doe", 30)
+		require.NoError(t, err)
+	})
+
+	t.Run("should call underlying SelectContext when dest is slice", func(t *testing.T) {
+		t.Parallel()
+
+		mockDB, mock, err := sqlmock.New()
+		require.NoError(t, err)
+		defer mockDB.Close()
+
+		sqlxDB := sqlx.NewDb(mockDB, "sqlmock")
+		defer sqlxDB.Close()
+		pgDB := database.NewPostgresDatabase(sqlxDB)
+
+		rows := sqlmock.NewRows([]string{"name", "age"}).AddRow("John Doe", 30)
+		mock.ExpectQuery("INSERT INTO users (.+) VALUES (.+)").
+			WithArgs("John Doe", 30).
+			WillReturnRows(rows)
+
+		var users []struct {
+			Name string `db:"name"`
+			Age  int    `db:"age"`
+		}
+
+		err = pgDB.Exec(context.TODO(), &users,
+			"INSERT INTO users (name, age) VALUES ($1, $2) RETURNING name, age", "John Doe", 30)
+		require.NoError(t, err)
+		assert.Len(t, users, 1)
+		assert.Equal(t, "John Doe", users[0].Name)
+		assert.Equal(t, 30, users[0].Age)
+	})
+
+	t.Run("should call underlying Get when dest is non-slice non-array pointer", func(t *testing.T) {
+		t.Parallel()
+
+		mockDB, mock, err := sqlmock.New()
+		require.NoError(t, err)
+		defer mockDB.Close()
+
+		sqlxDB := sqlx.NewDb(mockDB, "sqlmock")
+		defer sqlxDB.Close()
+		pgDB := database.NewPostgresDatabase(sqlxDB)
+
+		rows := sqlmock.NewRows([]string{"id"}).AddRow(1)
+		mock.ExpectQuery("INSERT INTO users (.+) VALUES (.+)").
+			WithArgs("John Doe", 30).
+			WillReturnRows(rows)
+
+		var id *int64
+		err = pgDB.Exec(context.TODO(), &id,
+			"INSERT INTO users (name, age) VALUES ($1, $2) RETURNING id", "John Doe", 30)
+		require.NoError(t, err)
+		require.NotNil(t, id)
+		assert.Equal(t, int64(1), *id)
+	})
+
+	t.Run("should return an error when the underlying ExecContext fails", func(t *testing.T) {
+		t.Parallel()
+
+		mockDB, mock, err := sqlmock.New()
+		require.NoError(t, err)
+		defer mockDB.Close()
+
+		sqlxDB := sqlx.NewDb(mockDB, "sqlmock")
+		defer sqlxDB.Close()
+		pgDB := database.NewPostgresDatabase(sqlxDB)
+
+		mock.ExpectExec("INSERT INTO users (.+) VALUES (.+)").
+			WithArgs("John Doe", 30).
+			WillReturnError(assert.AnError)
+
+		err = pgDB.Exec(context.TODO(), nil, "INSERT INTO users (name, age) VALUES ($1, $2)", "John Doe", 30)
+		require.Error(t, err)
+		assert.ErrorIs(t, err, assert.AnError)
+	})
+
+	t.Run("should return an error when the underlying SelectContext fails", func(t *testing.T) {
+		t.Parallel()
+
+		mockDB, mock, err := sqlmock.New()
+		require.NoError(t, err)
+		defer mockDB.Close()
+
+		sqlxDB := sqlx.NewDb(mockDB, "sqlmock")
+		defer sqlxDB.Close()
+		pgDB := database.NewPostgresDatabase(sqlxDB)
+
+		mock.ExpectQuery("INSERT INTO users (.+) VALUES (.+)").
+			WithArgs("John Doe", 30).
+			WillReturnError(assert.AnError)
+
+		var users []struct {
+			Name string `db:"name"`
+			Age  int    `db:"age"`
+		}
+
+		err = pgDB.Exec(context.TODO(), &users,
+			"INSERT INTO users (name, age) VALUES ($1, $2) RETURNING name, age", "John Doe", 30)
+		require.Error(t, err)
+		assert.ErrorIs(t, err, assert.AnError)
+	})
+
+	t.Run("should return an error when the underlying GetContext fails", func(t *testing.T) {
+		t.Parallel()
+
+		mockDB, mock, err := sqlmock.New()
+		require.NoError(t, err)
+		defer mockDB.Close()
+
+		sqlxDB := sqlx.NewDb(mockDB, "sqlmock")
+		defer sqlxDB.Close()
+		pgDB := database.NewPostgresDatabase(sqlxDB)
+
+		mock.ExpectQuery("INSERT INTO users (.+) VALUES (.+)").
+			WithArgs("John Doe", 30).
+			WillReturnError(assert.AnError)
+
+		var id *int64
+		err = pgDB.Exec(context.TODO(), &id,
+			"INSERT INTO users (name, age) VALUES ($1, $2) RETURNING id", "John Doe", 30)
+		require.Error(t, err)
+		assert.ErrorIs(t, err, assert.AnError)
 	})
 }
 

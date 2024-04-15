@@ -36,9 +36,13 @@ func main() {
 	if err != nil {
 		log.Fatal("failed to connect to database: %v", err)
 	}
+	defer db.Close()
+
+	// create a new instance of the postgresDatabase
+	pgDB := database.NewPostgresDatabase(db)
 
 	// setup routes and start the server
-	handler := web.SetupRoutes(db)
+	handler := web.SetupRoutes(pgDB)
 	server := &http.Server{
 		Addr:              configs.HTTPAddress,
 		Handler:           handler,
@@ -66,7 +70,7 @@ func main() {
 	})
 }
 
-func connectToDatabase(configs config.Config) (database.Database, error) {
+func connectToDatabase(configs config.Config) (*sqlx.DB, error) {
 	db, err := sqlx.Open("pgx", configs.DBConn)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %w", err)
@@ -81,7 +85,7 @@ func connectToDatabase(configs config.Config) (database.Database, error) {
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 
-	return database.NewPostgresDatabase(db), nil
+	return db, nil
 }
 
 func trapTerminateSignal(onTerminate func()) {

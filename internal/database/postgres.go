@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"database/sql"
+	"reflect"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -12,12 +13,24 @@ type postgresDatabase struct {
 }
 
 // NewPostgresDatabase creates a new instance of the postgresDatabase.
+// Currently we are executing the queries directly.
+// The idea to use different connections for read and write operations.
+// The Exec method will be used for write operations. Get & Select methods will be used for readonly operations.
 func NewPostgresDatabase(db *sqlx.DB) Database {
 	return &postgresDatabase{db: db}
 }
 
-func (p *postgresDatabase) Exec(ctx context.Context, query string, args ...any) (sql.Result, error) {
-	return p.db.ExecContext(ctx, query, args...)
+func (p *postgresDatabase) Exec(ctx context.Context, dest any, query string, args ...any) error {
+	if dest == nil {
+		_, err := p.db.ExecContext(ctx, query, args...)
+		return err
+	}
+
+	if isSliceOrArray(dest) {
+		return p.db.SelectContext(ctx, dest, query, args...)
+	}
+
+	return p.db.GetContext(ctx, dest, query, args...)
 }
 
 func (p *postgresDatabase) Get(ctx context.Context, dest any, query string, args ...any) error {
@@ -53,4 +66,9 @@ func (p *postgresDatabase) Transact( //nolint:nonamedreturns // named return is 
 	err = tx.Commit()
 
 	return err
+}
+
+func isSliceOrArray(dest any) bool {
+	kind := reflect.Indirect(reflect.ValueOf(dest)).Kind()
+	return kind == reflect.Slice || kind == reflect.Array
 }

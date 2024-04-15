@@ -9,11 +9,11 @@ import (
 
 // Database is an interface that defines the methods that a database should implement.
 type Database interface {
-	// Exec executes a query without returning any rows.
-	Exec(ctx context.Context, query string, args ...any) (sql.Result, error)
-	// Get executes a query that is expected to return at most one row.
+	// Exec executes a query. Should be used for write operations.
+	Exec(ctx context.Context, dest any, query string, args ...any) error
+	// Get executes a query that is expected to return at most one row. Should be used for read operations.
 	Get(ctx context.Context, dest any, query string, args ...any) error
-	// Select executes a query that is expected to return multiple rows.
+	// Select executes a query that is expected to return multiple rows. Should be used for read operations.
 	Select(ctx context.Context, dest any, query string, args ...any) error
 	// Transact executes the given function inside a transaction.
 	Transact(ctx context.Context, fn func(*sql.Tx) error) error

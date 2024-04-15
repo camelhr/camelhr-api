@@ -14,10 +14,10 @@ type DatabaseMock struct {
 	mock.Mock
 }
 
-// Exec provides a mock function with given fields: ctx, query, args
-func (_m *DatabaseMock) Exec(ctx context.Context, query string, args ...interface{}) (sql.Result, error) {
+// Exec provides a mock function with given fields: ctx, dest, query, args
+func (_m *DatabaseMock) Exec(ctx context.Context, dest interface{}, query string, args ...interface{}) error {
 	var _ca []interface{}
-	_ca = append(_ca, ctx, query)
+	_ca = append(_ca, ctx, dest, query)
 	_ca = append(_ca, args...)
 	ret := _m.Called(_ca...)
 
@@ -25,26 +25,14 @@ func (_m *DatabaseMock) Exec(ctx context.Context, query string, args ...interfac
 		panic("no return value specified for Exec")
 	}
 
-	var r0 sql.Result
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, ...interface{}) (sql.Result, error)); ok {
-		return rf(ctx, query, args...)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, ...interface{}) sql.Result); ok {
-		r0 = rf(ctx, query, args...)
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, interface{}, string, ...interface{}) error); ok {
+		r0 = rf(ctx, dest, query, args...)
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(sql.Result)
-		}
+		r0 = ret.Error(0)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, ...interface{}) error); ok {
-		r1 = rf(ctx, query, args...)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
+	return r0
 }
 
 // Get provides a mock function with given fields: ctx, dest, query, args
