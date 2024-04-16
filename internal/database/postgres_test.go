@@ -159,7 +159,7 @@ func TestExec(t *testing.T) {
 func TestGet(t *testing.T) {
 	t.Parallel()
 
-	t.Run("should call the Get method", func(t *testing.T) {
+	t.Run("should populate provided type with result", func(t *testing.T) {
 		t.Parallel()
 
 		mockDB, mock, err := sqlmock.New()
@@ -187,10 +187,10 @@ func TestGet(t *testing.T) {
 	})
 }
 
-func TestSelect(t *testing.T) {
+func TestList(t *testing.T) {
 	t.Parallel()
 
-	t.Run("should call the Select method", func(t *testing.T) {
+	t.Run("should populate provided slice with result", func(t *testing.T) {
 		t.Parallel()
 
 		mockDB, mock, err := sqlmock.New()
@@ -211,7 +211,7 @@ func TestSelect(t *testing.T) {
 			Age  int    `db:"age"`
 		}
 
-		err = pgDB.Select(context.TODO(), &users, "SELECT name, age FROM users WHERE age > $1", 25)
+		err = pgDB.List(context.TODO(), &users, "SELECT name, age FROM users WHERE age > $1", 25)
 		require.NoError(t, err)
 		assert.Len(t, users, 1)
 		assert.Equal(t, "John Doe", users[0].Name)
@@ -222,7 +222,7 @@ func TestSelect(t *testing.T) {
 func TestTransact(t *testing.T) {
 	t.Parallel()
 
-	t.Run("should call the Transact method", func(t *testing.T) {
+	t.Run("should execute transaction", func(t *testing.T) {
 		t.Parallel()
 
 		mockDB, mock, err := sqlmock.New()

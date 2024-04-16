@@ -37,7 +37,7 @@ func (p *postgresDatabase) Get(ctx context.Context, dest any, query string, args
 	return p.db.GetContext(ctx, dest, query, args...)
 }
 
-func (p *postgresDatabase) Select(ctx context.Context, dest any, query string, args ...any) error {
+func (p *postgresDatabase) List(ctx context.Context, dest any, query string, args ...any) error {
 	return p.db.SelectContext(ctx, dest, query, args...)
 }
 

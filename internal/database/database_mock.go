@@ -56,15 +56,15 @@ func (_m *DatabaseMock) Get(ctx context.Context, dest interface{}, query string,
 	return r0
 }
 
-// Select provides a mock function with given fields: ctx, dest, query, args
-func (_m *DatabaseMock) Select(ctx context.Context, dest interface{}, query string, args ...interface{}) error {
+// List provides a mock function with given fields: ctx, dest, query, args
+func (_m *DatabaseMock) List(ctx context.Context, dest interface{}, query string, args ...interface{}) error {
 	var _ca []interface{}
 	_ca = append(_ca, ctx, dest, query)
 	_ca = append(_ca, args...)
 	ret := _m.Called(_ca...)
 
 	if len(ret) == 0 {
-		panic("no return value specified for Select")
+		panic("no return value specified for List")
 	}
 
 	var r0 error
