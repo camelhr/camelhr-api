@@ -12,11 +12,11 @@ func init() {
 }
 
 func upAddOrganizationRecord(ctx context.Context, tx *sql.Tx) error {
-	_, err := tx.ExecContext(ctx, "INSERT INTO organizations VALUES (1, 'org1');")
+	_, err := tx.ExecContext(ctx, "INSERT INTO organizations(name) VALUES('org1');")
 	return err
 }
 
 func downAddOrganizationRecord(ctx context.Context, tx *sql.Tx) error {
-	_, err := tx.ExecContext(ctx, "DELETE FROM organizations WHERE id = 1;")
+	_, err := tx.ExecContext(ctx, "DELETE FROM organizations WHERE organization_id = 1;")
 	return err
 }
