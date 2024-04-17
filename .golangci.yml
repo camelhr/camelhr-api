@@ -40,17 +40,6 @@ linters:
     - varcheck # disabling as it is deprecated
 
 linters-settings:
-  depguard:
-    rules:
-      main:
-        list-mode: lax
-        deny:
-          - pkg: "log"
-            desc: should be replaced with github.com/camelhr/log
-          - pkg: "slog"
-            desc: should be replaced with github.com/camelhr/log
-          - pkg: "logrus"
-            desc: should be replaced with github.com/camelhr/log
   nlreturn:
     block-size: 2
   wsl:
@@ -65,6 +54,21 @@ linters-settings:
     min-function-lines: 15
   gocyclo:
     min-complexity: 10
+  tagliatelle:
+    case:
+      rules:
+        json: snake
+  depguard:
+    rules:
+      main:
+        list-mode: lax
+        deny:
+          - pkg: "log"
+            desc: should be replaced with github.com/camelhr/log
+          - pkg: "slog"
+            desc: should be replaced with github.com/camelhr/log
+          - pkg: "logrus"
+            desc: should be replaced with github.com/camelhr/log
   revive:
     rules:
       - name: use-any

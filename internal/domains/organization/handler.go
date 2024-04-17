@@ -89,6 +89,8 @@ func (h *organizationHandler) toResponse(org Organization) *Response {
 	return &Response{
 		ID:   org.ID,
 		Name: org.Name,
+
+		Timestamps: org.Timestamps,
 	}
 }
 
