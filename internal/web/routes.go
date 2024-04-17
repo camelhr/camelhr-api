@@ -11,6 +11,7 @@ import (
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
 )
 
+// SetupRoutes initializes the routes for the web server.
 func SetupRoutes(db database.Database) http.Handler {
 	// initialize dependencies
 	orgRepo := organization.NewOrganizationRepository(db)

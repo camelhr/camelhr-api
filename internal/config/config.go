@@ -44,6 +44,7 @@ func init() {
 	viper.AutomaticEnv()
 }
 
+// LoadConfig reads the configuration from viper and returns a Config struct.
 func LoadConfig() Config {
 	var config Config
 

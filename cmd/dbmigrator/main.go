@@ -108,7 +108,7 @@ func main() {
 
 // extractCommand extracts the command from the arguments,
 // validates it against the allowed commands and returns the command.
-// it returns an error if the command is invalid.
+// It returns an error if the command is invalid.
 func extractCommand(args []string, allowedCommands []string) (string, error) {
 	if len(args) < 1 {
 		return "", errors.New("command argument is required")
@@ -123,7 +123,7 @@ func extractCommand(args []string, allowedCommands []string) (string, error) {
 }
 
 // validateDBConnectionString ensures that the db connection string is not empty for the commands that require it.
-// it returns error if db connection string is missing for the required commands.
+// It returns error if db connection string is missing for the required commands.
 func validateDBConnectionString(dbConn string, command string, dbConnectionNotNeedCommands []string) error {
 	if dbConn == "" {
 		// if the command does not require a db connection string then return

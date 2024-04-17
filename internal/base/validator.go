@@ -17,6 +17,7 @@ var (
 	v    *validator.Validate //nolint:gochecknoglobals // global variable is used to initialize the validator once
 )
 
+// Validator returns a new instance of the validator. It is thread-safe.
 func Validator() *validator.Validate {
 	initValidator()
 	return v
