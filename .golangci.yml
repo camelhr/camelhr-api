@@ -23,6 +23,7 @@ linters:
     - wrapcheck
     - godox
     - exhaustruct
+    - tagalign # disabling as it is not compatible with github.com/go-playground/validator/v10
     - ireturn # disabling as it is opinionated
     - sloglint # disabling since we are using different logger
     - zerologlint # disabling since we are using custom logger based on zerolog

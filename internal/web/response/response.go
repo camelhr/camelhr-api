@@ -24,6 +24,8 @@ func ErrorResponse(w http.ResponseWriter, statusCode int, err error) {
 	var apiErr *base.APIError
 	if ok := errors.As(err, &apiErr); ok {
 		message = apiErr.Error()
+	} else {
+		log.Error("%v", err)
 	}
 
 	JSON(w, statusCode, &errorResponse{ErrorText: message})

@@ -13,7 +13,9 @@ import (
 
 func SetupRoutes(db database.Database) http.Handler {
 	// initialize dependencies
-	orgHandler := organization.NewOrganizationHandler()
+	orgRepo := organization.NewOrganizationRepository(db)
+	orgService := organization.NewOrganizationService(orgRepo)
+	orgHandler := organization.NewOrganizationHandler(orgService)
 
 	// create a default router
 	r := chi.NewRouter()
@@ -40,7 +42,7 @@ func SetupRoutes(db database.Database) http.Handler {
 		r.Route("/organizations", func(r chi.Router) {
 			r.Post("/", orgHandler.CreateOrganization)
 			r.Route("/{orgID:[0-9]+}", func(r chi.Router) {
-				r.Get("/", orgHandler.GetOrganization)
+				r.Get("/", orgHandler.GetOrganizationByID)
 				r.Put("/", orgHandler.UpdateOrganization)
 				r.Delete("/", orgHandler.DeleteOrganization)
 			})

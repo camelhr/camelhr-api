@@ -8,13 +8,24 @@ import (
 	"net/url"
 	"strconv"
 
+	"github.com/camelhr/camelhr-api/internal/base"
 	"github.com/go-chi/chi/v5"
 )
 
 // DecodeJSON decodes a JSON payload from the given reader into the given value.
+// It also validates the fields using the validator.
 func DecodeJSON(r io.Reader, v any) error {
 	defer io.Copy(io.Discard, r) //nolint:errcheck // ignore the error as we are discarding the body
-	return json.NewDecoder(r).Decode(v)
+
+	if err := json.NewDecoder(r).Decode(v); err != nil {
+		return fmt.Errorf("failed to decode JSON payload: %w", err)
+	}
+
+	if err := base.Validator().Struct(v); err != nil {
+		return fmt.Errorf("invalid request payload: %w", err)
+	}
+
+	return nil
 }
 
 // GetURLParam returns the unescaped value of a URL parameter from the request.
@@ -31,15 +42,15 @@ func URLParam(r *http.Request, param string) string {
 	return val
 }
 
-// GetURLParamID returns the value of a URL parameter from the request as an int64.
+// GetURLParamID returns the value of a ID URL parameter from the request as an int64.
 func URLParamID(r *http.Request, param string) (int64, error) {
 	id, err := strconv.ParseInt(URLParam(r, param), 10, 64)
 	if err != nil {
-		return 0, fmt.Errorf("failed to parse '%s' param from url", param)
+		return 0, fmt.Errorf("failed to parse '%s' param from url, error: %w", param, err)
 	}
 
 	if id <= 0 {
-		return 0, fmt.Errorf("failed to parse '%s' param from url", param)
+		return 0, fmt.Errorf("invalid value %d for url param '%s'", id, param)
 	}
 
 	return id, nil
