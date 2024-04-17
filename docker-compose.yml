@@ -36,7 +36,7 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      DB_CONN: "user=${PGUSER?} password=${PGPASSWORD?} dbname=${PGDATABASE?} host=${PGHOST} port=${PGPORT?} sslmode=${PGSSLMODE}"
+      DB_CONN: "user=${PGUSER?} password=${PGPASSWORD?} dbname=${PGDATABASE?} host=db port=${PGPORT?} sslmode=${PGSSLMODE}"
       LOG_LEVEL: DEBUG
     depends_on:
       db:
