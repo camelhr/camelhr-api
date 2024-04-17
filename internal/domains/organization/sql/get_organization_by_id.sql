@@ -7,6 +7,6 @@ SELECT
     updated_at,
     deleted_at
 FROM
-    organization
+    organizations
 WHERE
     organization_id = $1;

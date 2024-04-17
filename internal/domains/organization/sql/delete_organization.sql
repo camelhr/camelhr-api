@@ -1,7 +1,7 @@
 -- deleteOrganizationQuery
 -- $1: organization_id
 UPDATE
-    organization
+    organizations
 SET
     deleted_at = NOW()
 WHERE

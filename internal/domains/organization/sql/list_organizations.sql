@@ -7,7 +7,7 @@ SELECT
     o.updated_at,
     o.deleted_at
 FROM
-    organization o
+    organizations o
 WHERE
     o.deleted_at IS NULL
 ORDER BY
