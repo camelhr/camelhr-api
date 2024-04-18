@@ -1,5 +1,4 @@
 -- listOrganizationsQuery
-
 SELECT
     o.organization_id,
     o.name,

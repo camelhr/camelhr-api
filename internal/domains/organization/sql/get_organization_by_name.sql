@@ -9,4 +9,5 @@ SELECT
 FROM
     organizations
 WHERE
-    name = $1;
+    name = $1
+    AND deleted_at IS NULL;
