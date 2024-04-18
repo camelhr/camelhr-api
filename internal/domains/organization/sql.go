@@ -2,9 +2,6 @@ package organization
 
 import _ "embed"
 
-//go:embed sql/list_organizations.sql
-var listOrganizationsQuery string
-
 //go:embed sql/get_organization_by_id.sql
 var getOrganizationByIDQuery string
 

@@ -5,9 +5,6 @@ import "context"
 //go:generate mockery --name=Service --structname=ServiceMock --inpackage --filename=service_mock.go
 
 type Service interface {
-	// ListOrganizations returns a list of organizations.
-	ListOrganizations(ctx context.Context) ([]Organization, error)
-
 	// GetOrganizationByID returns an organization by its ID.
 	GetOrganizationByID(ctx context.Context, id int64) (Organization, error)
 
@@ -34,8 +31,12 @@ func NewOrganizationService(repo Repository) Service {
 	}
 }
 
-func (s *organizationService) ListOrganizations(ctx context.Context) ([]Organization, error) {
-	return s.repo.ListOrganizations(ctx)
+func (s *organizationService) GetOrganizationByID(ctx context.Context, id int64) (Organization, error) {
+	return s.repo.GetOrganizationByID(ctx, id)
+}
+
+func (s *organizationService) GetOrganizationByName(ctx context.Context, name string) (Organization, error) {
+	return s.repo.GetOrganizationByName(ctx, name)
 }
 
 func (s *organizationService) CreateOrganization(ctx context.Context, org Organization) (int64, error) {
@@ -48,12 +49,4 @@ func (s *organizationService) UpdateOrganization(ctx context.Context, org Organi
 
 func (s *organizationService) DeleteOrganization(ctx context.Context, id int64) error {
 	return s.repo.DeleteOrganization(ctx, id)
-}
-
-func (s *organizationService) GetOrganizationByID(ctx context.Context, id int64) (Organization, error) {
-	return s.repo.GetOrganizationByID(ctx, id)
-}
-
-func (s *organizationService) GetOrganizationByName(ctx context.Context, name string) (Organization, error) {
-	return s.repo.GetOrganizationByName(ctx, name)
 }

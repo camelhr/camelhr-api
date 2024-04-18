@@ -22,55 +22,6 @@ var queryMatcher = func(queryLabel string) any {
 	})
 }
 
-func TestOrganizationRepository_ListOrganizations(t *testing.T) {
-	t.Parallel()
-
-	t.Run("should return an error when the database call fails", func(t *testing.T) {
-		t.Parallel()
-
-		mockDB := &database.DatabaseMock{}
-		repo := organization.NewOrganizationRepository(mockDB)
-
-		mockDB.On("List", context.TODO(), mock.Anything, queryMatcher("listOrganizationsQuery")).
-			Return(assert.AnError)
-
-		_, err := repo.ListOrganizations(context.TODO())
-		require.Error(t, err)
-		assert.Equal(t, assert.AnError, err)
-	})
-
-	t.Run("should return a list of organizations", func(t *testing.T) {
-		t.Parallel()
-
-		var emptyOrgList []organization.Organization
-
-		mockDB := database.NewDatabaseMock(t)
-		repo := organization.NewOrganizationRepository(mockDB)
-
-		orgs := []organization.Organization{
-			{
-				ID:   1,
-				Name: "org1",
-			},
-			{
-				ID:   2,
-				Name: "org2",
-			},
-		}
-
-		mockDB.On("List", context.TODO(), &emptyOrgList, queryMatcher("listOrganizationsQuery")).
-			Run(func(args mock.Arguments) {
-				arg, ok := args.Get(1).(*[]organization.Organization)
-				require.True(t, ok)
-				*arg = orgs
-			}).Return(nil)
-
-		result, err := repo.ListOrganizations(context.TODO())
-		require.NoError(t, err)
-		assert.Equal(t, orgs, result)
-	})
-}
-
 func TestOrganizationRepository_GetOrganizationByID(t *testing.T) {
 	t.Parallel()
 

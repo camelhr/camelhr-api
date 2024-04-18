@@ -9,9 +9,6 @@ import (
 //go:generate mockery --name=Repository --structname=RepositoryMock --inpackage --filename=repository_mock.go
 
 type Repository interface {
-	// ListOrganizations returns a list of organizations.
-	ListOrganizations(ctx context.Context) ([]Organization, error)
-
 	// GetOrganizationByID returns an organization by its ID.
 	GetOrganizationByID(ctx context.Context, id int64) (Organization, error)
 
@@ -34,13 +31,6 @@ type organizationRepository struct {
 
 func NewOrganizationRepository(db database.Database) Repository {
 	return &organizationRepository{db}
-}
-
-func (r *organizationRepository) ListOrganizations(ctx context.Context) ([]Organization, error) {
-	var orgs []Organization
-	err := r.db.List(ctx, &orgs, listOrganizationsQuery)
-
-	return orgs, err
 }
 
 func (r *organizationRepository) GetOrganizationByID(ctx context.Context, id int64) (Organization, error) {

@@ -9,49 +9,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestOrganizationService_ListOrganizations(t *testing.T) {
-	t.Parallel()
-
-	t.Run("should return an error when the repository call fails", func(t *testing.T) {
-		t.Parallel()
-
-		mockRepo := organization.NewRepositoryMock(t)
-		service := organization.NewOrganizationService(mockRepo)
-
-		mockRepo.On("ListOrganizations", context.TODO()).
-			Return(nil, assert.AnError)
-
-		_, err := service.ListOrganizations(context.TODO())
-		require.Error(t, err)
-		assert.Equal(t, assert.AnError, err)
-	})
-
-	t.Run("should return a list of organizations", func(t *testing.T) {
-		t.Parallel()
-
-		mockRepo := organization.NewRepositoryMock(t)
-		service := organization.NewOrganizationService(mockRepo)
-
-		orgs := []organization.Organization{
-			{
-				ID:   1,
-				Name: "org1",
-			},
-			{
-				ID:   2,
-				Name: "org2",
-			},
-		}
-
-		mockRepo.On("ListOrganizations", context.TODO()).
-			Return(orgs, nil)
-
-		result, err := service.ListOrganizations(context.TODO())
-		require.NoError(t, err)
-		assert.Equal(t, orgs, result)
-	})
-}
-
 func TestOrganizationService_GetOrganizationByID(t *testing.T) {
 	t.Parallel()
 
