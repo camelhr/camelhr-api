@@ -16,3 +16,9 @@ var updateOrganizationQuery string
 
 //go:embed sql/delete_organization.sql
 var deleteOrganizationQuery string
+
+//go:embed sql/suspend_organization.sql
+var suspendOrganizationQuery string
+
+//go:embed sql/unsuspend_organization.sql
+var unsuspendOrganizationQuery string

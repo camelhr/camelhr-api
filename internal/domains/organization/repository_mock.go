@@ -115,6 +115,42 @@ func (_m *RepositoryMock) GetOrganizationByName(ctx context.Context, name string
 	return r0, r1
 }
 
+// SuspendOrganization provides a mock function with given fields: ctx, id
+func (_m *RepositoryMock) SuspendOrganization(ctx context.Context, id int64) error {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SuspendOrganization")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, int64) error); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// UnsuspendOrganization provides a mock function with given fields: ctx, id
+func (_m *RepositoryMock) UnsuspendOrganization(ctx context.Context, id int64) error {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UnsuspendOrganization")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, int64) error); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // UpdateOrganization provides a mock function with given fields: ctx, org
 func (_m *RepositoryMock) UpdateOrganization(ctx context.Context, org Organization) error {
 	ret := _m.Called(ctx, org)

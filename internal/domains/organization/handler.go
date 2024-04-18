@@ -87,10 +87,10 @@ func (h *organizationHandler) DeleteOrganization(w http.ResponseWriter, r *http.
 
 func (h *organizationHandler) toResponse(org Organization) *Response {
 	return &Response{
-		ID:   org.ID,
-		Name: org.Name,
-
-		Timestamps: org.Timestamps,
+		ID:          org.ID,
+		Name:        org.Name,
+		SuspendedAt: org.SuspendedAt,
+		Timestamps:  org.Timestamps,
 	}
 }
 

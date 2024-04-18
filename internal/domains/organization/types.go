@@ -1,10 +1,15 @@
 package organization
 
-import "github.com/camelhr/camelhr-api/internal/base"
+import (
+	"time"
+
+	"github.com/camelhr/camelhr-api/internal/base"
+)
 
 type Organization struct {
-	ID   int64  `db:"organization_id"`
-	Name string `db:"name"`
+	ID          int64      `db:"organization_id"`
+	Name        string     `db:"name"`
+	SuspendedAt *time.Time `db:"suspended_at"`
 	base.Timestamps
 }
 
@@ -13,7 +18,8 @@ type Request struct {
 }
 
 type Response struct {
-	ID   int64  `json:"id"`
-	Name string `json:"name"`
+	ID          int64      `json:"id"`
+	Name        string     `json:"name"`
+	SuspendedAt *time.Time `json:"suspended_at"`
 	base.Timestamps
 }

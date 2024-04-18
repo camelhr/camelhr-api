@@ -1,7 +1,6 @@
 -- createOrganizationQuery
 -- $1: name
--- $2: description
 INSERT INTO
-    organizations(name, description)
+    organizations(name)
 VALUES
-    ($1, $2) RETURNING organization_id;
+    ($1) RETURNING organization_id;

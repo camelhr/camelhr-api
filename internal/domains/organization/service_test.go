@@ -23,7 +23,7 @@ func TestOrganizationService_GetOrganizationByID(t *testing.T) {
 
 		_, err := service.GetOrganizationByID(context.TODO(), int64(1))
 		require.Error(t, err)
-		assert.Equal(t, assert.AnError, err)
+		assert.ErrorIs(t, assert.AnError, err)
 	})
 
 	t.Run("should return the organization by ID", func(t *testing.T) {
@@ -60,7 +60,7 @@ func TestOrganizationService_GetOrganizationByName(t *testing.T) {
 
 		_, err := service.GetOrganizationByName(context.TODO(), "org1")
 		require.Error(t, err)
-		assert.Equal(t, assert.AnError, err)
+		assert.ErrorIs(t, assert.AnError, err)
 	})
 
 	t.Run("should return the organization by name", func(t *testing.T) {
@@ -101,7 +101,7 @@ func TestOrganizationService_CreateOrganization(t *testing.T) {
 
 		_, err := service.CreateOrganization(context.TODO(), org)
 		require.Error(t, err)
-		assert.Equal(t, assert.AnError, err)
+		assert.ErrorIs(t, assert.AnError, err)
 	})
 
 	t.Run("should return the ID of the created organization", func(t *testing.T) {
@@ -141,7 +141,7 @@ func TestOrganizationService_UpdateOrganization(t *testing.T) {
 
 		err := service.UpdateOrganization(context.TODO(), org)
 		require.Error(t, err)
-		assert.Equal(t, assert.AnError, err)
+		assert.ErrorIs(t, assert.AnError, err)
 	})
 
 	t.Run("should return nil when the organization is updated", func(t *testing.T) {
@@ -176,7 +176,7 @@ func TestOrganizationService_DeleteOrganization(t *testing.T) {
 
 		err := service.DeleteOrganization(context.TODO(), int64(1))
 		require.Error(t, err)
-		assert.Equal(t, assert.AnError, err)
+		assert.ErrorIs(t, assert.AnError, err)
 	})
 
 	t.Run("should return nil when the organization is deleted", func(t *testing.T) {
@@ -189,6 +189,68 @@ func TestOrganizationService_DeleteOrganization(t *testing.T) {
 			Return(nil)
 
 		err := service.DeleteOrganization(context.TODO(), int64(1))
+		require.NoError(t, err)
+	})
+}
+
+func TestOrganizationService_SuspendOrganization(t *testing.T) {
+	t.Parallel()
+
+	t.Run("should return an error when the repository call fails", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := organization.NewRepositoryMock(t)
+		service := organization.NewOrganizationService(mockRepo)
+
+		mockRepo.On("SuspendOrganization", context.TODO(), int64(1)).
+			Return(assert.AnError)
+
+		err := service.SuspendOrganization(context.TODO(), int64(1))
+		require.Error(t, err)
+		assert.ErrorIs(t, assert.AnError, err)
+	})
+
+	t.Run("should return nil when the organization is suspended", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := organization.NewRepositoryMock(t)
+		service := organization.NewOrganizationService(mockRepo)
+
+		mockRepo.On("SuspendOrganization", context.TODO(), int64(1)).
+			Return(nil)
+
+		err := service.SuspendOrganization(context.TODO(), int64(1))
+		require.NoError(t, err)
+	})
+}
+
+func TestOrganizationService_UnsuspendOrganization(t *testing.T) {
+	t.Parallel()
+
+	t.Run("should return an error when the repository call fails", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := organization.NewRepositoryMock(t)
+		service := organization.NewOrganizationService(mockRepo)
+
+		mockRepo.On("UnsuspendOrganization", context.TODO(), int64(1)).
+			Return(assert.AnError)
+
+		err := service.UnsuspendOrganization(context.TODO(), int64(1))
+		require.Error(t, err)
+		assert.ErrorIs(t, assert.AnError, err)
+	})
+
+	t.Run("should return nil when the organization is unsuspended", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := organization.NewRepositoryMock(t)
+		service := organization.NewOrganizationService(mockRepo)
+
+		mockRepo.On("UnsuspendOrganization", context.TODO(), int64(1)).
+			Return(nil)
+
+		err := service.UnsuspendOrganization(context.TODO(), int64(1))
 		require.NoError(t, err)
 	})
 }

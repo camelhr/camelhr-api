@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"reflect"
 	"strconv"
 
 	"github.com/camelhr/camelhr-api/internal/base"
@@ -21,8 +22,11 @@ func DecodeJSON(r io.Reader, v any) error {
 		return fmt.Errorf("failed to decode JSON payload: %w", err)
 	}
 
-	if err := base.Validator().Struct(v); err != nil {
-		return fmt.Errorf("invalid request payload: %w", err)
+	// validate the request payload if it is a struct
+	if reflect.TypeOf(v).Kind() == reflect.Ptr && reflect.TypeOf(v).Elem().Kind() == reflect.Struct {
+		if err := base.Validator().Struct(v); err != nil {
+			return fmt.Errorf("invalid request payload: %w", err)
+		}
 	}
 
 	return nil

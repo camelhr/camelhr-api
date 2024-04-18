@@ -23,6 +23,12 @@ type Repository interface {
 
 	// DeleteOrganization deletes an organization by its ID.
 	DeleteOrganization(ctx context.Context, id int64) error
+
+	// SuspendOrganization suspends an organization by its ID.
+	SuspendOrganization(ctx context.Context, id int64) error
+
+	// UnsuspendOrganization unsuspend an organization by its ID.
+	UnsuspendOrganization(ctx context.Context, id int64) error
 }
 
 type organizationRepository struct {
@@ -60,4 +66,12 @@ func (r *organizationRepository) UpdateOrganization(ctx context.Context, org Org
 
 func (r *organizationRepository) DeleteOrganization(ctx context.Context, id int64) error {
 	return r.db.Exec(ctx, nil, deleteOrganizationQuery, id)
+}
+
+func (r *organizationRepository) SuspendOrganization(ctx context.Context, id int64) error {
+	return r.db.Exec(ctx, nil, suspendOrganizationQuery, id)
+}
+
+func (r *organizationRepository) UnsuspendOrganization(ctx context.Context, id int64) error {
+	return r.db.Exec(ctx, nil, unsuspendOrganizationQuery, id)
 }

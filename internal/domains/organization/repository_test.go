@@ -36,7 +36,7 @@ func TestOrganizationRepository_GetOrganizationByID(t *testing.T) {
 
 		_, err := repo.GetOrganizationByID(context.TODO(), 1)
 		require.Error(t, err)
-		assert.Equal(t, assert.AnError, err)
+		assert.ErrorIs(t, assert.AnError, err)
 	})
 
 	t.Run("should return an organization", func(t *testing.T) {
@@ -79,7 +79,7 @@ func TestOrganizationRepository_GetOrganizationByName(t *testing.T) {
 
 		_, err := repo.GetOrganizationByName(context.TODO(), "org1")
 		require.Error(t, err)
-		assert.Equal(t, assert.AnError, err)
+		assert.ErrorIs(t, assert.AnError, err)
 	})
 
 	t.Run("should return an organization", func(t *testing.T) {
@@ -122,7 +122,7 @@ func TestOrganizationRepository_CreateOrganization(t *testing.T) {
 
 		_, err := repo.CreateOrganization(context.TODO(), organization.Organization{Name: "org1"})
 		require.Error(t, err)
-		assert.Equal(t, assert.AnError, err)
+		assert.ErrorIs(t, assert.AnError, err)
 	})
 
 	t.Run("should return the organization ID", func(t *testing.T) {
@@ -156,7 +156,7 @@ func TestOrganizationRepository_UpdateOrganization(t *testing.T) {
 
 		err := repo.UpdateOrganization(context.TODO(), organization.Organization{Name: "org1"})
 		require.Error(t, err)
-		assert.Equal(t, assert.AnError, err)
+		assert.ErrorIs(t, assert.AnError, err)
 	})
 
 	t.Run("should return nil when the organization is updated", func(t *testing.T) {
@@ -187,7 +187,7 @@ func TestOrganizationRepository_DeleteOrganization(t *testing.T) {
 
 		err := repo.DeleteOrganization(context.TODO(), 1)
 		require.Error(t, err)
-		assert.Equal(t, assert.AnError, err)
+		assert.ErrorIs(t, assert.AnError, err)
 	})
 
 	t.Run("should return nil when the organization is deleted", func(t *testing.T) {
@@ -200,6 +200,68 @@ func TestOrganizationRepository_DeleteOrganization(t *testing.T) {
 			Return(nil)
 
 		err := repo.DeleteOrganization(context.TODO(), 1)
+		require.NoError(t, err)
+	})
+}
+
+func TestOrganizationRepository_SuspendOrganization(t *testing.T) {
+	t.Parallel()
+
+	t.Run("should return an error when the database call fails", func(t *testing.T) {
+		t.Parallel()
+
+		mockDB := &database.DatabaseMock{}
+		repo := organization.NewOrganizationRepository(mockDB)
+
+		mockDB.On("Exec", context.TODO(), nil, queryMatcher("suspendOrganizationQuery"), int64(1)).
+			Return(assert.AnError)
+
+		err := repo.SuspendOrganization(context.TODO(), 1)
+		require.Error(t, err)
+		assert.ErrorIs(t, assert.AnError, err)
+	})
+
+	t.Run("should return nil when the organization is suspended", func(t *testing.T) {
+		t.Parallel()
+
+		mockDB := database.NewDatabaseMock(t)
+		repo := organization.NewOrganizationRepository(mockDB)
+
+		mockDB.On("Exec", context.TODO(), nil, queryMatcher("suspendOrganizationQuery"), int64(1)).
+			Return(nil)
+
+		err := repo.SuspendOrganization(context.TODO(), 1)
+		require.NoError(t, err)
+	})
+}
+
+func TestOrganizationRepository_UnsuspendOrganization(t *testing.T) {
+	t.Parallel()
+
+	t.Run("should return an error when the database call fails", func(t *testing.T) {
+		t.Parallel()
+
+		mockDB := &database.DatabaseMock{}
+		repo := organization.NewOrganizationRepository(mockDB)
+
+		mockDB.On("Exec", context.TODO(), nil, queryMatcher("unsuspendOrganizationQuery"), int64(1)).
+			Return(assert.AnError)
+
+		err := repo.UnsuspendOrganization(context.TODO(), 1)
+		require.Error(t, err)
+		assert.ErrorIs(t, assert.AnError, err)
+	})
+
+	t.Run("should return nil when the organization is unsuspended", func(t *testing.T) {
+		t.Parallel()
+
+		mockDB := database.NewDatabaseMock(t)
+		repo := organization.NewOrganizationRepository(mockDB)
+
+		mockDB.On("Exec", context.TODO(), nil, queryMatcher("unsuspendOrganizationQuery"), int64(1)).
+			Return(nil)
+
+		err := repo.UnsuspendOrganization(context.TODO(), 1)
 		require.NoError(t, err)
 	})
 }

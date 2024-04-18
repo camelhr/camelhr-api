@@ -19,6 +19,12 @@ type Service interface {
 
 	// DeleteOrganization deletes an organization by its ID.
 	DeleteOrganization(ctx context.Context, id int64) error
+
+	// SuspendOrganization suspends an organization by its ID.
+	SuspendOrganization(ctx context.Context, id int64) error
+
+	// UnsuspendOrganization unsuspend an organization by its ID.
+	UnsuspendOrganization(ctx context.Context, id int64) error
 }
 
 type organizationService struct {
@@ -49,4 +55,12 @@ func (s *organizationService) UpdateOrganization(ctx context.Context, org Organi
 
 func (s *organizationService) DeleteOrganization(ctx context.Context, id int64) error {
 	return s.repo.DeleteOrganization(ctx, id)
+}
+
+func (s *organizationService) SuspendOrganization(ctx context.Context, id int64) error {
+	return s.repo.SuspendOrganization(ctx, id)
+}
+
+func (s *organizationService) UnsuspendOrganization(ctx context.Context, id int64) error {
+	return s.repo.UnsuspendOrganization(ctx, id)
 }
