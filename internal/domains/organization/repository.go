@@ -25,10 +25,16 @@ type Repository interface {
 	DeleteOrganization(ctx context.Context, id int64) error
 
 	// SuspendOrganization suspends an organization by its ID.
-	SuspendOrganization(ctx context.Context, id int64) error
+	SuspendOrganization(ctx context.Context, id int64, comment string) error
 
 	// UnsuspendOrganization unsuspend an organization by its ID.
-	UnsuspendOrganization(ctx context.Context, id int64) error
+	UnsuspendOrganization(ctx context.Context, id int64, comment string) error
+
+	// BlacklistOrganization blacklists an organization by its ID.
+	BlacklistOrganization(ctx context.Context, id int64, comment string) error
+
+	// UnblacklistOrganization unblacklist an organization by its ID.
+	UnblacklistOrganization(ctx context.Context, id int64, comment string) error
 }
 
 type organizationRepository struct {
@@ -68,10 +74,18 @@ func (r *organizationRepository) DeleteOrganization(ctx context.Context, id int6
 	return r.db.Exec(ctx, nil, deleteOrganizationQuery, id)
 }
 
-func (r *organizationRepository) SuspendOrganization(ctx context.Context, id int64) error {
-	return r.db.Exec(ctx, nil, suspendOrganizationQuery, id)
+func (r *organizationRepository) SuspendOrganization(ctx context.Context, id int64, comment string) error {
+	return r.db.Exec(ctx, nil, suspendOrganizationQuery, id, comment)
 }
 
-func (r *organizationRepository) UnsuspendOrganization(ctx context.Context, id int64) error {
-	return r.db.Exec(ctx, nil, unsuspendOrganizationQuery, id)
+func (r *organizationRepository) UnsuspendOrganization(ctx context.Context, id int64, comment string) error {
+	return r.db.Exec(ctx, nil, unsuspendOrganizationQuery, id, comment)
+}
+
+func (r *organizationRepository) BlacklistOrganization(ctx context.Context, id int64, comment string) error {
+	return r.db.Exec(ctx, nil, blacklistOrganizationQuery, id, comment)
+}
+
+func (r *organizationRepository) UnblacklistOrganization(ctx context.Context, id int64, comment string) error {
+	return r.db.Exec(ctx, nil, unblacklistOrganizationQuery, id, comment)
 }

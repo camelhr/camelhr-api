@@ -13,6 +13,24 @@ type RepositoryMock struct {
 	mock.Mock
 }
 
+// BlacklistOrganization provides a mock function with given fields: ctx, id, comment
+func (_m *RepositoryMock) BlacklistOrganization(ctx context.Context, id int64, comment string) error {
+	ret := _m.Called(ctx, id, comment)
+
+	if len(ret) == 0 {
+		panic("no return value specified for BlacklistOrganization")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, int64, string) error); ok {
+		r0 = rf(ctx, id, comment)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // CreateOrganization provides a mock function with given fields: ctx, org
 func (_m *RepositoryMock) CreateOrganization(ctx context.Context, org Organization) (int64, error) {
 	ret := _m.Called(ctx, org)
@@ -115,17 +133,17 @@ func (_m *RepositoryMock) GetOrganizationByName(ctx context.Context, name string
 	return r0, r1
 }
 
-// SuspendOrganization provides a mock function with given fields: ctx, id
-func (_m *RepositoryMock) SuspendOrganization(ctx context.Context, id int64) error {
-	ret := _m.Called(ctx, id)
+// SuspendOrganization provides a mock function with given fields: ctx, id, comment
+func (_m *RepositoryMock) SuspendOrganization(ctx context.Context, id int64, comment string) error {
+	ret := _m.Called(ctx, id, comment)
 
 	if len(ret) == 0 {
 		panic("no return value specified for SuspendOrganization")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, int64) error); ok {
-		r0 = rf(ctx, id)
+	if rf, ok := ret.Get(0).(func(context.Context, int64, string) error); ok {
+		r0 = rf(ctx, id, comment)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -133,17 +151,35 @@ func (_m *RepositoryMock) SuspendOrganization(ctx context.Context, id int64) err
 	return r0
 }
 
-// UnsuspendOrganization provides a mock function with given fields: ctx, id
-func (_m *RepositoryMock) UnsuspendOrganization(ctx context.Context, id int64) error {
-	ret := _m.Called(ctx, id)
+// UnblacklistOrganization provides a mock function with given fields: ctx, id, comment
+func (_m *RepositoryMock) UnblacklistOrganization(ctx context.Context, id int64, comment string) error {
+	ret := _m.Called(ctx, id, comment)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UnblacklistOrganization")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, int64, string) error); ok {
+		r0 = rf(ctx, id, comment)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// UnsuspendOrganization provides a mock function with given fields: ctx, id, comment
+func (_m *RepositoryMock) UnsuspendOrganization(ctx context.Context, id int64, comment string) error {
+	ret := _m.Called(ctx, id, comment)
 
 	if len(ret) == 0 {
 		panic("no return value specified for UnsuspendOrganization")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, int64) error); ok {
-		r0 = rf(ctx, id)
+	if rf, ok := ret.Get(0).(func(context.Context, int64, string) error); ok {
+		r0 = rf(ctx, id, comment)
 	} else {
 		r0 = ret.Error(0)
 	}

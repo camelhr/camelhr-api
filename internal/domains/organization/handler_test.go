@@ -16,7 +16,7 @@ import (
 func TestOrganizationHandler_GetOrganizationByID(t *testing.T) {
 	t.Parallel()
 
-	t.Run("should return the organization by ID", func(t *testing.T) {
+	t.Run("should return the organization by id", func(t *testing.T) {
 		t.Parallel()
 		// create a new request with a URL parameter
 		req, err := http.NewRequest(http.MethodGet, "/organizations/{orgID}", nil)
@@ -28,7 +28,8 @@ func TestOrganizationHandler_GetOrganizationByID(t *testing.T) {
 		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
 
 		expectedBody := `{"id": 1, "name": "org1",
-		"suspended_at": null, "created_at": "0001-01-01T00:00:00Z", "updated_at": "0001-01-01T00:00:00Z"}`
+		"suspended_at": null, "blacklisted_at": null,
+		"created_at": "0001-01-01T00:00:00Z", "updated_at": "0001-01-01T00:00:00Z"}`
 		mockService := organization.NewServiceMock(t)
 		rr := httptest.NewRecorder()
 		handler := organization.NewOrganizationHandler(mockService)
@@ -102,7 +103,8 @@ func TestOrganizationHandler_CreateOrganization(t *testing.T) {
 		require.NoError(t, err)
 
 		expectedBody := `{"id": 1, "name": "org_create_test", 
-		"suspended_at": null, "created_at": "0001-01-01T00:00:00Z", "updated_at": "0001-01-01T00:00:00Z"}`
+		"suspended_at": null, "blacklisted_at": null,
+		"created_at": "0001-01-01T00:00:00Z", "updated_at": "0001-01-01T00:00:00Z"}`
 		mockService := organization.NewServiceMock(t)
 		rr := httptest.NewRecorder()
 		handler := organization.NewOrganizationHandler(mockService)

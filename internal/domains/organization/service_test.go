@@ -202,10 +202,10 @@ func TestOrganizationService_SuspendOrganization(t *testing.T) {
 		mockRepo := organization.NewRepositoryMock(t)
 		service := organization.NewOrganizationService(mockRepo)
 
-		mockRepo.On("SuspendOrganization", context.TODO(), int64(1)).
+		mockRepo.On("SuspendOrganization", context.TODO(), int64(1), "test suspend").
 			Return(assert.AnError)
 
-		err := service.SuspendOrganization(context.TODO(), int64(1))
+		err := service.SuspendOrganization(context.TODO(), int64(1), "test suspend")
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
@@ -216,10 +216,10 @@ func TestOrganizationService_SuspendOrganization(t *testing.T) {
 		mockRepo := organization.NewRepositoryMock(t)
 		service := organization.NewOrganizationService(mockRepo)
 
-		mockRepo.On("SuspendOrganization", context.TODO(), int64(1)).
+		mockRepo.On("SuspendOrganization", context.TODO(), int64(1), "test suspend").
 			Return(nil)
 
-		err := service.SuspendOrganization(context.TODO(), int64(1))
+		err := service.SuspendOrganization(context.TODO(), int64(1), "test suspend")
 		require.NoError(t, err)
 	})
 }
@@ -233,10 +233,10 @@ func TestOrganizationService_UnsuspendOrganization(t *testing.T) {
 		mockRepo := organization.NewRepositoryMock(t)
 		service := organization.NewOrganizationService(mockRepo)
 
-		mockRepo.On("UnsuspendOrganization", context.TODO(), int64(1)).
+		mockRepo.On("UnsuspendOrganization", context.TODO(), int64(1), "test unsuspend").
 			Return(assert.AnError)
 
-		err := service.UnsuspendOrganization(context.TODO(), int64(1))
+		err := service.UnsuspendOrganization(context.TODO(), int64(1), "test unsuspend")
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
@@ -247,10 +247,72 @@ func TestOrganizationService_UnsuspendOrganization(t *testing.T) {
 		mockRepo := organization.NewRepositoryMock(t)
 		service := organization.NewOrganizationService(mockRepo)
 
-		mockRepo.On("UnsuspendOrganization", context.TODO(), int64(1)).
+		mockRepo.On("UnsuspendOrganization", context.TODO(), int64(1), "test unsuspend").
 			Return(nil)
 
-		err := service.UnsuspendOrganization(context.TODO(), int64(1))
+		err := service.UnsuspendOrganization(context.TODO(), int64(1), "test unsuspend")
+		require.NoError(t, err)
+	})
+}
+
+func TestOrganizationService_BlacklistOrganization(t *testing.T) {
+	t.Parallel()
+
+	t.Run("should return an error when the repository call fails", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := organization.NewRepositoryMock(t)
+		service := organization.NewOrganizationService(mockRepo)
+
+		mockRepo.On("BlacklistOrganization", context.TODO(), int64(1), "test blacklist").
+			Return(assert.AnError)
+
+		err := service.BlacklistOrganization(context.TODO(), int64(1), "test blacklist")
+		require.Error(t, err)
+		assert.ErrorIs(t, assert.AnError, err)
+	})
+
+	t.Run("should return nil when the organization is blacklisted", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := organization.NewRepositoryMock(t)
+		service := organization.NewOrganizationService(mockRepo)
+
+		mockRepo.On("BlacklistOrganization", context.TODO(), int64(1), "test blacklist").
+			Return(nil)
+
+		err := service.BlacklistOrganization(context.TODO(), int64(1), "test blacklist")
+		require.NoError(t, err)
+	})
+}
+
+func TestOrganizationService_UnblacklistOrganization(t *testing.T) {
+	t.Parallel()
+
+	t.Run("should return an error when the repository call fails", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := organization.NewRepositoryMock(t)
+		service := organization.NewOrganizationService(mockRepo)
+
+		mockRepo.On("UnblacklistOrganization", context.TODO(), int64(1), "test unblacklist").
+			Return(assert.AnError)
+
+		err := service.UnblacklistOrganization(context.TODO(), int64(1), "test unblacklist")
+		require.Error(t, err)
+		assert.ErrorIs(t, assert.AnError, err)
+	})
+
+	t.Run("should return nil when the organization is unblacklisted", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := organization.NewRepositoryMock(t)
+		service := organization.NewOrganizationService(mockRepo)
+
+		mockRepo.On("UnblacklistOrganization", context.TODO(), int64(1), "test unblacklist").
+			Return(nil)
+
+		err := service.UnblacklistOrganization(context.TODO(), int64(1), "test unblacklist")
 		require.NoError(t, err)
 	})
 }

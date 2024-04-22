@@ -1,12 +1,12 @@
--- unsuspendOrganizationQuery
+-- blacklistOrganizationQuery
 -- $1: organization_id
 -- $2: comment
 UPDATE
     organization
 SET
-    suspended_at = NULL,
+    blacklisted_at = NOW(),
     comment = $2
 WHERE
     organization_id = $1
-    AND suspended_at IS NOT NULL
+    AND blacklisted_at IS NULL
     AND deleted_at IS NULL;

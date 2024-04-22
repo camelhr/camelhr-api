@@ -5,6 +5,7 @@ package database
 import (
 	"context"
 	"database/sql"
+	"errors"
 )
 
 // Database is an interface that defines the methods that a database should implement.
@@ -17,4 +18,13 @@ type Database interface {
 	List(ctx context.Context, dest any, query string, args ...any) error
 	// Transact executes the given function inside a transaction.
 	Transact(ctx context.Context, fn func(*sql.Tx) error) error
+}
+
+// SuppressNoRowsError suppresses the sql.ErrNoRows error.
+func SuppressNoRowsError(err error) error {
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil
+	}
+
+	return err
 }

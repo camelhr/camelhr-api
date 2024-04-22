@@ -21,10 +21,16 @@ type Service interface {
 	DeleteOrganization(ctx context.Context, id int64) error
 
 	// SuspendOrganization suspends an organization by its ID.
-	SuspendOrganization(ctx context.Context, id int64) error
+	SuspendOrganization(ctx context.Context, id int64, comment string) error
 
 	// UnsuspendOrganization unsuspend an organization by its ID.
-	UnsuspendOrganization(ctx context.Context, id int64) error
+	UnsuspendOrganization(ctx context.Context, id int64, comment string) error
+
+	// BlacklistOrganization blacklists an organization by its ID.
+	BlacklistOrganization(ctx context.Context, id int64, comment string) error
+
+	// UnblacklistOrganization unblacklist an organization by its ID.
+	UnblacklistOrganization(ctx context.Context, id int64, comment string) error
 }
 
 type organizationService struct {
@@ -57,10 +63,18 @@ func (s *organizationService) DeleteOrganization(ctx context.Context, id int64) 
 	return s.repo.DeleteOrganization(ctx, id)
 }
 
-func (s *organizationService) SuspendOrganization(ctx context.Context, id int64) error {
-	return s.repo.SuspendOrganization(ctx, id)
+func (s *organizationService) SuspendOrganization(ctx context.Context, id int64, comment string) error {
+	return s.repo.SuspendOrganization(ctx, id, comment)
 }
 
-func (s *organizationService) UnsuspendOrganization(ctx context.Context, id int64) error {
-	return s.repo.UnsuspendOrganization(ctx, id)
+func (s *organizationService) UnsuspendOrganization(ctx context.Context, id int64, comment string) error {
+	return s.repo.UnsuspendOrganization(ctx, id, comment)
+}
+
+func (s *organizationService) BlacklistOrganization(ctx context.Context, id int64, comment string) error {
+	return s.repo.BlacklistOrganization(ctx, id, comment)
+}
+
+func (s *organizationService) UnblacklistOrganization(ctx context.Context, id int64, comment string) error {
+	return s.repo.UnblacklistOrganization(ctx, id, comment)
 }

@@ -14,7 +14,6 @@ issues:
         - noctx # excluding as passing context to request is not required in tests
         - funlen # excluding as test functions can be long as they could contain multiple sub tests
         - gochecknoglobals # excluding as using globals in tests is not an issue
-        - dupl # excluding as similar test cases triggering this lint error
 
 linters:
   enable-all: true
@@ -24,6 +23,7 @@ linters:
     - wrapcheck
     - godox
     - exhaustruct
+    - dupl # disabling as it is failing for repository and service interfaces which are similar
     - tagalign # disabling as it is not compatible with github.com/go-playground/validator/v10
     - ireturn # disabling as it is opinionated
     - sloglint # disabling since we are using different logger
