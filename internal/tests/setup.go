@@ -5,7 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	_ "github.com/camelhr/camelhr-api/migrations"
+	_ "github.com/camelhr/camelhr-api/migrations/datafix"
+	_ "github.com/camelhr/camelhr-api/migrations/schema"
 	"github.com/camelhr/log"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
@@ -122,7 +123,8 @@ func (c *PostgreSQLContainer) Purge() error {
 
 // RunMigrations runs the database migration.
 func RunMigrations(db *sql.DB) error {
-	migrationsDir := "../../../migrations"
+	schemaMigrationsDir := "../../../migrations/schema"
+	datafixMigrationsDir := "../../../migrations/datafix"
 
 	// get the current version
 	version, err := goose.GetDBVersion(db)
@@ -130,8 +132,14 @@ func RunMigrations(db *sql.DB) error {
 		return err
 	}
 
-	// run the migrations
-	err = goose.Up(db, migrationsDir)
+	// run schema migrations
+	err = goose.Up(db, schemaMigrationsDir)
+	if err != nil {
+		return err
+	}
+
+	// run datafix migrations
+	err = goose.Up(db, datafixMigrationsDir)
 	if err != nil {
 		return err
 	}

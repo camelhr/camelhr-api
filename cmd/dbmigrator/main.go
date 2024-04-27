@@ -8,7 +8,8 @@ import (
 	"os"
 	"strings"
 
-	_ "github.com/camelhr/camelhr-api/migrations"
+	_ "github.com/camelhr/camelhr-api/migrations/datafix"
+	_ "github.com/camelhr/camelhr-api/migrations/schema"
 	"github.com/camelhr/log"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/pressly/goose/v3"
@@ -17,13 +18,14 @@ import (
 const (
 	driver = "postgres"
 
+	//nolint:lll // ignore documentation line length
 	usagePrefix = `Usage: dbmigrator [OPTIONS] COMMAND
 
 You can also provide the database connection string as an environment variable named DB_CONN.
 If both the -db_conn flag and the DB_CONN environment variable are provided, the -db_conn flag will take precedence.
 
 Examples:
-  dbmigrator -dir=./migrations -db_conn=postgres://user:password@localhost:5432/dbname?sslmode=disable up
+  dbmigrator -dirs=./migrations/schema,./migrations/datafix -db_conn=postgres://user:password@localhost:5432/dbname?sslmode=disable up
   DB_CONN=postgres://user:password@localhost:5432/dbname?sslmode=disable dbmigrator up
 
 Options:
@@ -44,15 +46,13 @@ Commands:
 )
 
 func main() {
-	ctx := context.Background()
-
 	flagSet := flag.NewFlagSet("dbmigrator", flag.ExitOnError)
 	flagSet.Usage = func() {
 		fmt.Print(usagePrefix) //nolint:forbidigo // structured logger is not needed here
 		flagSet.PrintDefaults()
 		fmt.Print(usageCommands) //nolint:forbidigo // structured logger is not needed here
 	}
-	dir := flagSet.String("dir", "migrations", "directory with migration files")
+	dirs := flagSet.String("dirs", "migrations/schema,migrations/datafix", "comma separated migration directories")
 	dbConn := flagSet.String("db_conn", "", "database connection string")
 
 	allowedCommands := []string{"up", "up-by-one", "up-to", "down", "down-to", "redo", "status", "version", "create"}
@@ -70,8 +70,7 @@ func main() {
 		log.Fatal("failed to extract command: %v", err)
 	}
 
-	// if db connection string is provided as a flag then use it.
-	// otherwise, get it from the environment variable.
+	// if db connection string is provided as a flag then use it. otherwise, get it from the environment variable
 	if dbConn == nil || *dbConn == "" {
 		envDBConn := os.Getenv("DB_CONN")
 		dbConn = &envDBConn
@@ -98,12 +97,14 @@ func main() {
 		arguments = append(arguments, args[1:]...)
 	}
 
-	if err := goose.RunContext(ctx, command, db, *dir, arguments...); err != nil {
-		log.Error("failed to execute migration with goose %v: %v", command, err)
-		return
+	for _, dir := range strings.Split(*dirs, ",") {
+		if err := goose.RunContext(context.Background(), command, db, dir, arguments...); err != nil {
+			log.Error("failed to execute migration with goose %v: %v", command, err)
+			return
+		}
 	}
 
-	log.Info("migration completed successfully")
+	log.Info("migration completed")
 }
 
 // extractCommand extracts the command from the arguments,
