@@ -9,6 +9,8 @@ import (
 
 func (s *FakeTestSuite) TestFakeOrganization() {
 	s.Run("should create an organization with default values", func() {
+		s.T().Parallel()
+
 		// create a fake organization with default values
 		o := fake.NewOrganization(s.db)
 
@@ -25,6 +27,8 @@ func (s *FakeTestSuite) TestFakeOrganization() {
 	})
 
 	s.Run("should create an organization with custom name", func() {
+		s.T().Parallel()
+
 		// create a fake organization with custom name
 		name := "test organization"
 		o := fake.NewOrganization(s.db, fake.OrganizationName(name))
@@ -35,6 +39,8 @@ func (s *FakeTestSuite) TestFakeOrganization() {
 	})
 
 	s.Run("should create a deleted organization", func() {
+		s.T().Parallel()
+
 		// create a deleted organization
 		o := fake.NewOrganization(s.db, fake.OrganizationDeleted())
 
@@ -44,6 +50,8 @@ func (s *FakeTestSuite) TestFakeOrganization() {
 	})
 
 	s.Run("should create a suspended organization", func() {
+		s.T().Parallel()
+
 		// create a suspended organization
 		o := fake.NewOrganization(s.db, fake.OrganizationSuspended())
 
@@ -55,6 +63,8 @@ func (s *FakeTestSuite) TestFakeOrganization() {
 	})
 
 	s.Run("should return true if organization is suspended", func() {
+		s.T().Parallel()
+
 		// create a suspended organization
 		o := fake.NewOrganization(s.db, fake.OrganizationSuspended())
 		s.Require().NotNil(o)
@@ -65,6 +75,8 @@ func (s *FakeTestSuite) TestFakeOrganization() {
 	})
 
 	s.Run("should created a blacklisted organization", func() {
+		s.T().Parallel()
+
 		// create a blacklisted organization
 		o := fake.NewOrganization(s.db, fake.OrganizationBlacklisted())
 
@@ -76,6 +88,8 @@ func (s *FakeTestSuite) TestFakeOrganization() {
 	})
 
 	s.Run("should return true if organization is blacklisted", func() {
+		s.T().Parallel()
+
 		// create a blacklisted organization
 		o := fake.NewOrganization(s.db, fake.OrganizationBlacklisted())
 		s.Require().NotNil(o)
@@ -86,6 +100,8 @@ func (s *FakeTestSuite) TestFakeOrganization() {
 	})
 
 	s.Run("should panic if the organization option returns error", func() {
+		s.T().Parallel()
+
 		errOrgOption := func(t *testing.T) fake.OrganizationOption {
 			t.Helper()
 

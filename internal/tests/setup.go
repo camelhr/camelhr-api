@@ -127,7 +127,7 @@ func RunMigrations(db *sql.DB) error {
 	datafixMigrationsDir := "../../../migrations/datafix"
 
 	// get the current version
-	version, err := goose.GetDBVersion(db)
+	oldVersion, err := goose.GetDBVersion(db)
 	if err != nil {
 		return err
 	}
@@ -144,7 +144,13 @@ func RunMigrations(db *sql.DB) error {
 		return err
 	}
 
-	log.Info("migrations successful. db version: %v", version)
+	// get the new migration version
+	newVersion, err := goose.GetDBVersion(db)
+	if err != nil {
+		return err
+	}
+
+	log.Info("migrations successful. migrated db from version: %d to version: %d", oldVersion, newVersion)
 
 	return nil
 }
