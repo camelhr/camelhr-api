@@ -29,7 +29,7 @@ func (s *FakeTestSuite) SetupSuite() {
 		}
 	}()
 
-	c, err := tests.NewPostgresContainer("5433")
+	c, err := tests.NewPostgresContainer()
 	s.Require().NoError(err)
 	s.pgContainer = c
 

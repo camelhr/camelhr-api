@@ -27,7 +27,7 @@ const (
 )
 
 // NewPostgresContainer creates a new postgres database docker container for testing.
-func NewPostgresContainer(exposedPort string) (*PostgreSQLContainer, error) {
+func NewPostgresContainer() (*PostgreSQLContainer, error) {
 	container := &PostgreSQLContainer{}
 
 	// create a new pool
@@ -53,12 +53,7 @@ func NewPostgresContainer(exposedPort string) (*PostgreSQLContainer, error) {
 			"POSTGRES_DB=" + pgDBName,
 			"listen_addresses = '*'",
 		},
-		ExposedPorts: []string{exposedPort},
-		PortBindings: map[docker.Port][]docker.PortBinding{
-			"5432/tcp": {
-				{HostIP: "0.0.0.0", HostPort: exposedPort},
-			},
-		},
+		ExposedPorts: []string{"5432/tcp"},
 	}, func(config *docker.HostConfig) {
 		// set AutoRemove to true so that stopped container goes away by itself
 		config.AutoRemove = true
