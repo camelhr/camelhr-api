@@ -7,15 +7,15 @@ import (
 	"github.com/camelhr/camelhr-api/internal/web/response"
 )
 
-type organizationHandler struct {
+type handler struct {
 	service Service
 }
 
-func NewOrganizationHandler(service Service) *organizationHandler {
-	return &organizationHandler{service}
+func NewHandler(service Service) *handler {
+	return &handler{service}
 }
 
-func (h *organizationHandler) GetOrganizationByID(w http.ResponseWriter, r *http.Request) {
+func (h *handler) GetOrganizationByID(w http.ResponseWriter, r *http.Request) {
 	id, err := request.URLParamID(r, "orgID")
 	if err != nil {
 		response.ErrorResponse(w, http.StatusBadRequest, err)
@@ -32,7 +32,7 @@ func (h *organizationHandler) GetOrganizationByID(w http.ResponseWriter, r *http
 	response.JSON(w, http.StatusOK, resp)
 }
 
-func (h *organizationHandler) CreateOrganization(w http.ResponseWriter, r *http.Request) {
+func (h *handler) CreateOrganization(w http.ResponseWriter, r *http.Request) {
 	var reqPayload Request
 	if err := request.DecodeJSON(r.Body, &reqPayload); err != nil {
 		response.ErrorResponse(w, http.StatusBadRequest, err)
@@ -53,7 +53,7 @@ func (h *organizationHandler) CreateOrganization(w http.ResponseWriter, r *http.
 	response.JSON(w, http.StatusCreated, resp)
 }
 
-func (h *organizationHandler) UpdateOrganization(w http.ResponseWriter, r *http.Request) {
+func (h *handler) UpdateOrganization(w http.ResponseWriter, r *http.Request) {
 	var reqPayload Request
 	if err := request.DecodeJSON(r.Body, &reqPayload); err != nil {
 		response.ErrorResponse(w, http.StatusBadRequest, err)
@@ -70,7 +70,7 @@ func (h *organizationHandler) UpdateOrganization(w http.ResponseWriter, r *http.
 	response.Empty(w, http.StatusOK)
 }
 
-func (h *organizationHandler) DeleteOrganization(w http.ResponseWriter, r *http.Request) {
+func (h *handler) DeleteOrganization(w http.ResponseWriter, r *http.Request) {
 	id, err := request.URLParamID(r, "orgID")
 	if err != nil {
 		response.ErrorResponse(w, http.StatusBadRequest, err)
@@ -85,7 +85,7 @@ func (h *organizationHandler) DeleteOrganization(w http.ResponseWriter, r *http.
 	response.Empty(w, http.StatusOK)
 }
 
-func (h *organizationHandler) toResponse(org Organization) *Response {
+func (h *handler) toResponse(org Organization) *Response {
 	return &Response{
 		ID:          org.ID,
 		Name:        org.Name,
@@ -94,7 +94,7 @@ func (h *organizationHandler) toResponse(org Organization) *Response {
 	}
 }
 
-func (h *organizationHandler) toOrganization(req Request) Organization {
+func (h *handler) toOrganization(req Request) Organization {
 	return Organization{
 		Name: req.Name,
 	}

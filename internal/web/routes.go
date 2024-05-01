@@ -14,9 +14,9 @@ import (
 // SetupRoutes initializes the routes for the web server.
 func SetupRoutes(db database.Database) http.Handler {
 	// initialize dependencies
-	orgRepo := organization.NewOrganizationRepository(db)
-	orgService := organization.NewOrganizationService(orgRepo)
-	orgHandler := organization.NewOrganizationHandler(orgService)
+	orgRepo := organization.NewRepository(db)
+	orgService := organization.NewService(orgRepo)
+	orgHandler := organization.NewHandler(orgService)
 
 	// create a default router
 	r := chi.NewRouter()

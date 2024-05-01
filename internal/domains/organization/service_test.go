@@ -9,14 +9,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestOrganizationService_GetOrganizationByID(t *testing.T) {
+func TestService_GetOrganizationByID(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should return an error when the repository call fails", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := organization.NewRepositoryMock(t)
-		service := organization.NewOrganizationService(mockRepo)
+		service := organization.NewService(mockRepo)
 
 		mockRepo.On("GetOrganizationByID", context.TODO(), int64(1)).
 			Return(organization.Organization{}, assert.AnError)
@@ -30,7 +30,7 @@ func TestOrganizationService_GetOrganizationByID(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := organization.NewRepositoryMock(t)
-		service := organization.NewOrganizationService(mockRepo)
+		service := organization.NewService(mockRepo)
 
 		org := organization.Organization{
 			ID:   1,
@@ -46,14 +46,14 @@ func TestOrganizationService_GetOrganizationByID(t *testing.T) {
 	})
 }
 
-func TestOrganizationService_GetOrganizationByName(t *testing.T) {
+func TestService_GetOrganizationByName(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should return an error when the repository call fails", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := organization.NewRepositoryMock(t)
-		service := organization.NewOrganizationService(mockRepo)
+		service := organization.NewService(mockRepo)
 
 		mockRepo.On("GetOrganizationByName", context.TODO(), "org1").
 			Return(organization.Organization{}, assert.AnError)
@@ -67,7 +67,7 @@ func TestOrganizationService_GetOrganizationByName(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := organization.NewRepositoryMock(t)
-		service := organization.NewOrganizationService(mockRepo)
+		service := organization.NewService(mockRepo)
 
 		org := organization.Organization{
 			ID:   1,
@@ -83,14 +83,14 @@ func TestOrganizationService_GetOrganizationByName(t *testing.T) {
 	})
 }
 
-func TestOrganizationService_CreateOrganization(t *testing.T) {
+func TestService_CreateOrganization(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should return an error when the repository call fails", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := organization.NewRepositoryMock(t)
-		service := organization.NewOrganizationService(mockRepo)
+		service := organization.NewService(mockRepo)
 
 		org := organization.Organization{
 			Name: "org1",
@@ -108,7 +108,7 @@ func TestOrganizationService_CreateOrganization(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := organization.NewRepositoryMock(t)
-		service := organization.NewOrganizationService(mockRepo)
+		service := organization.NewService(mockRepo)
 
 		org := organization.Organization{
 			Name: "org1",
@@ -123,14 +123,14 @@ func TestOrganizationService_CreateOrganization(t *testing.T) {
 	})
 }
 
-func TestOrganizationService_UpdateOrganization(t *testing.T) {
+func TestService_UpdateOrganization(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should return an error when the repository call fails", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := organization.NewRepositoryMock(t)
-		service := organization.NewOrganizationService(mockRepo)
+		service := organization.NewService(mockRepo)
 
 		org := organization.Organization{
 			Name: "org1",
@@ -148,7 +148,7 @@ func TestOrganizationService_UpdateOrganization(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := organization.NewRepositoryMock(t)
-		service := organization.NewOrganizationService(mockRepo)
+		service := organization.NewService(mockRepo)
 
 		org := organization.Organization{
 			Name: "org1",
@@ -162,14 +162,14 @@ func TestOrganizationService_UpdateOrganization(t *testing.T) {
 	})
 }
 
-func TestOrganizationService_DeleteOrganization(t *testing.T) {
+func TestService_DeleteOrganization(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should return an error when the repository call fails", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := organization.NewRepositoryMock(t)
-		service := organization.NewOrganizationService(mockRepo)
+		service := organization.NewService(mockRepo)
 
 		mockRepo.On("DeleteOrganization", context.TODO(), int64(1)).
 			Return(assert.AnError)
@@ -183,7 +183,7 @@ func TestOrganizationService_DeleteOrganization(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := organization.NewRepositoryMock(t)
-		service := organization.NewOrganizationService(mockRepo)
+		service := organization.NewService(mockRepo)
 
 		mockRepo.On("DeleteOrganization", context.TODO(), int64(1)).
 			Return(nil)
@@ -193,14 +193,14 @@ func TestOrganizationService_DeleteOrganization(t *testing.T) {
 	})
 }
 
-func TestOrganizationService_SuspendOrganization(t *testing.T) {
+func TestService_SuspendOrganization(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should return an error when the repository call fails", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := organization.NewRepositoryMock(t)
-		service := organization.NewOrganizationService(mockRepo)
+		service := organization.NewService(mockRepo)
 
 		mockRepo.On("SuspendOrganization", context.TODO(), int64(1), "test suspend").
 			Return(assert.AnError)
@@ -214,7 +214,7 @@ func TestOrganizationService_SuspendOrganization(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := organization.NewRepositoryMock(t)
-		service := organization.NewOrganizationService(mockRepo)
+		service := organization.NewService(mockRepo)
 
 		mockRepo.On("SuspendOrganization", context.TODO(), int64(1), "test suspend").
 			Return(nil)
@@ -224,14 +224,14 @@ func TestOrganizationService_SuspendOrganization(t *testing.T) {
 	})
 }
 
-func TestOrganizationService_UnsuspendOrganization(t *testing.T) {
+func TestService_UnsuspendOrganization(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should return an error when the repository call fails", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := organization.NewRepositoryMock(t)
-		service := organization.NewOrganizationService(mockRepo)
+		service := organization.NewService(mockRepo)
 
 		mockRepo.On("UnsuspendOrganization", context.TODO(), int64(1), "test unsuspend").
 			Return(assert.AnError)
@@ -245,7 +245,7 @@ func TestOrganizationService_UnsuspendOrganization(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := organization.NewRepositoryMock(t)
-		service := organization.NewOrganizationService(mockRepo)
+		service := organization.NewService(mockRepo)
 
 		mockRepo.On("UnsuspendOrganization", context.TODO(), int64(1), "test unsuspend").
 			Return(nil)
@@ -255,14 +255,14 @@ func TestOrganizationService_UnsuspendOrganization(t *testing.T) {
 	})
 }
 
-func TestOrganizationService_BlacklistOrganization(t *testing.T) {
+func TestService_BlacklistOrganization(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should return an error when the repository call fails", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := organization.NewRepositoryMock(t)
-		service := organization.NewOrganizationService(mockRepo)
+		service := organization.NewService(mockRepo)
 
 		mockRepo.On("BlacklistOrganization", context.TODO(), int64(1), "test blacklist").
 			Return(assert.AnError)
@@ -276,7 +276,7 @@ func TestOrganizationService_BlacklistOrganization(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := organization.NewRepositoryMock(t)
-		service := organization.NewOrganizationService(mockRepo)
+		service := organization.NewService(mockRepo)
 
 		mockRepo.On("BlacklistOrganization", context.TODO(), int64(1), "test blacklist").
 			Return(nil)
@@ -286,14 +286,14 @@ func TestOrganizationService_BlacklistOrganization(t *testing.T) {
 	})
 }
 
-func TestOrganizationService_UnblacklistOrganization(t *testing.T) {
+func TestService_UnblacklistOrganization(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should return an error when the repository call fails", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := organization.NewRepositoryMock(t)
-		service := organization.NewOrganizationService(mockRepo)
+		service := organization.NewService(mockRepo)
 
 		mockRepo.On("UnblacklistOrganization", context.TODO(), int64(1), "test unblacklist").
 			Return(assert.AnError)
@@ -307,7 +307,7 @@ func TestOrganizationService_UnblacklistOrganization(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := organization.NewRepositoryMock(t)
-		service := organization.NewOrganizationService(mockRepo)
+		service := organization.NewService(mockRepo)
 
 		mockRepo.On("UnblacklistOrganization", context.TODO(), int64(1), "test unblacklist").
 			Return(nil)

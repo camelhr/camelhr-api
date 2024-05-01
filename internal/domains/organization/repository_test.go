@@ -22,14 +22,14 @@ var queryMatcher = func(queryLabel string) any {
 	})
 }
 
-func TestOrganizationRepository_GetOrganizationByID(t *testing.T) {
+func TestRepository_GetOrganizationByID(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should return an error when the database call fails", func(t *testing.T) {
 		t.Parallel()
 
 		mockDB := &database.DatabaseMock{}
-		repo := organization.NewOrganizationRepository(mockDB)
+		repo := organization.NewRepository(mockDB)
 
 		mockDB.On("Get", context.TODO(), mock.Anything, queryMatcher("getOrganizationByIDQuery"), int64(1)).
 			Return(assert.AnError)
@@ -45,7 +45,7 @@ func TestOrganizationRepository_GetOrganizationByID(t *testing.T) {
 		var emptyOrg organization.Organization
 
 		mockDB := database.NewDatabaseMock(t)
-		repo := organization.NewOrganizationRepository(mockDB)
+		repo := organization.NewRepository(mockDB)
 
 		org := organization.Organization{
 			ID:   1,
@@ -65,14 +65,14 @@ func TestOrganizationRepository_GetOrganizationByID(t *testing.T) {
 	})
 }
 
-func TestOrganizationRepository_GetOrganizationByName(t *testing.T) {
+func TestRepository_GetOrganizationByName(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should return an error when the database call fails", func(t *testing.T) {
 		t.Parallel()
 
 		mockDB := &database.DatabaseMock{}
-		repo := organization.NewOrganizationRepository(mockDB)
+		repo := organization.NewRepository(mockDB)
 
 		mockDB.On("Get", context.TODO(), mock.Anything, queryMatcher("getOrganizationByNameQuery"), "org1").
 			Return(assert.AnError)
@@ -88,7 +88,7 @@ func TestOrganizationRepository_GetOrganizationByName(t *testing.T) {
 		var emptyOrg organization.Organization
 
 		mockDB := database.NewDatabaseMock(t)
-		repo := organization.NewOrganizationRepository(mockDB)
+		repo := organization.NewRepository(mockDB)
 
 		org := organization.Organization{
 			ID:   1,
@@ -108,14 +108,14 @@ func TestOrganizationRepository_GetOrganizationByName(t *testing.T) {
 	})
 }
 
-func TestOrganizationRepository_CreateOrganization(t *testing.T) {
+func TestRepository_CreateOrganization(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should return an error when the database call fails", func(t *testing.T) {
 		t.Parallel()
 
 		mockDB := &database.DatabaseMock{}
-		repo := organization.NewOrganizationRepository(mockDB)
+		repo := organization.NewRepository(mockDB)
 
 		mockDB.On("Exec", context.TODO(), mock.Anything, queryMatcher("createOrganizationQuery"), "org1").
 			Return(assert.AnError)
@@ -131,7 +131,7 @@ func TestOrganizationRepository_CreateOrganization(t *testing.T) {
 		var id int64
 
 		mockDB := database.NewDatabaseMock(t)
-		repo := organization.NewOrganizationRepository(mockDB)
+		repo := organization.NewRepository(mockDB)
 
 		mockDB.On("Exec", context.TODO(), &id, queryMatcher("createOrganizationQuery"), "org1").
 			Return(nil)
@@ -142,14 +142,14 @@ func TestOrganizationRepository_CreateOrganization(t *testing.T) {
 	})
 }
 
-func TestOrganizationRepository_UpdateOrganization(t *testing.T) {
+func TestRepository_UpdateOrganization(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should return an error when the database call fails", func(t *testing.T) {
 		t.Parallel()
 
 		mockDB := &database.DatabaseMock{}
-		repo := organization.NewOrganizationRepository(mockDB)
+		repo := organization.NewRepository(mockDB)
 
 		mockDB.On("Exec", context.TODO(), nil, queryMatcher("updateOrganizationQuery"), "org1").
 			Return(assert.AnError)
@@ -163,7 +163,7 @@ func TestOrganizationRepository_UpdateOrganization(t *testing.T) {
 		t.Parallel()
 
 		mockDB := database.NewDatabaseMock(t)
-		repo := organization.NewOrganizationRepository(mockDB)
+		repo := organization.NewRepository(mockDB)
 
 		mockDB.On("Exec", context.TODO(), nil, queryMatcher("updateOrganizationQuery"), "org1").
 			Return(nil)
@@ -173,14 +173,14 @@ func TestOrganizationRepository_UpdateOrganization(t *testing.T) {
 	})
 }
 
-func TestOrganizationRepository_DeleteOrganization(t *testing.T) {
+func TestRepository_DeleteOrganization(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should return an error when the database call fails", func(t *testing.T) {
 		t.Parallel()
 
 		mockDB := &database.DatabaseMock{}
-		repo := organization.NewOrganizationRepository(mockDB)
+		repo := organization.NewRepository(mockDB)
 
 		mockDB.On("Exec", context.TODO(), nil, queryMatcher("deleteOrganizationQuery"), int64(1)).
 			Return(assert.AnError)
@@ -194,7 +194,7 @@ func TestOrganizationRepository_DeleteOrganization(t *testing.T) {
 		t.Parallel()
 
 		mockDB := database.NewDatabaseMock(t)
-		repo := organization.NewOrganizationRepository(mockDB)
+		repo := organization.NewRepository(mockDB)
 
 		mockDB.On("Exec", context.TODO(), nil, queryMatcher("deleteOrganizationQuery"), int64(1)).
 			Return(nil)
@@ -204,14 +204,14 @@ func TestOrganizationRepository_DeleteOrganization(t *testing.T) {
 	})
 }
 
-func TestOrganizationRepository_SuspendOrganization(t *testing.T) {
+func TestRepository_SuspendOrganization(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should return an error when the database call fails", func(t *testing.T) {
 		t.Parallel()
 
 		mockDB := &database.DatabaseMock{}
-		repo := organization.NewOrganizationRepository(mockDB)
+		repo := organization.NewRepository(mockDB)
 
 		mockDB.On("Exec", context.TODO(), nil, queryMatcher("suspendOrganizationQuery"), int64(1), "test suspended").
 			Return(assert.AnError)
@@ -225,7 +225,7 @@ func TestOrganizationRepository_SuspendOrganization(t *testing.T) {
 		t.Parallel()
 
 		mockDB := database.NewDatabaseMock(t)
-		repo := organization.NewOrganizationRepository(mockDB)
+		repo := organization.NewRepository(mockDB)
 
 		mockDB.On("Exec", context.TODO(), nil, queryMatcher("suspendOrganizationQuery"), int64(1), "test suspended").
 			Return(nil)
@@ -235,14 +235,14 @@ func TestOrganizationRepository_SuspendOrganization(t *testing.T) {
 	})
 }
 
-func TestOrganizationRepository_UnsuspendOrganization(t *testing.T) {
+func TestRepository_UnsuspendOrganization(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should return an error when the database call fails", func(t *testing.T) {
 		t.Parallel()
 
 		mockDB := &database.DatabaseMock{}
-		repo := organization.NewOrganizationRepository(mockDB)
+		repo := organization.NewRepository(mockDB)
 
 		mockDB.On("Exec", context.TODO(), nil, queryMatcher("unsuspendOrganizationQuery"), int64(1), "test unsuspended").
 			Return(assert.AnError)
@@ -256,7 +256,7 @@ func TestOrganizationRepository_UnsuspendOrganization(t *testing.T) {
 		t.Parallel()
 
 		mockDB := database.NewDatabaseMock(t)
-		repo := organization.NewOrganizationRepository(mockDB)
+		repo := organization.NewRepository(mockDB)
 
 		mockDB.On("Exec", context.TODO(), nil, queryMatcher("unsuspendOrganizationQuery"), int64(1), "test unsuspended").
 			Return(nil)
@@ -266,14 +266,14 @@ func TestOrganizationRepository_UnsuspendOrganization(t *testing.T) {
 	})
 }
 
-func TestOrganizationRepository_BlacklistOrganization(t *testing.T) {
+func TestRepository_BlacklistOrganization(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should return an error when the database call fails", func(t *testing.T) {
 		t.Parallel()
 
 		mockDB := &database.DatabaseMock{}
-		repo := organization.NewOrganizationRepository(mockDB)
+		repo := organization.NewRepository(mockDB)
 
 		mockDB.On("Exec", context.TODO(), nil, queryMatcher("blacklistOrganizationQuery"), int64(1), "test blacklisted").
 			Return(assert.AnError)
@@ -287,7 +287,7 @@ func TestOrganizationRepository_BlacklistOrganization(t *testing.T) {
 		t.Parallel()
 
 		mockDB := database.NewDatabaseMock(t)
-		repo := organization.NewOrganizationRepository(mockDB)
+		repo := organization.NewRepository(mockDB)
 
 		mockDB.On("Exec", context.TODO(), nil, queryMatcher("blacklistOrganizationQuery"), int64(1), "test blacklisted").
 			Return(nil)
@@ -297,14 +297,14 @@ func TestOrganizationRepository_BlacklistOrganization(t *testing.T) {
 	})
 }
 
-func TestOrganizationRepository_UnblacklistOrganization(t *testing.T) {
+func TestRepository_UnblacklistOrganization(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should return an error when the database call fails", func(t *testing.T) {
 		t.Parallel()
 
 		mockDB := &database.DatabaseMock{}
-		repo := organization.NewOrganizationRepository(mockDB)
+		repo := organization.NewRepository(mockDB)
 
 		mockDB.On("Exec", context.TODO(), nil, queryMatcher("unblacklistOrganizationQuery"), int64(1), "test unblacklisted").
 			Return(assert.AnError)
@@ -318,7 +318,7 @@ func TestOrganizationRepository_UnblacklistOrganization(t *testing.T) {
 		t.Parallel()
 
 		mockDB := database.NewDatabaseMock(t)
-		repo := organization.NewOrganizationRepository(mockDB)
+		repo := organization.NewRepository(mockDB)
 
 		mockDB.On("Exec", context.TODO(), nil, queryMatcher("unblacklistOrganizationQuery"), int64(1), "test unblacklisted").
 			Return(nil)

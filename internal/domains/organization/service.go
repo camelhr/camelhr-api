@@ -33,48 +33,48 @@ type Service interface {
 	UnblacklistOrganization(ctx context.Context, id int64, comment string) error
 }
 
-type organizationService struct {
+type service struct {
 	repo Repository
 }
 
-func NewOrganizationService(repo Repository) Service {
-	return &organizationService{
+func NewService(repo Repository) Service {
+	return &service{
 		repo: repo,
 	}
 }
 
-func (s *organizationService) GetOrganizationByID(ctx context.Context, id int64) (Organization, error) {
+func (s *service) GetOrganizationByID(ctx context.Context, id int64) (Organization, error) {
 	return s.repo.GetOrganizationByID(ctx, id)
 }
 
-func (s *organizationService) GetOrganizationByName(ctx context.Context, name string) (Organization, error) {
+func (s *service) GetOrganizationByName(ctx context.Context, name string) (Organization, error) {
 	return s.repo.GetOrganizationByName(ctx, name)
 }
 
-func (s *organizationService) CreateOrganization(ctx context.Context, org Organization) (int64, error) {
+func (s *service) CreateOrganization(ctx context.Context, org Organization) (int64, error) {
 	return s.repo.CreateOrganization(ctx, org)
 }
 
-func (s *organizationService) UpdateOrganization(ctx context.Context, org Organization) error {
+func (s *service) UpdateOrganization(ctx context.Context, org Organization) error {
 	return s.repo.UpdateOrganization(ctx, org)
 }
 
-func (s *organizationService) DeleteOrganization(ctx context.Context, id int64) error {
+func (s *service) DeleteOrganization(ctx context.Context, id int64) error {
 	return s.repo.DeleteOrganization(ctx, id)
 }
 
-func (s *organizationService) SuspendOrganization(ctx context.Context, id int64, comment string) error {
+func (s *service) SuspendOrganization(ctx context.Context, id int64, comment string) error {
 	return s.repo.SuspendOrganization(ctx, id, comment)
 }
 
-func (s *organizationService) UnsuspendOrganization(ctx context.Context, id int64, comment string) error {
+func (s *service) UnsuspendOrganization(ctx context.Context, id int64, comment string) error {
 	return s.repo.UnsuspendOrganization(ctx, id, comment)
 }
 
-func (s *organizationService) BlacklistOrganization(ctx context.Context, id int64, comment string) error {
+func (s *service) BlacklistOrganization(ctx context.Context, id int64, comment string) error {
 	return s.repo.BlacklistOrganization(ctx, id, comment)
 }
 
-func (s *organizationService) UnblacklistOrganization(ctx context.Context, id int64, comment string) error {
+func (s *service) UnblacklistOrganization(ctx context.Context, id int64, comment string) error {
 	return s.repo.UnblacklistOrganization(ctx, id, comment)
 }

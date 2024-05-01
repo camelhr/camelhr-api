@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestOrganizationHandler_GetOrganizationByID(t *testing.T) {
+func TestHandler_GetOrganizationByID(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should return the organization by id", func(t *testing.T) {
@@ -32,7 +32,7 @@ func TestOrganizationHandler_GetOrganizationByID(t *testing.T) {
 		"created_at": "0001-01-01T00:00:00Z", "updated_at": "0001-01-01T00:00:00Z"}`
 		mockService := organization.NewServiceMock(t)
 		rr := httptest.NewRecorder()
-		handler := organization.NewOrganizationHandler(mockService)
+		handler := organization.NewHandler(mockService)
 
 		// mock the GetOrganizationByID function
 		mockService.On("GetOrganizationByID", req.Context(), int64(1)).
@@ -59,7 +59,7 @@ func TestOrganizationHandler_GetOrganizationByID(t *testing.T) {
 
 		mockService := organization.NewServiceMock(t)
 		rr := httptest.NewRecorder()
-		handler := organization.NewOrganizationHandler(mockService)
+		handler := organization.NewHandler(mockService)
 
 		// mock the GetOrganizationByID function
 		mockService.On("GetOrganizationByID", req.Context(), int64(1)).
@@ -81,7 +81,7 @@ func TestOrganizationHandler_GetOrganizationByID(t *testing.T) {
 
 		mockService := organization.NewServiceMock(t)
 		rr := httptest.NewRecorder()
-		handler := organization.NewOrganizationHandler(mockService)
+		handler := organization.NewHandler(mockService)
 
 		// call the GetOrganizationByID function
 		handler.GetOrganizationByID(rr, req)
@@ -92,7 +92,7 @@ func TestOrganizationHandler_GetOrganizationByID(t *testing.T) {
 	})
 }
 
-func TestOrganizationHandler_CreateOrganization(t *testing.T) {
+func TestHandler_CreateOrganization(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should create the organization", func(t *testing.T) {
@@ -107,7 +107,7 @@ func TestOrganizationHandler_CreateOrganization(t *testing.T) {
 		"created_at": "0001-01-01T00:00:00Z", "updated_at": "0001-01-01T00:00:00Z"}`
 		mockService := organization.NewServiceMock(t)
 		rr := httptest.NewRecorder()
-		handler := organization.NewOrganizationHandler(mockService)
+		handler := organization.NewHandler(mockService)
 
 		// mock the CreateOrganization function
 		mockService.On("CreateOrganization", req.Context(), organization.Organization{Name: "org_create_test"}).
@@ -130,7 +130,7 @@ func TestOrganizationHandler_CreateOrganization(t *testing.T) {
 
 		mockService := organization.NewServiceMock(t)
 		rr := httptest.NewRecorder()
-		handler := organization.NewOrganizationHandler(mockService)
+		handler := organization.NewHandler(mockService)
 
 		// mock the CreateOrganization function
 		mockService.On("CreateOrganization", req.Context(), organization.Organization{Name: "org_create_test"}).
@@ -153,7 +153,7 @@ func TestOrganizationHandler_CreateOrganization(t *testing.T) {
 
 		mockService := organization.NewServiceMock(t)
 		rr := httptest.NewRecorder()
-		handler := organization.NewOrganizationHandler(mockService)
+		handler := organization.NewHandler(mockService)
 
 		// call the CreateOrganization function
 		handler.CreateOrganization(rr, req)
@@ -164,7 +164,7 @@ func TestOrganizationHandler_CreateOrganization(t *testing.T) {
 	})
 }
 
-func TestOrganizationHandler_UpdateOrganization(t *testing.T) {
+func TestHandler_UpdateOrganization(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should update the organization", func(t *testing.T) {
@@ -176,7 +176,7 @@ func TestOrganizationHandler_UpdateOrganization(t *testing.T) {
 
 		mockService := organization.NewServiceMock(t)
 		rr := httptest.NewRecorder()
-		handler := organization.NewOrganizationHandler(mockService)
+		handler := organization.NewHandler(mockService)
 
 		// mock the UpdateOrganization function
 		mockService.On("UpdateOrganization", req.Context(), organization.Organization{Name: "org_update_test"}).
@@ -199,7 +199,7 @@ func TestOrganizationHandler_UpdateOrganization(t *testing.T) {
 
 		mockService := organization.NewServiceMock(t)
 		rr := httptest.NewRecorder()
-		handler := organization.NewOrganizationHandler(mockService)
+		handler := organization.NewHandler(mockService)
 
 		// mock the UpdateOrganization function
 		mockService.On("UpdateOrganization", req.Context(), organization.Organization{Name: "org_update_test"}).
@@ -222,7 +222,7 @@ func TestOrganizationHandler_UpdateOrganization(t *testing.T) {
 
 		mockService := organization.NewServiceMock(t)
 		rr := httptest.NewRecorder()
-		handler := organization.NewOrganizationHandler(mockService)
+		handler := organization.NewHandler(mockService)
 
 		// call the UpdateOrganization function
 		handler.UpdateOrganization(rr, req)
@@ -233,7 +233,7 @@ func TestOrganizationHandler_UpdateOrganization(t *testing.T) {
 	})
 }
 
-func TestOrganizationHandler_DeleteOrganization(t *testing.T) {
+func TestHandler_DeleteOrganization(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should delete the organization", func(t *testing.T) {
@@ -249,7 +249,7 @@ func TestOrganizationHandler_DeleteOrganization(t *testing.T) {
 
 		mockService := organization.NewServiceMock(t)
 		rr := httptest.NewRecorder()
-		handler := organization.NewOrganizationHandler(mockService)
+		handler := organization.NewHandler(mockService)
 
 		// mock the DeleteOrganization function
 		mockService.On("DeleteOrganization", req.Context(), int64(1)).
@@ -276,7 +276,7 @@ func TestOrganizationHandler_DeleteOrganization(t *testing.T) {
 
 		mockService := organization.NewServiceMock(t)
 		rr := httptest.NewRecorder()
-		handler := organization.NewOrganizationHandler(mockService)
+		handler := organization.NewHandler(mockService)
 
 		// mock the DeleteOrganization function
 		mockService.On("DeleteOrganization", req.Context(), int64(1)).
@@ -298,7 +298,7 @@ func TestOrganizationHandler_DeleteOrganization(t *testing.T) {
 
 		mockService := organization.NewServiceMock(t)
 		rr := httptest.NewRecorder()
-		handler := organization.NewOrganizationHandler(mockService)
+		handler := organization.NewHandler(mockService)
 
 		// call the DeleteOrganization function
 		handler.DeleteOrganization(rr, req)
