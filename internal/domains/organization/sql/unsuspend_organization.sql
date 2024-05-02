@@ -2,7 +2,7 @@
 -- $1: organization_id
 -- $2: comment
 UPDATE
-    organization
+    organizations
 SET
     suspended_at = NULL,
     comment = $2

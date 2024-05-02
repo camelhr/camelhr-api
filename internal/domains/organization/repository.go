@@ -67,7 +67,7 @@ func (r *repository) CreateOrganization(ctx context.Context, org Organization) (
 }
 
 func (r *repository) UpdateOrganization(ctx context.Context, org Organization) error {
-	return r.db.Exec(ctx, nil, updateOrganizationQuery, org.Name)
+	return r.db.Exec(ctx, nil, updateOrganizationQuery, org.ID, org.Name)
 }
 
 func (r *repository) DeleteOrganization(ctx context.Context, id int64) error {

@@ -4,6 +4,8 @@ SELECT
     organization_id,
     name,
     suspended_at,
+    blacklisted_at,
+    comment,
     created_at,
     updated_at,
     deleted_at
