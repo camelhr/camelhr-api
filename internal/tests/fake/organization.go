@@ -79,6 +79,14 @@ func NewOrganization(db database.Database, options ...OrganizationOption) *FakeO
 
 func (o *FakeOrganization) setDefaults() {
 	o.Name = gofakeit.Name()
+
+	if o.CreatedAt.IsZero() {
+		o.CreatedAt = time.Now().UTC()
+	}
+
+	if o.UpdatedAt.IsZero() {
+		o.UpdatedAt = o.CreatedAt
+	}
 }
 
 func persist(db database.Database, o *FakeOrganization) error {
