@@ -1,4 +1,4 @@
-package fake_test
+package organization_test
 
 import (
 	"testing"
@@ -7,11 +7,11 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type FakeTestSuite struct {
+type OrganizationTestSuite struct {
 	tests.BaseSuite
 }
 
 func TestSuite(t *testing.T) {
 	t.Parallel()
-	suite.Run(t, new(FakeTestSuite))
+	suite.Run(t, new(OrganizationTestSuite))
 }

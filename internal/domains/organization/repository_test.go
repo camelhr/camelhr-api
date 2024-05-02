@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/camelhr/camelhr-api/internal/database"
 	"github.com/camelhr/camelhr-api/internal/domains/organization"
 	"github.com/stretchr/testify/assert"
@@ -150,11 +151,15 @@ func TestRepository_UpdateOrganization(t *testing.T) {
 
 		mockDB := &database.DatabaseMock{}
 		repo := organization.NewRepository(mockDB)
+		org := organization.Organization{
+			ID:   gofakeit.Int64(),
+			Name: "org1",
+		}
 
-		mockDB.On("Exec", context.TODO(), nil, queryMatcher("updateOrganizationQuery"), "org1").
+		mockDB.On("Exec", context.TODO(), nil, queryMatcher("updateOrganizationQuery"), org.ID, org.Name).
 			Return(assert.AnError)
 
-		err := repo.UpdateOrganization(context.TODO(), organization.Organization{Name: "org1"})
+		err := repo.UpdateOrganization(context.TODO(), org)
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
@@ -164,11 +169,15 @@ func TestRepository_UpdateOrganization(t *testing.T) {
 
 		mockDB := database.NewDatabaseMock(t)
 		repo := organization.NewRepository(mockDB)
+		org := organization.Organization{
+			ID:   gofakeit.Int64(),
+			Name: "org1",
+		}
 
-		mockDB.On("Exec", context.TODO(), nil, queryMatcher("updateOrganizationQuery"), "org1").
+		mockDB.On("Exec", context.TODO(), nil, queryMatcher("updateOrganizationQuery"), org.ID, org.Name).
 			Return(nil)
 
-		err := repo.UpdateOrganization(context.TODO(), organization.Organization{Name: "org1"})
+		err := repo.UpdateOrganization(context.TODO(), org)
 		require.NoError(t, err)
 	})
 }

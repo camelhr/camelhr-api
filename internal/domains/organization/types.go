@@ -21,7 +21,7 @@ type Organization struct {
 	BlacklistedAt *time.Time `db:"blacklisted_at"`
 
 	// Comment represents any additional information about the organization's current state.
-	Comment string `db:"comment"`
+	Comment *string `db:"comment"`
 
 	base.Timestamps
 }

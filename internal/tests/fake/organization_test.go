@@ -12,7 +12,7 @@ func (s *FakeTestSuite) TestFakeOrganization() {
 		s.T().Parallel()
 
 		// create a fake organization with default values
-		o := fake.NewOrganization(s.db)
+		o := fake.NewOrganization(s.DB)
 
 		// assert that the organization is created with the default values
 		s.Require().NotNil(o)
@@ -31,7 +31,7 @@ func (s *FakeTestSuite) TestFakeOrganization() {
 
 		// create a fake organization with custom name
 		name := "test organization"
-		o := fake.NewOrganization(s.db, fake.OrganizationName(name))
+		o := fake.NewOrganization(s.DB, fake.OrganizationName(name))
 
 		// assert that the organization is created the specified name
 		s.Require().NotNil(o)
@@ -42,7 +42,7 @@ func (s *FakeTestSuite) TestFakeOrganization() {
 		s.T().Parallel()
 
 		// create a deleted organization
-		o := fake.NewOrganization(s.db, fake.OrganizationDeleted())
+		o := fake.NewOrganization(s.DB, fake.OrganizationDeleted())
 
 		// assert that the organization is set deleted
 		s.Require().NotNil(o)
@@ -53,7 +53,7 @@ func (s *FakeTestSuite) TestFakeOrganization() {
 		s.T().Parallel()
 
 		// create a suspended organization
-		o := fake.NewOrganization(s.db, fake.OrganizationSuspended())
+		o := fake.NewOrganization(s.DB, fake.OrganizationSuspended())
 
 		// assert that the organization is suspended
 		s.Require().NotNil(o)
@@ -66,9 +66,9 @@ func (s *FakeTestSuite) TestFakeOrganization() {
 		s.T().Parallel()
 
 		// create a suspended organization
-		o := fake.NewOrganization(s.db, fake.OrganizationSuspended())
+		o := fake.NewOrganization(s.DB, fake.OrganizationSuspended())
 		s.Require().NotNil(o)
-		isSuspended := o.IsSuspended(s.db)
+		isSuspended := o.IsSuspended(s.DB)
 
 		// assert that the organization is suspended
 		s.True(isSuspended)
@@ -78,7 +78,7 @@ func (s *FakeTestSuite) TestFakeOrganization() {
 		s.T().Parallel()
 
 		// create a blacklisted organization
-		o := fake.NewOrganization(s.db, fake.OrganizationBlacklisted())
+		o := fake.NewOrganization(s.DB, fake.OrganizationBlacklisted())
 
 		// assert that the organization is blacklisted
 		s.Require().NotNil(o)
@@ -91,9 +91,9 @@ func (s *FakeTestSuite) TestFakeOrganization() {
 		s.T().Parallel()
 
 		// create a blacklisted organization
-		o := fake.NewOrganization(s.db, fake.OrganizationBlacklisted())
+		o := fake.NewOrganization(s.DB, fake.OrganizationBlacklisted())
 		s.Require().NotNil(o)
-		isBlacklisted := o.IsBlacklisted(s.db)
+		isBlacklisted := o.IsBlacklisted(s.DB)
 
 		// assert that the organization is blacklisted
 		s.True(isBlacklisted)
@@ -110,7 +110,7 @@ func (s *FakeTestSuite) TestFakeOrganization() {
 			}
 		}
 		newOrgFunction := func() {
-			fake.NewOrganization(s.db, errOrgOption(s.T()))
+			fake.NewOrganization(s.DB, errOrgOption(s.T()))
 		}
 		s.Panics(newOrgFunction)
 	})
