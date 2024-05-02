@@ -141,7 +141,7 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_UpdateOrganization() {
 		s.Require().NoError(err)
 		s.Equal(org.Name+" Updated", result.Name)
 		s.Equal(org.CreatedAt, result.CreatedAt)
-		s.GreaterOrEqual(result.UpdatedAt.Unix(), result.CreatedAt.Unix()) // could be equal if the update is fast
+		s.GreaterOrEqual(result.UpdatedAt, result.CreatedAt) // could be equal if the update is fast
 		s.Nil(result.DeletedAt)
 		s.Nil(result.SuspendedAt)
 		s.Nil(result.BlacklistedAt)

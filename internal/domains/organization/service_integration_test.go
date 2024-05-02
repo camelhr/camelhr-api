@@ -101,7 +101,7 @@ func (s *OrganizationTestSuite) TestServiceIntegration_UpdateOrganization() {
 		s.Nil(result.DeletedAt)
 		s.NotZero(result.CreatedAt)
 		s.NotZero(result.UpdatedAt)
-		s.GreaterOrEqual(result.UpdatedAt.Unix(), result.CreatedAt.Unix()) // could be equal if the update is fast
+		s.GreaterOrEqual(result.UpdatedAt, result.CreatedAt) // could be equal if the update is fast
 		s.Nil(result.SuspendedAt)
 		s.Nil(result.BlacklistedAt)
 		s.Nil(result.Comment)
