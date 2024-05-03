@@ -2,7 +2,7 @@
 -- +goose StatementBegin
 CREATE TABLE organizations (
     organization_id SERIAL PRIMARY KEY,
-    name VARCHAR(60) NOT NULL UNIQUE,
+    name VARCHAR(60) NOT NULL UNIQUE CHECK (name <> ''),
     suspended_at TIMESTAMP WITHOUT TIME ZONE,
     blacklisted_at TIMESTAMP WITHOUT TIME ZONE,
     comment VARCHAR(255),
