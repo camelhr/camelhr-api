@@ -103,6 +103,19 @@ func persist(db database.Database, o *FakeOrganization) error {
 	return nil
 }
 
+func (o *FakeOrganization) IsDeleted(db database.Database) bool {
+	var isDeleted bool
+
+	query := "SELECT deleted_at IS NOT NULL FROM organizations WHERE organization_id = $1"
+	err := db.Get(context.TODO(), &isDeleted, query, o.ID)
+
+	if database.SuppressNoRowsError(err) != nil {
+		panic(err)
+	}
+
+	return isDeleted
+}
+
 // IsSuspended returns suspended status of the organization by querying the database.
 func (o *FakeOrganization) IsSuspended(db database.Database) bool {
 	var isSuspended bool

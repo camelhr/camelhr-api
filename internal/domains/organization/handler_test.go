@@ -171,16 +171,23 @@ func TestHandler_UpdateOrganization(t *testing.T) {
 		t.Parallel()
 		// create a new request with a JSON payload
 		payload := `{"name": "org_update_test"}`
-		req, err := http.NewRequest(http.MethodPut, "/organizations", strings.NewReader(payload))
+		req, err := http.NewRequest(http.MethodPut, "/organizations/{orgID}", strings.NewReader(payload))
 		require.NoError(t, err)
+
+		// simulate chi's URL parameters
+		reqContext := chi.NewRouteContext()
+		reqContext.URLParams.Add("orgID", "1")
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
 
 		mockService := organization.NewServiceMock(t)
 		rr := httptest.NewRecorder()
 		handler := organization.NewHandler(mockService)
 
 		// mock the UpdateOrganization function
-		mockService.On("UpdateOrganization", req.Context(), organization.Organization{Name: "org_update_test"}).
-			Return(nil)
+		mockService.On("UpdateOrganization", req.Context(), organization.Organization{
+			ID:   1,
+			Name: "org_update_test",
+		}).Return(nil)
 
 		// call the UpdateOrganization function
 		handler.UpdateOrganization(rr, req)
@@ -194,16 +201,23 @@ func TestHandler_UpdateOrganization(t *testing.T) {
 		t.Parallel()
 		// create a new request with a JSON payload
 		payload := `{"name": "org_update_test"}`
-		req, err := http.NewRequest(http.MethodPut, "/organizations", strings.NewReader(payload))
+		req, err := http.NewRequest(http.MethodPut, "/organizations/{orgID}", strings.NewReader(payload))
 		require.NoError(t, err)
+
+		// simulate chi's URL parameters
+		reqContext := chi.NewRouteContext()
+		reqContext.URLParams.Add("orgID", "1")
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
 
 		mockService := organization.NewServiceMock(t)
 		rr := httptest.NewRecorder()
 		handler := organization.NewHandler(mockService)
 
 		// mock the UpdateOrganization function
-		mockService.On("UpdateOrganization", req.Context(), organization.Organization{Name: "org_update_test"}).
-			Return(assert.AnError)
+		mockService.On("UpdateOrganization", req.Context(), organization.Organization{
+			ID:   1,
+			Name: "org_update_test",
+		}).Return(assert.AnError)
 
 		// call the UpdateOrganization function
 		handler.UpdateOrganization(rr, req)
@@ -217,8 +231,13 @@ func TestHandler_UpdateOrganization(t *testing.T) {
 		t.Parallel()
 		// create a new request with an invalid JSON payload
 		payload := `{"invalid": "payload"}`
-		req, err := http.NewRequest(http.MethodPut, "/organizations", strings.NewReader(payload))
+		req, err := http.NewRequest(http.MethodPut, "/organizations/{orgID}", strings.NewReader(payload))
 		require.NoError(t, err)
+
+		// simulate chi's URL parameters
+		reqContext := chi.NewRouteContext()
+		reqContext.URLParams.Add("orgID", "1")
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
 
 		mockService := organization.NewServiceMock(t)
 		rr := httptest.NewRecorder()

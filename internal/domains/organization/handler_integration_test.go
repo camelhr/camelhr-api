@@ -78,6 +78,23 @@ func (s *OrganizationTestSuite) TestHandlerIntegration_CreateOrganization() {
 		s.NotEmpty(resp.Name)
 		s.Equal(orgReqPayload.Name, resp.Name)
 		s.NotZero(resp.ID)
+
+		// retrieve the created organization
+		rr = httptest.NewRecorder()
+		getResp := organization.Response{}
+		req, err = http.NewRequest(http.MethodGet, fmt.Sprintf("/api/v1/organizations/%d", resp.ID), nil)
+		s.Require().NoError(err)
+		h.ServeHTTP(rr, req)
+		s.Require().Equal(http.StatusOK, rr.Code)
+		err = json.Unmarshal(rr.Body.Bytes(), &getResp)
+		s.Require().NoError(err)
+
+		// assert the response
+		s.Equal(resp.ID, getResp.ID)
+		s.Equal(orgReqPayload.Name, getResp.Name)
+		s.NotZero(getResp.CreatedAt)
+		s.NotZero(getResp.UpdatedAt)
+		s.GreaterOrEqual(getResp.UpdatedAt, getResp.CreatedAt) // could be equal if the update is fast
 	})
 }
 
@@ -107,6 +124,24 @@ func (s *OrganizationTestSuite) TestHandlerIntegration_UpdateOrganization() {
 
 		// assert the response status code
 		s.Require().Equal(http.StatusOK, rr.Code)
+		s.Empty(rr.Body.String())
+
+		// retrieve the updated organization
+		rr = httptest.NewRecorder()
+		resp := organization.Response{}
+		req, err = http.NewRequest(http.MethodGet, fmt.Sprintf("/api/v1/organizations/%d", fakeOrg.ID), nil)
+		s.Require().NoError(err)
+		h.ServeHTTP(rr, req)
+		s.Require().Equal(http.StatusOK, rr.Code)
+		err = json.Unmarshal(rr.Body.Bytes(), &resp)
+		s.Require().NoError(err)
+
+		// assert the response
+		s.Equal(fakeOrg.Organization.ID, resp.ID)
+		s.Equal(orgReqPayload.Name, resp.Name)
+		s.NotZero(resp.CreatedAt)
+		s.NotZero(resp.UpdatedAt)
+		s.GreaterOrEqual(resp.UpdatedAt, resp.CreatedAt) // could be equal if the update is fast
 	})
 }
 
@@ -126,6 +161,11 @@ func (s *OrganizationTestSuite) TestHandlerIntegration_DeleteOrganization() {
 
 		// assert the response status code
 		s.Require().Equal(http.StatusOK, rr.Code)
+		s.Empty(rr.Body.String())
+
+		// assert that the organization is deleted
+		isDeleted := fakeOrg.IsDeleted(s.DB)
+		s.True(isDeleted)
 	})
 }
 

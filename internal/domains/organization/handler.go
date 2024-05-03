@@ -54,6 +54,12 @@ func (h *handler) CreateOrganization(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) UpdateOrganization(w http.ResponseWriter, r *http.Request) {
+	id, err := request.URLParamID(r, "orgID")
+	if err != nil {
+		response.ErrorResponse(w, http.StatusBadRequest, err)
+		return
+	}
+
 	var reqPayload Request
 	if err := request.DecodeJSON(r.Body, &reqPayload); err != nil {
 		response.ErrorResponse(w, http.StatusBadRequest, err)
@@ -61,6 +67,7 @@ func (h *handler) UpdateOrganization(w http.ResponseWriter, r *http.Request) {
 	}
 
 	org := h.toOrganization(reqPayload)
+	org.ID = id
 
 	if err := h.service.UpdateOrganization(r.Context(), org); err != nil {
 		response.ErrorResponse(w, http.StatusInternalServerError, err)
