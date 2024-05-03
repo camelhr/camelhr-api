@@ -8,7 +8,7 @@ import (
 )
 
 type OrganizationTestSuite struct {
-	tests.BaseSuite
+	tests.IntegrationBaseSuite
 }
 
 func TestSuite(t *testing.T) {

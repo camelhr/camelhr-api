@@ -1,17 +1,23 @@
 package tests
 
 import (
+	"testing"
+
 	"github.com/camelhr/camelhr-api/internal/database"
 	"github.com/stretchr/testify/suite"
 )
 
-type BaseSuite struct {
+type IntegrationBaseSuite struct {
 	suite.Suite
 	DB          database.Database
 	PGContainer *PostgreSQLContainer
 }
 
-func (s *BaseSuite) SetupSuite() {
+func (s *IntegrationBaseSuite) SetupSuite() {
+	if testing.Short() {
+		s.T().Skip("skipping suite in short mode")
+	}
+
 	setupDone := false
 	defer func() {
 		if !setupDone {
@@ -33,7 +39,7 @@ func (s *BaseSuite) SetupSuite() {
 	setupDone = true
 }
 
-func (s *BaseSuite) TearDownSuite() {
+func (s *IntegrationBaseSuite) TearDownSuite() {
 	err := s.PGContainer.Purge()
 	s.Require().NoError(err)
 }

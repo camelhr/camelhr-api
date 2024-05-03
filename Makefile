@@ -25,6 +25,9 @@ build:
 test:
 	go test -v -cover -race ./...
 
+unit-test:
+	go test -v -cover -race ./... -short
+
 lint:
 	golangci-lint run
 
