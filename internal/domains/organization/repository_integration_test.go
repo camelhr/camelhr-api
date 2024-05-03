@@ -5,28 +5,11 @@ import (
 	"database/sql"
 
 	"github.com/brianvoe/gofakeit/v7"
-	"github.com/camelhr/camelhr-api/internal/database"
 	"github.com/camelhr/camelhr-api/internal/domains/organization"
 	"github.com/camelhr/camelhr-api/internal/tests/fake"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
 
 func (s *OrganizationTestSuite) TestRepositoryIntegration_GetOrganizationByID() {
-	s.Run("should return error if query execution fails", func() {
-		s.T().Parallel()
-		db := database.NewDatabaseMock(s.T())
-		r := organization.NewRepository(db)
-
-		db.On("Get", fake.MockContext, mock.AnythingOfType("*organization.Organization"), fake.MockString, fake.MockInt64).
-			Return(assert.AnError)
-
-		_, err := r.GetOrganizationByID(context.TODO(), 1)
-
-		s.Require().Error(err)
-		s.ErrorIs(err, assert.AnError)
-	})
-
 	s.Run("should return an organization", func() {
 		s.T().Parallel()
 		r := organization.NewRepository(s.DB)
@@ -38,23 +21,26 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_GetOrganizationByID() 
 		s.Require().NoError(err)
 		s.Equal(org.Organization, result)
 	})
+
+	s.Run("should return error when organization does not exist", func() {
+		s.T().Parallel()
+		repo := organization.NewRepository(s.DB)
+
+		_, err := repo.GetOrganizationByID(context.TODO(), int64(gofakeit.Number(1000, 9999)))
+		s.ErrorIs(err, sql.ErrNoRows)
+	})
+
+	s.Run("should return error when organization is deleted", func() {
+		s.T().Parallel()
+		repo := organization.NewRepository(s.DB)
+		org := fake.NewOrganization(s.DB, fake.OrganizationDeleted())
+
+		_, err := repo.GetOrganizationByID(context.TODO(), org.ID)
+		s.ErrorIs(err, sql.ErrNoRows)
+	})
 }
 
 func (s *OrganizationTestSuite) TestRepositoryIntegration_GetOrganizationByName() {
-	s.Run("should return error if query execution fails", func() {
-		s.T().Parallel()
-		db := database.NewDatabaseMock(s.T())
-		r := organization.NewRepository(db)
-
-		db.On("Get", fake.MockContext, mock.AnythingOfType("*organization.Organization"), fake.MockString, fake.MockString).
-			Return(assert.AnError)
-
-		_, err := r.GetOrganizationByName(context.TODO(), "TestOrg")
-
-		s.Require().Error(err)
-		s.ErrorIs(err, assert.AnError)
-	})
-
 	s.Run("should return an organization", func() {
 		s.T().Parallel()
 		r := organization.NewRepository(s.DB)
@@ -66,24 +52,26 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_GetOrganizationByName(
 		s.Require().NoError(err)
 		s.Equal(org.Organization, result)
 	})
+
+	s.Run("should return error when organization does not exist", func() {
+		s.T().Parallel()
+		repo := organization.NewRepository(s.DB)
+
+		_, err := repo.GetOrganizationByName(context.TODO(), gofakeit.Name())
+		s.ErrorIs(err, sql.ErrNoRows)
+	})
+
+	s.Run("should return error when organization is deleted", func() {
+		s.T().Parallel()
+		repo := organization.NewRepository(s.DB)
+		org := fake.NewOrganization(s.DB, fake.OrganizationDeleted())
+
+		_, err := repo.GetOrganizationByName(context.TODO(), org.Name)
+		s.ErrorIs(err, sql.ErrNoRows)
+	})
 }
 
 func (s *OrganizationTestSuite) TestRepositoryIntegration_CreateOrganization() {
-	s.Run("should return error if query execution fails", func() {
-		s.T().Parallel()
-		db := database.NewDatabaseMock(s.T())
-		r := organization.NewRepository(db)
-
-		db.On("Exec", fake.MockContext, fake.MockInt64Ptr, fake.MockString, fake.MockString).Return(assert.AnError)
-
-		_, err := r.CreateOrganization(context.TODO(), organization.Organization{
-			Name: gofakeit.Name(),
-		})
-
-		s.Require().Error(err)
-		s.ErrorIs(err, assert.AnError)
-	})
-
 	s.Run("should create an organization", func() {
 		s.T().Parallel()
 		r := organization.NewRepository(s.DB)
@@ -107,24 +95,34 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_CreateOrganization() {
 		s.Nil(result.BlacklistedAt)
 		s.Nil(result.Comment)
 	})
-}
 
-func (s *OrganizationTestSuite) TestRepositoryIntegration_UpdateOrganization() {
-	s.Run("should return error if query execution fails", func() {
+	s.Run("should return error when organization with the same name already exists", func() {
 		s.T().Parallel()
-		db := database.NewDatabaseMock(s.T())
-		r := organization.NewRepository(db)
+		r := organization.NewRepository(s.DB)
+		org := fake.NewOrganization(s.DB)
 
-		db.On("Exec", fake.MockContext, nil, fake.MockString, fake.MockInt64, fake.MockString).Return(assert.AnError)
-
-		err := r.UpdateOrganization(context.TODO(), organization.Organization{
-			Name: gofakeit.Name(),
+		_, err := r.CreateOrganization(context.TODO(), organization.Organization{
+			Name: org.Name,
 		})
 
 		s.Require().Error(err)
-		s.ErrorIs(err, assert.AnError)
+		s.ErrorContains(err, "duplicate key value violates unique constraint")
 	})
 
+	s.Run("should return error when organization has empty name", func() {
+		s.T().Parallel()
+		r := organization.NewRepository(s.DB)
+
+		_, err := r.CreateOrganization(context.TODO(), organization.Organization{
+			Name: "",
+		})
+
+		s.Require().Error(err)
+		s.ErrorContains(err, "violates check constraint")
+	})
+}
+
+func (s *OrganizationTestSuite) TestRepositoryIntegration_UpdateOrganization() {
 	s.Run("should update an organization", func() {
 		s.T().Parallel()
 		r := organization.NewRepository(s.DB)
@@ -137,8 +135,7 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_UpdateOrganization() {
 		})
 		s.Require().NoError(err)
 
-		result, err := r.GetOrganizationByID(context.TODO(), org.ID)
-		s.Require().NoError(err)
+		result := org.FetchLatest(s.DB)
 		s.Equal(org.Name+" Updated", result.Name)
 		s.Equal(org.CreatedAt, result.CreatedAt)
 		s.GreaterOrEqual(result.UpdatedAt, result.CreatedAt) // could be equal if the update is fast
@@ -147,22 +144,31 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_UpdateOrganization() {
 		s.Nil(result.BlacklistedAt)
 		s.Nil(result.Comment)
 	})
+
+	s.Run("should not update an organization if already deleted", func() {
+		s.T().Parallel()
+		r := organization.NewRepository(s.DB)
+
+		org := fake.NewOrganization(s.DB, fake.OrganizationDeleted())
+
+		err := r.UpdateOrganization(context.TODO(), organization.Organization{
+			ID:   org.ID,
+			Name: org.Name + " delete_update",
+		})
+		s.Require().NoError(err)
+
+		result := org.FetchLatest(s.DB)
+		s.Equal(org.Name, result.Name)           // name should not be updated
+		s.Equal(org.UpdatedAt, result.UpdatedAt) // update time should not be updated
+		s.Equal(org.CreatedAt, result.CreatedAt)
+		s.NotNil(result.DeletedAt)
+		s.Nil(result.SuspendedAt)
+		s.Nil(result.BlacklistedAt)
+		s.Nil(result.Comment)
+	})
 }
 
 func (s *OrganizationTestSuite) TestRepositoryIntegration_DeleteOrganization() {
-	s.Run("should return error if query execution fails", func() {
-		s.T().Parallel()
-		db := database.NewDatabaseMock(s.T())
-		r := organization.NewRepository(db)
-
-		db.On("Exec", fake.MockContext, nil, fake.MockString, fake.MockInt64).Return(assert.AnError)
-
-		err := r.DeleteOrganization(context.TODO(), 1)
-
-		s.Require().Error(err)
-		s.ErrorIs(err, assert.AnError)
-	})
-
 	s.Run("should delete an organization", func() {
 		s.T().Parallel()
 		r := organization.NewRepository(s.DB)
@@ -172,148 +178,160 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_DeleteOrganization() {
 		err := r.DeleteOrganization(context.TODO(), org.ID)
 		s.Require().NoError(err)
 
-		_, err = r.GetOrganizationByID(context.TODO(), org.ID)
-		s.Require().Error(err)
-		s.ErrorIs(err, sql.ErrNoRows)
+		isDeleted := org.IsDeleted(s.DB)
+		s.True(isDeleted)
+	})
+
+	s.Run("should not delete an organization if already deleted", func() {
+		s.T().Parallel()
+		r := organization.NewRepository(s.DB)
+
+		org := fake.NewOrganization(s.DB, fake.OrganizationDeleted())
+
+		err := r.DeleteOrganization(context.TODO(), org.ID)
+		s.Require().NoError(err)
+
+		result := org.FetchLatest(s.DB)
+		s.NotNil(result.DeletedAt)
+		s.Equal(org.DeletedAt, result.DeletedAt) // delete time should not be updated
 	})
 }
 
 func (s *OrganizationTestSuite) TestRepositoryIntegration_SuspendOrganization() {
-	s.Run("should return error if query execution fails", func() {
-		s.T().Parallel()
-		db := database.NewDatabaseMock(s.T())
-		r := organization.NewRepository(db)
-
-		db.On("Exec", fake.MockContext, nil, fake.MockString, fake.MockInt64, fake.MockString).Return(assert.AnError)
-
-		err := r.SuspendOrganization(context.TODO(), 1, "test comment")
-
-		s.Require().Error(err)
-		s.ErrorIs(err, assert.AnError)
-	})
-
 	s.Run("should suspend an organization", func() {
 		s.T().Parallel()
 		r := organization.NewRepository(s.DB)
 
 		org := fake.NewOrganization(s.DB)
 
-		err := r.SuspendOrganization(context.TODO(), org.ID, "test comment")
+		err := r.SuspendOrganization(context.TODO(), org.ID, "test suspend comment")
 		s.Require().NoError(err)
 
-		result, err := r.GetOrganizationByID(context.TODO(), org.ID)
-		s.Require().NoError(err)
+		isSuspended := org.IsSuspended(s.DB)
+		s.True(isSuspended)
+
+		result := org.FetchLatest(s.DB)
 		s.NotNil(result.SuspendedAt)
 		s.Require().NotNil(result.Comment)
-		s.Equal("test comment", *result.Comment)
+		s.Equal("test suspend comment", *result.Comment)
 		s.Nil(result.DeletedAt)
 		s.Nil(result.BlacklistedAt)
 		s.Equal(org.CreatedAt, result.CreatedAt)
 		s.Equal(org.UpdatedAt, result.UpdatedAt)
 	})
+
+	s.Run("should not suspend an organization if already deleted", func() {
+		s.T().Parallel()
+		r := organization.NewRepository(s.DB)
+
+		org := fake.NewOrganization(s.DB, fake.OrganizationDeleted())
+
+		err := r.SuspendOrganization(context.TODO(), org.ID, "test suspend comment")
+		s.Require().NoError(err)
+
+		isSuspended := org.IsSuspended(s.DB)
+		s.False(isSuspended)
+	})
 }
 
 func (s *OrganizationTestSuite) TestRepositoryIntegration_UnsuspendOrganization() {
-	s.Run("should return error if query execution fails", func() {
-		s.T().Parallel()
-		db := database.NewDatabaseMock(s.T())
-		r := organization.NewRepository(db)
-
-		db.On("Exec", fake.MockContext, nil, fake.MockString, fake.MockInt64, fake.MockString).Return(assert.AnError)
-
-		err := r.UnsuspendOrganization(context.TODO(), 1, "test comment")
-
-		s.Require().Error(err)
-		s.ErrorIs(err, assert.AnError)
-	})
-
 	s.Run("should unsuspend an organization", func() {
 		s.T().Parallel()
 		r := organization.NewRepository(s.DB)
 
 		org := fake.NewOrganization(s.DB, fake.OrganizationSuspended())
 
-		err := r.UnsuspendOrganization(context.TODO(), org.ID, "test comment")
+		err := r.UnsuspendOrganization(context.TODO(), org.ID, "test unsuspend comment")
 		s.Require().NoError(err)
 
-		result, err := r.GetOrganizationByID(context.TODO(), org.ID)
-		s.Require().NoError(err)
+		result := org.FetchLatest(s.DB)
 		s.Nil(result.SuspendedAt)
 		s.Require().NotNil(result.Comment)
-		s.Equal("test comment", *result.Comment)
+		s.Equal("test unsuspend comment", *result.Comment)
 		s.Nil(result.DeletedAt)
 		s.Nil(result.BlacklistedAt)
 		s.Equal(org.CreatedAt, result.CreatedAt)
 		s.Equal(org.UpdatedAt, result.UpdatedAt)
 	})
+
+	s.Run("should not unsuspend an organization if already deleted", func() {
+		s.T().Parallel()
+		r := organization.NewRepository(s.DB)
+
+		org := fake.NewOrganization(s.DB, fake.OrganizationSuspended(), fake.OrganizationDeleted())
+
+		err := r.UnsuspendOrganization(context.TODO(), org.ID, "test unsuspend comment")
+		s.Require().NoError(err)
+
+		isSuspended := org.IsSuspended(s.DB)
+		s.True(isSuspended)
+	})
 }
 
 func (s *OrganizationTestSuite) TestRepositoryIntegration_BlacklistOrganization() {
-	s.Run("should return error if query execution fails", func() {
-		s.T().Parallel()
-		db := database.NewDatabaseMock(s.T())
-		r := organization.NewRepository(db)
-
-		db.On("Exec", fake.MockContext, nil, fake.MockString, fake.MockInt64, fake.MockString).Return(assert.AnError)
-
-		err := r.BlacklistOrganization(context.TODO(), 1, "test comment")
-
-		s.Require().Error(err)
-		s.ErrorIs(err, assert.AnError)
-	})
-
 	s.Run("should blacklist an organization", func() {
 		s.T().Parallel()
 		r := organization.NewRepository(s.DB)
 
 		org := fake.NewOrganization(s.DB)
 
-		err := r.BlacklistOrganization(context.TODO(), org.ID, "test comment")
+		err := r.BlacklistOrganization(context.TODO(), org.ID, "test blacklist comment")
 		s.Require().NoError(err)
 
-		result, err := r.GetOrganizationByID(context.TODO(), org.ID)
-		s.Require().NoError(err)
+		result := org.FetchLatest(s.DB)
 		s.NotNil(result.BlacklistedAt)
 		s.Require().NotNil(result.Comment)
-		s.Equal("test comment", *result.Comment)
+		s.Equal("test blacklist comment", *result.Comment)
 		s.Nil(result.DeletedAt)
 		s.Nil(result.SuspendedAt)
 		s.Equal(org.CreatedAt, result.CreatedAt)
 		s.Equal(org.UpdatedAt, result.UpdatedAt)
 	})
+
+	s.Run("should not blacklist an organization if already deleted", func() {
+		s.T().Parallel()
+		r := organization.NewRepository(s.DB)
+
+		org := fake.NewOrganization(s.DB, fake.OrganizationDeleted())
+
+		err := r.BlacklistOrganization(context.TODO(), org.ID, "test blacklist comment")
+		s.Require().NoError(err)
+
+		isBlacklisted := org.IsBlacklisted(s.DB)
+		s.False(isBlacklisted)
+	})
 }
 
 func (s *OrganizationTestSuite) TestRepositoryIntegration_UnblacklistOrganization() {
-	s.Run("should return error if query execution fails", func() {
-		s.T().Parallel()
-		db := database.NewDatabaseMock(s.T())
-		r := organization.NewRepository(db)
-
-		db.On("Exec", fake.MockContext, nil, fake.MockString, fake.MockInt64, fake.MockString).Return(assert.AnError)
-
-		err := r.UnblacklistOrganization(context.TODO(), 1, "test comment")
-
-		s.Require().Error(err)
-		s.ErrorIs(err, assert.AnError)
-	})
-
 	s.Run("should unblacklist an organization", func() {
 		s.T().Parallel()
 		r := organization.NewRepository(s.DB)
 
 		org := fake.NewOrganization(s.DB, fake.OrganizationBlacklisted())
 
-		err := r.UnblacklistOrganization(context.TODO(), org.ID, "test comment")
+		err := r.UnblacklistOrganization(context.TODO(), org.ID, "test unblacklist comment")
 		s.Require().NoError(err)
 
-		result, err := r.GetOrganizationByID(context.TODO(), org.ID)
-		s.Require().NoError(err)
+		result := org.FetchLatest(s.DB)
 		s.Nil(result.BlacklistedAt)
 		s.Require().NotNil(result.Comment)
-		s.Equal("test comment", *result.Comment)
+		s.Equal("test unblacklist comment", *result.Comment)
 		s.Nil(result.DeletedAt)
 		s.Nil(result.SuspendedAt)
 		s.Equal(org.CreatedAt, result.CreatedAt)
 		s.Equal(org.UpdatedAt, result.UpdatedAt)
+	})
+
+	s.Run("should not unblacklist an organization if already deleted", func() {
+		s.T().Parallel()
+		r := organization.NewRepository(s.DB)
+
+		org := fake.NewOrganization(s.DB, fake.OrganizationBlacklisted(), fake.OrganizationDeleted())
+
+		err := r.UnblacklistOrganization(context.TODO(), org.ID, "test unblacklist comment")
+		s.Require().NoError(err)
+
+		isBlacklisted := org.IsBlacklisted(s.DB)
+		s.True(isBlacklisted)
 	})
 }

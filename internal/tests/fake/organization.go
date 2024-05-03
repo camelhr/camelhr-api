@@ -143,3 +143,26 @@ func (o *FakeOrganization) IsBlacklisted(db database.Database) bool {
 
 	return isBlacklisted
 }
+
+func (o *FakeOrganization) FetchLatest(db database.Database) *FakeOrganization {
+	fakeOrg := &FakeOrganization{}
+
+	query := `
+			SELECT
+				name,
+				suspended_at,
+				blacklisted_at,
+				comment,
+				created_at,
+				updated_at,
+				deleted_at
+			FROM organizations 
+			WHERE organization_id = $1
+			`
+
+	if err := db.Get(context.TODO(), fakeOrg, query, o.ID); err != nil {
+		panic(err)
+	}
+
+	return fakeOrg
+}

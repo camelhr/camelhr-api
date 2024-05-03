@@ -2,10 +2,10 @@ package organization_test
 
 import (
 	"context"
-	"database/sql"
 
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/camelhr/camelhr-api/internal/domains/organization"
+	"github.com/camelhr/camelhr-api/internal/tests/fake"
 )
 
 func (s *OrganizationTestSuite) TestServiceIntegration_GetOrganizationByID() {
@@ -13,16 +13,11 @@ func (s *OrganizationTestSuite) TestServiceIntegration_GetOrganizationByID() {
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
 		svc := organization.NewService(repo)
-		org := organization.Organization{
-			Name: gofakeit.Name(),
-		}
+		org := fake.NewOrganization(s.DB)
 
-		id, err := svc.CreateOrganization(context.TODO(), org)
+		result, err := svc.GetOrganizationByID(context.TODO(), org.ID)
 		s.Require().NoError(err)
-
-		result, err := svc.GetOrganizationByID(context.TODO(), id)
-		s.Require().NoError(err)
-		s.Equal(id, result.ID)
+		s.Equal(org.ID, result.ID)
 		s.Equal(org.Name, result.Name)
 		s.Nil(result.DeletedAt)
 		s.NotZero(result.CreatedAt)
@@ -39,13 +34,7 @@ func (s *OrganizationTestSuite) TestServiceIntegration_GetOrganizationByName() {
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
 		svc := organization.NewService(repo)
-		org := organization.Organization{
-			Name: gofakeit.Name(),
-		}
-
-		id, err := svc.CreateOrganization(context.TODO(), org)
-		s.Require().NoError(err)
-		s.NotEmpty(id)
+		org := fake.NewOrganization(s.DB)
 
 		result, err := svc.GetOrganizationByName(context.TODO(), org.Name)
 		s.Require().NoError(err)
@@ -61,7 +50,7 @@ func (s *OrganizationTestSuite) TestServiceIntegration_GetOrganizationByName() {
 }
 
 func (s *OrganizationTestSuite) TestServiceIntegration_CreateOrganization() {
-	s.Run("should return organization ID", func() {
+	s.Run("should create organization with default values", func() {
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
 		svc := organization.NewService(repo)
@@ -70,9 +59,18 @@ func (s *OrganizationTestSuite) TestServiceIntegration_CreateOrganization() {
 		}
 
 		id, err := svc.CreateOrganization(context.TODO(), org)
-
 		s.Require().NoError(err)
-		s.NotEmpty(id)
+
+		result, err := svc.GetOrganizationByID(context.TODO(), id)
+		s.Require().NoError(err)
+		s.Equal(org.Name, result.Name)
+		s.Nil(result.DeletedAt)
+		s.NotZero(result.CreatedAt)
+		s.NotZero(result.UpdatedAt)
+		s.Equal(result.CreatedAt, result.UpdatedAt)
+		s.Nil(result.SuspendedAt)
+		s.Nil(result.BlacklistedAt)
+		s.Nil(result.Comment)
 	})
 }
 
@@ -81,22 +79,16 @@ func (s *OrganizationTestSuite) TestServiceIntegration_UpdateOrganization() {
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
 		svc := organization.NewService(repo)
-		org := organization.Organization{
-			Name: gofakeit.Name(),
-		}
-
-		id, err := svc.CreateOrganization(context.TODO(), org)
-		s.Require().NoError(err)
+		org := fake.NewOrganization(s.DB)
 
 		updateOrg := organization.Organization{
-			ID:   id,
+			ID:   org.ID,
 			Name: "UpdatedOrg",
 		}
-		err = svc.UpdateOrganization(context.TODO(), updateOrg)
+		err := svc.UpdateOrganization(context.TODO(), updateOrg)
 		s.Require().NoError(err)
 
-		result, err := svc.GetOrganizationByID(context.TODO(), id)
-		s.Require().NoError(err)
+		result := org.FetchLatest(s.DB)
 		s.Equal(updateOrg.Name, result.Name)
 		s.Nil(result.DeletedAt)
 		s.NotZero(result.CreatedAt)
@@ -113,18 +105,13 @@ func (s *OrganizationTestSuite) TestServiceIntegration_DeleteOrganization() {
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
 		svc := organization.NewService(repo)
-		org := organization.Organization{
-			Name: gofakeit.Name(),
-		}
+		org := fake.NewOrganization(s.DB)
 
-		id, err := svc.CreateOrganization(context.TODO(), org)
+		err := svc.DeleteOrganization(context.TODO(), org.ID)
 		s.Require().NoError(err)
 
-		err = svc.DeleteOrganization(context.TODO(), id)
-		s.Require().NoError(err)
-
-		_, err = svc.GetOrganizationByID(context.TODO(), id)
-		s.ErrorIs(err, sql.ErrNoRows)
+		result := org.FetchLatest(s.DB)
+		s.NotNil(result.DeletedAt)
 	})
 }
 
@@ -133,18 +120,12 @@ func (s *OrganizationTestSuite) TestServiceIntegration_SuspendOrganization() {
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
 		svc := organization.NewService(repo)
-		org := organization.Organization{
-			Name: gofakeit.Name(),
-		}
+		org := fake.NewOrganization(s.DB)
 
-		id, err := svc.CreateOrganization(context.TODO(), org)
+		err := svc.SuspendOrganization(context.TODO(), org.ID, "test suspend")
 		s.Require().NoError(err)
 
-		err = svc.SuspendOrganization(context.TODO(), id, "test suspend")
-		s.Require().NoError(err)
-
-		result, err := svc.GetOrganizationByID(context.TODO(), id)
-		s.Require().NoError(err)
+		result := org.FetchLatest(s.DB)
 		s.Require().NotNil(result.Comment)
 		s.Equal("test suspend", *result.Comment)
 		s.NotNil(result.SuspendedAt)
@@ -160,21 +141,12 @@ func (s *OrganizationTestSuite) TestServiceIntegration_UnsuspendOrganization() {
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
 		svc := organization.NewService(repo)
-		org := organization.Organization{
-			Name: gofakeit.Name(),
-		}
+		org := fake.NewOrganization(s.DB, fake.OrganizationSuspended())
 
-		id, err := svc.CreateOrganization(context.TODO(), org)
+		err := svc.UnsuspendOrganization(context.TODO(), org.ID, "test unsuspend")
 		s.Require().NoError(err)
 
-		err = svc.SuspendOrganization(context.TODO(), id, "test suspend")
-		s.Require().NoError(err)
-
-		err = svc.UnsuspendOrganization(context.TODO(), id, "test unsuspend")
-		s.Require().NoError(err)
-
-		result, err := svc.GetOrganizationByID(context.TODO(), id)
-		s.Require().NoError(err)
+		result := org.FetchLatest(s.DB)
 		s.Require().NotNil(result.Comment)
 		s.Equal("test unsuspend", *result.Comment)
 		s.Nil(result.SuspendedAt)
@@ -190,18 +162,12 @@ func (s *OrganizationTestSuite) TestServiceIntegration_BlacklistOrganization() {
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
 		svc := organization.NewService(repo)
-		org := organization.Organization{
-			Name: gofakeit.Name(),
-		}
+		org := fake.NewOrganization(s.DB)
 
-		id, err := svc.CreateOrganization(context.TODO(), org)
+		err := svc.BlacklistOrganization(context.TODO(), org.ID, "test blacklist")
 		s.Require().NoError(err)
 
-		err = svc.BlacklistOrganization(context.TODO(), id, "test blacklist")
-		s.Require().NoError(err)
-
-		result, err := svc.GetOrganizationByID(context.TODO(), id)
-		s.Require().NoError(err)
+		result := org.FetchLatest(s.DB)
 		s.Require().NotNil(result.Comment)
 		s.Equal("test blacklist", *result.Comment)
 		s.NotNil(result.BlacklistedAt)
@@ -217,21 +183,12 @@ func (s *OrganizationTestSuite) TestServiceIntegration_UnblacklistOrganization()
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
 		svc := organization.NewService(repo)
-		org := organization.Organization{
-			Name: gofakeit.Name(),
-		}
+		org := fake.NewOrganization(s.DB, fake.OrganizationBlacklisted())
 
-		id, err := svc.CreateOrganization(context.TODO(), org)
+		err := svc.UnblacklistOrganization(context.TODO(), org.ID, "test unblacklist")
 		s.Require().NoError(err)
 
-		err = svc.BlacklistOrganization(context.TODO(), id, "test blacklist")
-		s.Require().NoError(err)
-
-		err = svc.UnblacklistOrganization(context.TODO(), id, "test unblacklist")
-		s.Require().NoError(err)
-
-		result, err := svc.GetOrganizationByID(context.TODO(), id)
-		s.Require().NoError(err)
+		result := org.FetchLatest(s.DB)
 		s.Require().NotNil(result.Comment)
 		s.Equal("test unblacklist", *result.Comment)
 		s.Nil(result.BlacklistedAt)
