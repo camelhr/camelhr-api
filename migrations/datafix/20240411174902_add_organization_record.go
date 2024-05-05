@@ -17,6 +17,17 @@ func upAddOrganizationRecord(ctx context.Context, tx *sql.Tx) error {
 }
 
 func downAddOrganizationRecord(ctx context.Context, tx *sql.Tx) error {
-	_, err := tx.ExecContext(ctx, "DELETE FROM organizations WHERE organization_id = 1;")
+	_, err := tx.ExecContext(ctx, "ALTER TABLE organizations DISABLE TRIGGER prevent_delete_on_organizations;")
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.ExecContext(ctx, "DELETE FROM organizations WHERE name = 'org1';")
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.ExecContext(ctx, "ALTER TABLE organizations ENABLE TRIGGER prevent_delete_on_organizations;")
+
 	return err
 }
