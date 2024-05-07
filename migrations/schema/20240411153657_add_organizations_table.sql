@@ -15,14 +15,6 @@ CREATE TABLE organizations (
 -- create indexes
 CREATE INDEX idx_organizations_deleted_at ON organizations(deleted_at);
 
--- create a generic function that prevents an operation
-CREATE OR REPLACE FUNCTION operation_not_allowed()
-RETURNS TRIGGER AS $$
-BEGIN
-  RAISE EXCEPTION '% operation on table % is not allowed: %', TG_OP, TG_TABLE_NAME, TG_NAME::TEXT;
-END;
-$$ LANGUAGE plpgsql;
-
 -- create triggers to forbid truncate and delete operations on the organizations table
 CREATE TRIGGER prevent_truncate_on_organizations
 BEFORE TRUNCATE ON organizations
