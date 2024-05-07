@@ -3,6 +3,7 @@ package organization_test
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/camelhr/camelhr-api/internal/domains/organization"
@@ -132,6 +133,10 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_CreateOrganization() {
 		s.NotZero(result.CreatedAt)
 		s.NotZero(result.UpdatedAt)
 		s.Equal(result.CreatedAt, result.UpdatedAt)
+		s.Equal(time.UTC, result.CreatedAt.Location())
+		s.Equal(time.UTC, result.UpdatedAt.Location())
+		s.WithinDuration(time.Now().UTC(), result.CreatedAt, 1*time.Minute)
+		s.WithinDuration(time.Now().UTC(), result.UpdatedAt, 1*time.Minute)
 		s.Nil(result.DeletedAt)
 		s.Nil(result.SuspendedAt)
 		s.Nil(result.BlacklistedAt)
@@ -211,6 +216,8 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_UpdateOrganization() {
 		s.Equal("updated name", result.Name)
 		s.Equal(org.CreatedAt, result.CreatedAt)
 		s.GreaterOrEqual(result.UpdatedAt, result.CreatedAt) // could be equal if the update is fast
+		s.Equal(time.UTC, result.UpdatedAt.Location())
+		s.WithinDuration(time.Now().UTC(), result.UpdatedAt, 1*time.Minute)
 		s.Nil(result.DeletedAt)
 		s.Nil(result.SuspendedAt)
 		s.Nil(result.BlacklistedAt)
@@ -252,6 +259,11 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_DeleteOrganization() {
 
 		isDeleted := org.IsDeleted(s.DB)
 		s.True(isDeleted)
+
+		result := org.FetchLatest(s.DB)
+		s.Require().NotNil(result.DeletedAt)
+		s.Equal(time.UTC, result.DeletedAt.Location())
+		s.WithinDuration(time.Now().UTC(), *result.DeletedAt, 1*time.Minute)
 	})
 
 	s.Run("should not delete an organization if already deleted", func() {
@@ -281,7 +293,9 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_SuspendOrganization() 
 		s.True(isSuspended)
 
 		result := org.FetchLatest(s.DB)
-		s.NotNil(result.SuspendedAt)
+		s.Require().NotNil(result.SuspendedAt)
+		s.Equal(time.UTC, result.SuspendedAt.Location())
+		s.WithinDuration(time.Now().UTC(), *result.SuspendedAt, 1*time.Minute)
 		s.Require().NotNil(result.Comment)
 		s.Equal("test suspend comment", *result.Comment)
 		s.Nil(result.DeletedAt)
@@ -345,7 +359,9 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_BlacklistOrganization(
 		s.Require().NoError(err)
 
 		result := org.FetchLatest(s.DB)
-		s.NotNil(result.BlacklistedAt)
+		s.Require().NotNil(result.BlacklistedAt)
+		s.Equal(time.UTC, result.BlacklistedAt.Location())
+		s.WithinDuration(time.Now().UTC(), *result.BlacklistedAt, 1*time.Minute)
 		s.Require().NotNil(result.Comment)
 		s.Equal("test blacklist comment", *result.Comment)
 		s.Nil(result.DeletedAt)

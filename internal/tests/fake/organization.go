@@ -39,7 +39,7 @@ func OrganizationName(name string) OrganizationOption {
 // OrganizationDeleted sets deleted_at to current timestamp.
 func OrganizationDeleted() OrganizationOption {
 	return func(o *FakeOrganization) (*FakeOrganization, error) {
-		now := time.Now()
+		now := time.Now().UTC()
 		o.DeletedAt = &now
 
 		return o, nil
@@ -49,7 +49,7 @@ func OrganizationDeleted() OrganizationOption {
 // OrganizationSuspended sets suspended_at to current timestamp.
 func OrganizationSuspended() OrganizationOption {
 	return func(o *FakeOrganization) (*FakeOrganization, error) {
-		now := time.Now()
+		now := time.Now().UTC()
 		o.SuspendedAt = &now
 
 		return o, nil
@@ -59,7 +59,7 @@ func OrganizationSuspended() OrganizationOption {
 // OrganizationBlacklisted sets blacklisted_at to current timestamp.
 func OrganizationBlacklisted() OrganizationOption {
 	return func(o *FakeOrganization) (*FakeOrganization, error) {
-		now := time.Now()
+		now := time.Now().UTC()
 		o.BlacklistedAt = &now
 
 		return o, nil
@@ -86,18 +86,14 @@ func NewOrganization(db database.Database, options ...OrganizationOption) *FakeO
 	return org
 }
 
+// setDefaults sets the default values of a fake organization.
+//
 //nolint:gomnd // generate random values
 func (o *FakeOrganization) setDefaults() {
 	o.Subdomain = gofakeit.LetterN(uint(gofakeit.Number(1, 30)))
 	o.Name = fmt.Sprint(gofakeit.LetterN(8), " ", gofakeit.Company())
-
-	if o.CreatedAt.IsZero() {
-		o.CreatedAt = time.Now().UTC()
-	}
-
-	if o.UpdatedAt.IsZero() {
-		o.UpdatedAt = o.CreatedAt
-	}
+	o.CreatedAt = time.Now().UTC()
+	o.UpdatedAt = o.CreatedAt
 }
 
 func persist(db database.Database, o *FakeOrganization) error {

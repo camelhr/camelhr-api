@@ -10,6 +10,7 @@ services:
       POSTGRES_USER: ${PGUSER?}
       POSTGRES_PASSWORD: ${PGPASSWORD?}
       POSTGRES_DB: ${PGDATABASE?}
+      TZ: 'UTC'
     volumes:
       - camelhr-db-data:/var/lib/postgresql/data
     healthcheck:

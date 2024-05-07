@@ -2,6 +2,7 @@ package fake_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/camelhr/camelhr-api/internal/tests/fake"
 	"github.com/stretchr/testify/assert"
@@ -21,6 +22,10 @@ func (s *FakeTestSuite) TestFakeOrganization() {
 		s.NotEmpty(o.Name)
 		s.NotNil(o.CreatedAt)
 		s.NotNil(o.UpdatedAt)
+		s.Equal(time.UTC, o.CreatedAt.Location())
+		s.Equal(time.UTC, o.UpdatedAt.Location())
+		s.WithinDuration(time.Now().UTC(), o.CreatedAt, 1*time.Minute)
+		s.WithinDuration(time.Now().UTC(), o.UpdatedAt, 1*time.Minute)
 		s.Nil(o.DeletedAt)
 		s.Nil(o.SuspendedAt)
 		s.Nil(o.BlacklistedAt)
@@ -58,7 +63,9 @@ func (s *FakeTestSuite) TestFakeOrganization() {
 
 		// assert that the organization is set deleted
 		s.Require().NotNil(o)
-		s.NotNil(o.DeletedAt)
+		s.Require().NotNil(o.DeletedAt)
+		s.Equal(time.UTC, o.DeletedAt.Location())
+		s.WithinDuration(time.Now().UTC(), *o.DeletedAt, 1*time.Minute)
 	})
 
 	s.Run("should create a suspended organization", func() {
@@ -69,7 +76,9 @@ func (s *FakeTestSuite) TestFakeOrganization() {
 
 		// assert that the organization is suspended
 		s.Require().NotNil(o)
-		s.NotNil(o.SuspendedAt)
+		s.Require().NotNil(o.SuspendedAt)
+		s.Equal(time.UTC, o.SuspendedAt.Location())
+		s.WithinDuration(time.Now().UTC(), *o.SuspendedAt, 1*time.Minute)
 		s.Nil(o.DeletedAt)
 		s.Nil(o.BlacklistedAt)
 	})
@@ -94,7 +103,9 @@ func (s *FakeTestSuite) TestFakeOrganization() {
 
 		// assert that the organization is blacklisted
 		s.Require().NotNil(o)
-		s.NotNil(o.BlacklistedAt)
+		s.Require().NotNil(o.BlacklistedAt)
+		s.Equal(time.UTC, o.BlacklistedAt.Location())
+		s.WithinDuration(time.Now().UTC(), *o.BlacklistedAt, 1*time.Minute)
 		s.Nil(o.DeletedAt)
 		s.Nil(o.SuspendedAt)
 	})
