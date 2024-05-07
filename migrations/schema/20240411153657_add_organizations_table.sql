@@ -36,9 +36,5 @@ EXECUTE FUNCTION operation_not_allowed();
 
 -- +goose Down
 -- +goose StatementBegin
-DROP INDEX IF EXISTS idx_organizations_deleted_at;
-DROP TRIGGER IF EXISTS prevent_truncate_on_organizations ON organizations;
-DROP TRIGGER IF EXISTS prevent_delete_on_organizations ON organizations;
-DROP FUNCTION IF EXISTS operation_not_allowed();
 DROP TABLE IF EXISTS organizations;
 -- +goose StatementEnd
