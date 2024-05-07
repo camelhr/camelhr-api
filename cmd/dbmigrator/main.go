@@ -2,11 +2,14 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
+	"text/template"
 
 	_ "github.com/camelhr/camelhr-api/migrations/datafix"
 	_ "github.com/camelhr/camelhr-api/migrations/schema"
@@ -16,16 +19,17 @@ import (
 )
 
 const (
-	driver = "postgres"
+	driver     = "postgres"
+	schemaDir  = "migrations/schema"
+	datafixDir = "migrations/datafix"
 
-	//nolint:lll // ignore documentation line length
 	usagePrefix = `Usage: dbmigrator [OPTIONS] COMMAND
 
 You can also provide the database connection string as an environment variable named DB_CONN.
 If both the -db_conn flag and the DB_CONN environment variable are provided, the -db_conn flag will take precedence.
 
 Examples:
-  dbmigrator -dirs=./migrations/schema,./migrations/datafix -db_conn=postgres://user:password@localhost:5432/dbname?sslmode=disable up
+  dbmigrator -db_conn=postgres://user:password@localhost:5432/dbname?sslmode=disable up
   DB_CONN=postgres://user:password@localhost:5432/dbname?sslmode=disable dbmigrator up
 
 Options:
@@ -46,17 +50,15 @@ Commands:
 )
 
 func main() {
-	flagSet := flag.NewFlagSet("dbmigrator", flag.ExitOnError)
-	flagSet.Usage = func() {
-		fmt.Print(usagePrefix) //nolint:forbidigo // structured logger is not needed here
-		flagSet.PrintDefaults()
-		fmt.Print(usageCommands) //nolint:forbidigo // structured logger is not needed here
-	}
-	dirs := flagSet.String("dirs", "migrations/schema,migrations/datafix", "comma separated migration directories")
-	dbConn := flagSet.String("db_conn", "", "database connection string")
+	flagSet := prepareFlags()
+
+	// if db connection string is provided as a flag then use it. otherwise, use it from the environment variable
+	dbConn := flagSet.String("db_conn", os.Getenv("DB_CONN"), "database connection string")
+	operationType := flagSet.String("type", "all", "migration type (schema|datafix|all)")
 
 	allowedCommands := []string{"up", "up-by-one", "up-to", "down", "down-to", "redo", "status", "version", "create"}
-	dbConnectionNotNeedCommands := []string{"create"}
+	dbIndependentCommands := []string{"create"}
+	dirIndependentCommands := []string{"version"}
 
 	flagSet.Parse(os.Args[1:]) //nolint:errcheck // flag.ExitOnError will exit on error
 	log.InitGlobalLogger("dbmigrator", "info")
@@ -70,13 +72,7 @@ func main() {
 		log.Fatal("failed to extract command: %v", err)
 	}
 
-	// if db connection string is provided as a flag then use it. otherwise, get it from the environment variable
-	if dbConn == nil || *dbConn == "" {
-		envDBConn := os.Getenv("DB_CONN")
-		dbConn = &envDBConn
-	}
-
-	if err := validateDBConnectionString(*dbConn, command, dbConnectionNotNeedCommands); err != nil {
+	if err := validateDBConnectionString(*dbConn, command, dbIndependentCommands); err != nil {
 		flagSet.Usage()
 		log.Fatal("failed to validate db connection string: %v", err)
 	}
@@ -85,26 +81,85 @@ func main() {
 	if err != nil {
 		log.Fatal("failed to connect db: %v", err)
 	}
+	defer db.Close()
 
-	defer func() {
-		if err := db.Close(); err != nil {
-			log.Fatal("failed to close db: %v", err)
+	arguments := args[1:]
+
+	if contains(dirIndependentCommands, command) {
+		if err := runMigration(context.Background(), command, db, "", arguments); err != nil {
+			log.Error("failed to run migration: %v", err)
 		}
-	}()
 
-	arguments := []string{}
-	if len(args) > 1 {
-		arguments = append(arguments, args[1:]...)
+		log.Info("migration completed")
+
+		return
 	}
 
-	for _, dir := range strings.Split(*dirs, ",") {
-		if err := goose.RunContext(context.Background(), command, db, dir, arguments...); err != nil {
-			log.Error("failed to execute migration with goose %v: %v", command, err)
+	if shouldMigrateSchema(*operationType) {
+		if err := runMigration(context.Background(), command, db, schemaDir, arguments); err != nil {
+			log.Error("failed to run schema migration: %v", err)
+			return
+		}
+	}
+
+	if shouldMigrateDatafix(*operationType) {
+		if err := runMigration(context.Background(), command, db, datafixDir, arguments); err != nil {
+			log.Error("failed to run datafix migration: %v", err)
 			return
 		}
 	}
 
 	log.Info("migration completed")
+}
+
+func shouldMigrateSchema(migrationType string) bool {
+	return migrationType == "schema" || migrationType == "all"
+}
+
+func shouldMigrateDatafix(migrationType string) bool {
+	return migrationType == "datafix" || migrationType == "all"
+}
+
+// runMigration runs the migration command with the provided arguments.
+func runMigration(ctx context.Context, command string, db *sql.DB, dir string, args []string) error {
+	if command == "create" {
+		if len(args) < 2 { //nolint:gomnd // 2 is the minimum number of arguments required
+			return errors.New("create must be of form: goose [OPTIONS] DRIVER DBSTRING create NAME [go|sql]")
+		}
+
+		migrationType := args[1] // go or sql
+		migrationDir := filepath.Base(dir)
+
+		if migrationType == "go" {
+			return goose.CreateWithTemplate(db, dir, goMigrationTemplate(migrationDir), args[0], migrationType)
+		}
+
+		return goose.Create(db, dir, args[0], migrationType)
+	}
+
+	// run sql migrations from the provided directory
+	// please note that the path to the migrations directory (schemaDir) is used only for SQL migrations
+	// the Go migrations are found via the Go import path, not the file system path
+	if err := goose.RunWithOptionsContext(ctx, command, db, dir, args, goose.WithAllowMissing()); err != nil {
+		if !errors.Is(err, goose.ErrNoNextVersion) && !errors.Is(err, goose.ErrNoCurrentVersion) &&
+			!errors.Is(err, goose.ErrNoMigrationFiles) {
+			return fmt.Errorf("failed to execute migration with goose %v: %w", command, err)
+		}
+	}
+
+	return nil
+}
+
+// prepareFlags prepares the flag set with the required flags and usage.
+func prepareFlags() *flag.FlagSet {
+	flagSet := flag.NewFlagSet("dbmigrator", flag.ExitOnError)
+	flagSet.Usage = func() {
+		fmt.Print(usagePrefix) //nolint:forbidigo // structured logger is not needed here
+		flagSet.PrintDefaults()
+		fmt.Print(usageCommands) //nolint:forbidigo // structured logger is not needed here
+	}
+
+	return flagSet
 }
 
 // extractCommand extracts the command from the arguments,
@@ -125,10 +180,10 @@ func extractCommand(args []string, allowedCommands []string) (string, error) {
 
 // validateDBConnectionString ensures that the db connection string is not empty for the commands that require it.
 // It returns error if db connection string is missing for the required commands.
-func validateDBConnectionString(dbConn string, command string, dbConnectionNotNeedCommands []string) error {
+func validateDBConnectionString(dbConn string, command string, dbIndependentCommands []string) error {
 	if dbConn == "" {
 		// if the command does not require a db connection string then return
-		if contains(dbConnectionNotNeedCommands, command) {
+		if contains(dbIndependentCommands, command) {
 			return nil
 		}
 
@@ -136,6 +191,32 @@ func validateDBConnectionString(dbConn string, command string, dbConnectionNotNe
 	}
 
 	return nil
+}
+
+func goMigrationTemplate(pkg string) *template.Template {
+	tpl := template.Must(template.New("goose.go-migration").Parse(fmt.Sprintf(`package %s
+
+	import (
+		"database/sql"
+		"github.com/pressly/goose/v3"
+	)
+	
+	func init() {
+		goose.AddMigration(up{{.CamelName}}, down{{.CamelName}})
+	}
+	
+	func up{{.CamelName}}(tx *sql.Tx) error {
+		// This code is executed when the migration is applied.
+		return nil
+	}
+	
+	func down{{.CamelName}}(tx *sql.Tx) error {
+		// This code is executed when the migration is rolled back.
+		return nil
+	}
+	`, pkg)))
+
+	return tpl
 }
 
 func contains(s []string, e string) bool {

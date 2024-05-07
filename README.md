@@ -50,6 +50,32 @@ This application is configured to run with docker compose. Follow the steps belo
   make lint
   ```
 
+#### Database migrations
+
+* Create a new schema migration file
+
+  ```shell
+  make migrate-create-schema name=<FILENAME>
+  ```
+
+* Create a new datafix migration file
+
+  ```shell
+  make migrate-create-datafix name=<FILENAME>
+  ```
+
+* Run up migration
+  
+  ```shell
+  make migrate-up
+  ```
+
+* Run down migration
+  
+  ```shell
+  make migrate-down
+  ```
+
 ### Contribution Guidelines
 
 > Every Contribution Makes a Difference

@@ -39,3 +39,18 @@ clean:
 
 migrate-up:
 	@go run ./cmd/dbmigrator/main.go -db_conn=postgres://${PGUSER}:${PGPASSWORD}@${PGHOST}:5432/${PGDATABASE}?sslmode=${PGSSLMODE} up
+
+migrate-down:
+	@go run ./cmd/dbmigrator/main.go -db_conn=postgres://${PGUSER}:${PGPASSWORD}@${PGHOST}:5432/${PGDATABASE}?sslmode=${PGSSLMODE} down
+
+migrate-create-schema:
+	@go run ./cmd/dbmigrator/main.go -type=schema create $(name) sql
+
+migrate-create-datafix:
+	@go run ./cmd/dbmigrator/main.go -type=datafix create $(name) go
+
+migrate-version:
+	@go run ./cmd/dbmigrator/main.go -db_conn=postgres://${PGUSER}:${PGPASSWORD}@${PGHOST}:5432/${PGDATABASE}?sslmode=${PGSSLMODE} version
+
+migrate-status:
+	@go run ./cmd/dbmigrator/main.go -db_conn=postgres://${PGUSER}:${PGPASSWORD}@${PGHOST}:5432/${PGDATABASE}?sslmode=${PGSSLMODE} status
