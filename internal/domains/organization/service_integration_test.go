@@ -3,7 +3,6 @@ package organization_test
 import (
 	"context"
 
-	"github.com/brianvoe/gofakeit/v7"
 	"github.com/camelhr/camelhr-api/internal/domains/organization"
 	"github.com/camelhr/camelhr-api/internal/tests/fake"
 )
@@ -19,6 +18,26 @@ func (s *OrganizationTestSuite) TestServiceIntegration_GetOrganizationByID() {
 		s.Require().NoError(err)
 		s.Equal(org.ID, result.ID)
 		s.Equal(org.Name, result.Name)
+		s.Nil(result.DeletedAt)
+		s.NotZero(result.CreatedAt)
+		s.NotZero(result.UpdatedAt)
+		s.Equal(result.CreatedAt, result.UpdatedAt)
+		s.Nil(result.SuspendedAt)
+		s.Nil(result.BlacklistedAt)
+		s.Nil(result.Comment)
+	})
+}
+
+func (s *OrganizationTestSuite) TestServiceIntegration_GetOrganizationBySubdomain() {
+	s.Run("should return organization", func() {
+		s.T().Parallel()
+		repo := organization.NewRepository(s.DB)
+		svc := organization.NewService(repo)
+		org := fake.NewOrganization(s.DB)
+
+		result, err := svc.GetOrganizationBySubdomain(context.TODO(), org.Subdomain)
+		s.Require().NoError(err)
+		s.Equal(org.Subdomain, result.Subdomain)
 		s.Nil(result.DeletedAt)
 		s.NotZero(result.CreatedAt)
 		s.NotZero(result.UpdatedAt)
@@ -55,7 +74,8 @@ func (s *OrganizationTestSuite) TestServiceIntegration_CreateOrganization() {
 		repo := organization.NewRepository(s.DB)
 		svc := organization.NewService(repo)
 		org := organization.Organization{
-			Name: gofakeit.Name(),
+			Subdomain: randomOrganizationSubdomain(),
+			Name:      randomOrganizationName(),
 		}
 
 		id, err := svc.CreateOrganization(context.TODO(), org)
@@ -82,8 +102,9 @@ func (s *OrganizationTestSuite) TestServiceIntegration_UpdateOrganization() {
 		org := fake.NewOrganization(s.DB)
 
 		updateOrg := organization.Organization{
-			ID:   org.ID,
-			Name: "UpdatedOrg",
+			ID:        org.ID,
+			Subdomain: randomOrganizationSubdomain(),
+			Name:      randomOrganizationName(),
 		}
 		err := svc.UpdateOrganization(context.TODO(), updateOrg)
 		s.Require().NoError(err)

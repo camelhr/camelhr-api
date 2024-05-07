@@ -2,6 +2,7 @@ package organization_test
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -49,8 +50,9 @@ func TestRepository_GetOrganizationByID(t *testing.T) {
 		repo := organization.NewRepository(mockDB)
 
 		org := organization.Organization{
-			ID:   1,
-			Name: "org1",
+			ID:        1,
+			Subdomain: randomOrganizationSubdomain(),
+			Name:      randomOrganizationName(),
 		}
 
 		mockDB.On("Get", context.TODO(), &emptyOrg, queryMatcher("getOrganizationByIDQuery"), int64(1)).
@@ -61,6 +63,50 @@ func TestRepository_GetOrganizationByID(t *testing.T) {
 			}).Return(nil)
 
 		result, err := repo.GetOrganizationByID(context.TODO(), 1)
+		require.NoError(t, err)
+		assert.Equal(t, org, result)
+	})
+}
+
+func TestRepository_GetOrganizationBySubdomain(t *testing.T) {
+	t.Parallel()
+
+	t.Run("should return an error when the database call fails", func(t *testing.T) {
+		t.Parallel()
+
+		mockDB := &database.DatabaseMock{}
+		repo := organization.NewRepository(mockDB)
+
+		mockDB.On("Get", context.TODO(), mock.Anything, queryMatcher("getOrganizationBySubdomainQuery"), "org1").
+			Return(assert.AnError)
+
+		_, err := repo.GetOrganizationBySubdomain(context.TODO(), "org1")
+		require.Error(t, err)
+		assert.ErrorIs(t, assert.AnError, err)
+	})
+
+	t.Run("should return an organization", func(t *testing.T) {
+		t.Parallel()
+
+		var emptyOrg organization.Organization
+
+		mockDB := database.NewDatabaseMock(t)
+		repo := organization.NewRepository(mockDB)
+
+		org := organization.Organization{
+			ID:        1,
+			Subdomain: randomOrganizationSubdomain(),
+			Name:      randomOrganizationName(),
+		}
+
+		mockDB.On("Get", context.TODO(), &emptyOrg, queryMatcher("getOrganizationBySubdomainQuery"), "org1").
+			Run(func(args mock.Arguments) {
+				arg, ok := args.Get(1).(*organization.Organization)
+				require.True(t, ok)
+				*arg = org
+			}).Return(nil)
+
+		result, err := repo.GetOrganizationBySubdomain(context.TODO(), "org1")
 		require.NoError(t, err)
 		assert.Equal(t, org, result)
 	})
@@ -92,8 +138,9 @@ func TestRepository_GetOrganizationByName(t *testing.T) {
 		repo := organization.NewRepository(mockDB)
 
 		org := organization.Organization{
-			ID:   1,
-			Name: "org1",
+			ID:        1,
+			Subdomain: randomOrganizationSubdomain(),
+			Name:      randomOrganizationName(),
 		}
 
 		mockDB.On("Get", context.TODO(), &emptyOrg, queryMatcher("getOrganizationByNameQuery"), "org1").
@@ -117,11 +164,15 @@ func TestRepository_CreateOrganization(t *testing.T) {
 
 		mockDB := &database.DatabaseMock{}
 		repo := organization.NewRepository(mockDB)
+		org := organization.Organization{
+			Subdomain: randomOrganizationSubdomain(),
+			Name:      randomOrganizationName(),
+		}
 
-		mockDB.On("Exec", context.TODO(), mock.Anything, queryMatcher("createOrganizationQuery"), "org1").
+		mockDB.On("Exec", context.TODO(), mock.Anything, queryMatcher("createOrganizationQuery"), org.Subdomain, org.Name).
 			Return(assert.AnError)
 
-		_, err := repo.CreateOrganization(context.TODO(), organization.Organization{Name: "org1"})
+		_, err := repo.CreateOrganization(context.TODO(), org)
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
@@ -133,11 +184,15 @@ func TestRepository_CreateOrganization(t *testing.T) {
 
 		mockDB := database.NewDatabaseMock(t)
 		repo := organization.NewRepository(mockDB)
+		org := organization.Organization{
+			Subdomain: randomOrganizationSubdomain(),
+			Name:      randomOrganizationName(),
+		}
 
-		mockDB.On("Exec", context.TODO(), &id, queryMatcher("createOrganizationQuery"), "org1").
+		mockDB.On("Exec", context.TODO(), &id, queryMatcher("createOrganizationQuery"), org.Subdomain, org.Name).
 			Return(nil)
 
-		result, err := repo.CreateOrganization(context.TODO(), organization.Organization{Name: "org1"})
+		result, err := repo.CreateOrganization(context.TODO(), org)
 		require.NoError(t, err)
 		assert.Equal(t, id, result)
 	})
@@ -152,11 +207,12 @@ func TestRepository_UpdateOrganization(t *testing.T) {
 		mockDB := &database.DatabaseMock{}
 		repo := organization.NewRepository(mockDB)
 		org := organization.Organization{
-			ID:   gofakeit.Int64(),
-			Name: "org1",
+			ID:        gofakeit.Int64(),
+			Subdomain: randomOrganizationSubdomain(),
+			Name:      randomOrganizationName(),
 		}
 
-		mockDB.On("Exec", context.TODO(), nil, queryMatcher("updateOrganizationQuery"), org.ID, org.Name).
+		mockDB.On("Exec", context.TODO(), nil, queryMatcher("updateOrganizationQuery"), org.ID, org.Subdomain, org.Name).
 			Return(assert.AnError)
 
 		err := repo.UpdateOrganization(context.TODO(), org)
@@ -170,11 +226,12 @@ func TestRepository_UpdateOrganization(t *testing.T) {
 		mockDB := database.NewDatabaseMock(t)
 		repo := organization.NewRepository(mockDB)
 		org := organization.Organization{
-			ID:   gofakeit.Int64(),
-			Name: "org1",
+			ID:        gofakeit.Int64(),
+			Subdomain: randomOrganizationSubdomain(),
+			Name:      randomOrganizationName(),
 		}
 
-		mockDB.On("Exec", context.TODO(), nil, queryMatcher("updateOrganizationQuery"), org.ID, org.Name).
+		mockDB.On("Exec", context.TODO(), nil, queryMatcher("updateOrganizationQuery"), org.ID, org.Subdomain, org.Name).
 			Return(nil)
 
 		err := repo.UpdateOrganization(context.TODO(), org)
@@ -335,4 +392,12 @@ func TestRepository_UnblacklistOrganization(t *testing.T) {
 		err := repo.UnblacklistOrganization(context.TODO(), 1, "test unblacklisted")
 		require.NoError(t, err)
 	})
+}
+
+func randomOrganizationSubdomain() string {
+	return gofakeit.LetterN(uint(gofakeit.Number(1, 30)))
+}
+
+func randomOrganizationName() string {
+	return fmt.Sprint(gofakeit.LetterN(8), " ", gofakeit.Company())
 }

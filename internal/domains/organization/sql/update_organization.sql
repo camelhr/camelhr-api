@@ -1,10 +1,12 @@
 -- updateOrganizationQuery
 -- $1: organization_id
--- $2: name
+-- $2: subdomain
+-- $3: name
 UPDATE
     organizations
 SET
-    name = $2,
+    subdomain = $2,
+    name = $3,
     updated_at = NOW()
 WHERE
     organization_id = $1

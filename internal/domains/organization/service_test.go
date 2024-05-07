@@ -33,14 +33,54 @@ func TestService_GetOrganizationByID(t *testing.T) {
 		service := organization.NewService(mockRepo)
 
 		org := organization.Organization{
-			ID:   1,
-			Name: "org1",
+			ID:        1,
+			Subdomain: randomOrganizationSubdomain(),
+			Name:      randomOrganizationName(),
 		}
 
 		mockRepo.On("GetOrganizationByID", context.TODO(), int64(1)).
 			Return(org, nil)
 
 		result, err := service.GetOrganizationByID(context.TODO(), int64(1))
+		require.NoError(t, err)
+		assert.Equal(t, org, result)
+	})
+}
+
+func TestService_GetOrganizationBySubdomain(t *testing.T) {
+	t.Parallel()
+
+	t.Run("should return an error when the repository call fails", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := organization.NewRepositoryMock(t)
+		service := organization.NewService(mockRepo)
+		orgSubdomain := randomOrganizationSubdomain()
+
+		mockRepo.On("GetOrganizationBySubdomain", context.TODO(), orgSubdomain).
+			Return(organization.Organization{}, assert.AnError)
+
+		_, err := service.GetOrganizationBySubdomain(context.TODO(), orgSubdomain)
+		require.Error(t, err)
+		assert.ErrorIs(t, assert.AnError, err)
+	})
+
+	t.Run("should return the organization by subdomain", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := organization.NewRepositoryMock(t)
+		service := organization.NewService(mockRepo)
+		orgSubdomain := randomOrganizationSubdomain()
+
+		org := organization.Organization{
+			ID:        1,
+			Subdomain: orgSubdomain,
+		}
+
+		mockRepo.On("GetOrganizationBySubdomain", context.TODO(), orgSubdomain).
+			Return(org, nil)
+
+		result, err := service.GetOrganizationBySubdomain(context.TODO(), orgSubdomain)
 		require.NoError(t, err)
 		assert.Equal(t, org, result)
 	})
@@ -54,11 +94,12 @@ func TestService_GetOrganizationByName(t *testing.T) {
 
 		mockRepo := organization.NewRepositoryMock(t)
 		service := organization.NewService(mockRepo)
+		orgName := randomOrganizationName()
 
-		mockRepo.On("GetOrganizationByName", context.TODO(), "org1").
+		mockRepo.On("GetOrganizationByName", context.TODO(), orgName).
 			Return(organization.Organization{}, assert.AnError)
 
-		_, err := service.GetOrganizationByName(context.TODO(), "org1")
+		_, err := service.GetOrganizationByName(context.TODO(), orgName)
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
@@ -71,13 +112,13 @@ func TestService_GetOrganizationByName(t *testing.T) {
 
 		org := organization.Organization{
 			ID:   1,
-			Name: "org1",
+			Name: randomOrganizationName(),
 		}
 
-		mockRepo.On("GetOrganizationByName", context.TODO(), "org1").
+		mockRepo.On("GetOrganizationByName", context.TODO(), org.Name).
 			Return(org, nil)
 
-		result, err := service.GetOrganizationByName(context.TODO(), "org1")
+		result, err := service.GetOrganizationByName(context.TODO(), org.Name)
 		require.NoError(t, err)
 		assert.Equal(t, org, result)
 	})
@@ -93,7 +134,8 @@ func TestService_CreateOrganization(t *testing.T) {
 		service := organization.NewService(mockRepo)
 
 		org := organization.Organization{
-			Name: "org1",
+			Subdomain: randomOrganizationSubdomain(),
+			Name:      randomOrganizationName(),
 		}
 
 		mockRepo.On("CreateOrganization", context.TODO(), org).
@@ -111,7 +153,8 @@ func TestService_CreateOrganization(t *testing.T) {
 		service := organization.NewService(mockRepo)
 
 		org := organization.Organization{
-			Name: "org1",
+			Subdomain: randomOrganizationSubdomain(),
+			Name:      randomOrganizationName(),
 		}
 
 		mockRepo.On("CreateOrganization", context.TODO(), org).
@@ -133,7 +176,8 @@ func TestService_UpdateOrganization(t *testing.T) {
 		service := organization.NewService(mockRepo)
 
 		org := organization.Organization{
-			Name: "org1",
+			Subdomain: randomOrganizationSubdomain(),
+			Name:      randomOrganizationName(),
 		}
 
 		mockRepo.On("UpdateOrganization", context.TODO(), org).
@@ -151,7 +195,8 @@ func TestService_UpdateOrganization(t *testing.T) {
 		service := organization.NewService(mockRepo)
 
 		org := organization.Organization{
-			Name: "org1",
+			Subdomain: randomOrganizationSubdomain(),
+			Name:      randomOrganizationName(),
 		}
 
 		mockRepo.On("UpdateOrganization", context.TODO(), org).

@@ -5,6 +5,9 @@ import _ "embed"
 //go:embed sql/get_organization_by_id.sql
 var getOrganizationByIDQuery string
 
+//go:embed sql/get_organization_by_subdomain.sql
+var getOrganizationBySubdomainQuery string
+
 //go:embed sql/get_organization_by_name.sql
 var getOrganizationByNameQuery string
 

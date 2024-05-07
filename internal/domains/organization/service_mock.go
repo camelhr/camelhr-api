@@ -133,6 +133,34 @@ func (_m *ServiceMock) GetOrganizationByName(ctx context.Context, name string) (
 	return r0, r1
 }
 
+// GetOrganizationBySubdomain provides a mock function with given fields: ctx, subdomain
+func (_m *ServiceMock) GetOrganizationBySubdomain(ctx context.Context, subdomain string) (Organization, error) {
+	ret := _m.Called(ctx, subdomain)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetOrganizationBySubdomain")
+	}
+
+	var r0 Organization
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (Organization, error)); ok {
+		return rf(ctx, subdomain)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) Organization); ok {
+		r0 = rf(ctx, subdomain)
+	} else {
+		r0 = ret.Get(0).(Organization)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, subdomain)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // SuspendOrganization provides a mock function with given fields: ctx, id, comment
 func (_m *ServiceMock) SuspendOrganization(ctx context.Context, id int64, comment string) error {
 	ret := _m.Called(ctx, id, comment)

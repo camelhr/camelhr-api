@@ -11,6 +11,9 @@ type Organization struct {
 	// ID is the unique identifier of the organization.
 	ID int64 `db:"organization_id"`
 
+	// Subdomain is the subdomain of the organization.
+	Subdomain string `db:"subdomain"`
+
 	// Name is the name of the organization.
 	Name string `db:"name"`
 
@@ -28,12 +31,14 @@ type Organization struct {
 
 // Request represents a http request to create or update an organization.
 type Request struct {
-	Name string `json:"name" validate:"required"`
+	Subdomain string `json:"subdomain" validate:"required"`
+	Name      string `json:"name" validate:"required"`
 }
 
 // Response represents a response of an http response organization.
 type Response struct {
 	ID            int64      `json:"id"`
+	Subdomain     string     `json:"subdomain"`
 	Name          string     `json:"name"`
 	SuspendedAt   *time.Time `json:"suspended_at"`
 	BlacklistedAt *time.Time `json:"blacklisted_at"`

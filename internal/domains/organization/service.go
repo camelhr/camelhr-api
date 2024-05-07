@@ -8,6 +8,9 @@ type Service interface {
 	// GetOrganizationByID returns an organization by its ID.
 	GetOrganizationByID(ctx context.Context, id int64) (Organization, error)
 
+	// GetOrganizationBySubdomain returns an organization by its subdomain.
+	GetOrganizationBySubdomain(ctx context.Context, subdomain string) (Organization, error)
+
 	// GetOrganizationByName returns an organization by its name.
 	GetOrganizationByName(ctx context.Context, name string) (Organization, error)
 
@@ -45,6 +48,10 @@ func NewService(repo Repository) Service {
 
 func (s *service) GetOrganizationByID(ctx context.Context, id int64) (Organization, error) {
 	return s.repo.GetOrganizationByID(ctx, id)
+}
+
+func (s *service) GetOrganizationBySubdomain(ctx context.Context, subdomain string) (Organization, error) {
+	return s.repo.GetOrganizationBySubdomain(ctx, subdomain)
 }
 
 func (s *service) GetOrganizationByName(ctx context.Context, name string) (Organization, error) {

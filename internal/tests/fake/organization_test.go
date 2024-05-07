@@ -26,6 +26,18 @@ func (s *FakeTestSuite) TestFakeOrganization() {
 		s.Nil(o.BlacklistedAt)
 	})
 
+	s.Run("should create an organization with custom subdomain", func() {
+		s.T().Parallel()
+
+		// create a fake organization with custom subdomain
+		subdomain := "test"
+		o := fake.NewOrganization(s.DB, fake.OrganizationSubdomain(subdomain))
+
+		// assert that the organization is created with the specified subdomain
+		s.Require().NotNil(o)
+		s.Equal(subdomain, o.Subdomain)
+	})
+
 	s.Run("should create an organization with custom name", func() {
 		s.T().Parallel()
 

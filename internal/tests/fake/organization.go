@@ -2,6 +2,7 @@ package fake
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/brianvoe/gofakeit/v7"
@@ -18,6 +19,14 @@ type FakeOrganization struct {
 
 // OrganizationOption is a function that modifies an organization's default values.
 type OrganizationOption func(*FakeOrganization) (*FakeOrganization, error)
+
+// OrganizationSubdomain sets/overrides the default subdomain of an organization.
+func OrganizationSubdomain(subdomain string) OrganizationOption {
+	return func(o *FakeOrganization) (*FakeOrganization, error) {
+		o.Subdomain = subdomain
+		return o, nil
+	}
+}
 
 // OrganizationName sets/overrides the default name of an organization.
 func OrganizationName(name string) OrganizationOption {
@@ -77,8 +86,10 @@ func NewOrganization(db database.Database, options ...OrganizationOption) *FakeO
 	return org
 }
 
+//nolint:gomnd // generate random values
 func (o *FakeOrganization) setDefaults() {
-	o.Name = gofakeit.Name()
+	o.Subdomain = gofakeit.LetterN(uint(gofakeit.Number(1, 30)))
+	o.Name = fmt.Sprint(gofakeit.LetterN(8), " ", gofakeit.Company())
 
 	if o.CreatedAt.IsZero() {
 		o.CreatedAt = time.Now().UTC()
@@ -91,11 +102,11 @@ func (o *FakeOrganization) setDefaults() {
 
 func persist(db database.Database, o *FakeOrganization) error {
 	insertQuery := `INSERT INTO organizations
-			(name, suspended_at, blacklisted_at, comment, created_at, updated_at, deleted_at) VALUES
-			($1, $2, $3, $4, $5, $6, $7)
+			(subdomain, name, suspended_at, blacklisted_at, comment, created_at, updated_at, deleted_at) VALUES
+			($1, $2, $3, $4, $5, $6, $7, $8)
 			RETURNING *`
 
-	if err := db.Exec(context.TODO(), o, insertQuery, o.Name, o.SuspendedAt, o.BlacklistedAt,
+	if err := db.Exec(context.TODO(), o, insertQuery, o.Subdomain, o.Name, o.SuspendedAt, o.BlacklistedAt,
 		o.Comment, o.CreatedAt, o.UpdatedAt, o.DeletedAt); err != nil {
 		return err
 	}
@@ -149,6 +160,8 @@ func (o *FakeOrganization) FetchLatest(db database.Database) *FakeOrganization {
 
 	query := `
 			SELECT
+				organization_id,
+				subdomain,
 				name,
 				suspended_at,
 				blacklisted_at,

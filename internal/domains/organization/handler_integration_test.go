@@ -7,7 +7,6 @@ import (
 	"net/http/httptest"
 	"strings"
 
-	"github.com/brianvoe/gofakeit/v7"
 	"github.com/camelhr/camelhr-api/internal/domains/organization"
 	"github.com/camelhr/camelhr-api/internal/tests/fake"
 	"github.com/camelhr/camelhr-api/internal/web"
@@ -52,7 +51,8 @@ func (s *OrganizationTestSuite) TestHandlerIntegration_CreateOrganization() {
 		s.T().Parallel()
 
 		orgReqPayload := organization.Request{
-			Name: gofakeit.Name(),
+			Subdomain: randomOrganizationSubdomain(),
+			Name:      randomOrganizationName(),
 		}
 		orgJSON, err := json.Marshal(orgReqPayload)
 		s.Require().NoError(err)
@@ -104,7 +104,8 @@ func (s *OrganizationTestSuite) TestHandlerIntegration_UpdateOrganization() {
 
 		fakeOrg := fake.NewOrganization(s.DB)
 		orgReqPayload := organization.Request{
-			Name: gofakeit.Name(),
+			Subdomain: randomOrganizationSubdomain(),
+			Name:      randomOrganizationName(),
 		}
 		orgJSON, err := json.Marshal(orgReqPayload)
 		s.Require().NoError(err)
@@ -172,6 +173,7 @@ func (s *OrganizationTestSuite) TestHandlerIntegration_DeleteOrganization() {
 func toOrganizationResponse(org organization.Organization) organization.Response {
 	return organization.Response{
 		ID:            org.ID,
+		Subdomain:     org.Subdomain,
 		Name:          org.Name,
 		SuspendedAt:   org.SuspendedAt,
 		BlacklistedAt: org.BlacklistedAt,

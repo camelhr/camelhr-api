@@ -1,6 +1,7 @@
 -- createOrganizationQuery
--- $1: name
+-- $1: subdomain
+-- $2: name
 INSERT INTO
-    organizations(name)
+    organizations(subdomain, name)
 VALUES
-    ($1) RETURNING organization_id;
+    ($1, $2) RETURNING organization_id;

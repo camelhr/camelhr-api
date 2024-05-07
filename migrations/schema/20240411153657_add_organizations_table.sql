@@ -2,6 +2,7 @@
 -- +goose StatementBegin
 CREATE TABLE organizations (
     organization_id SERIAL PRIMARY KEY,
+    subdomain VARCHAR(30) NOT NULL UNIQUE CHECK (subdomain <> ''),
     name VARCHAR(60) NOT NULL UNIQUE CHECK (name <> ''),
     suspended_at TIMESTAMP WITHOUT TIME ZONE,
     blacklisted_at TIMESTAMP WITHOUT TIME ZONE,

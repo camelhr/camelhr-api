@@ -12,6 +12,9 @@ type Repository interface {
 	// GetOrganizationByID returns an organization by its ID.
 	GetOrganizationByID(ctx context.Context, id int64) (Organization, error)
 
+	// GetOrganizationBySubdomain returns an organization by its subdomain.
+	GetOrganizationBySubdomain(ctx context.Context, subdomain string) (Organization, error)
+
 	// GetOrganizationByName returns an organization by its name.
 	GetOrganizationByName(ctx context.Context, name string) (Organization, error)
 
@@ -52,6 +55,13 @@ func (r *repository) GetOrganizationByID(ctx context.Context, id int64) (Organiz
 	return org, err
 }
 
+func (r *repository) GetOrganizationBySubdomain(ctx context.Context, subdomain string) (Organization, error) {
+	var org Organization
+	err := r.db.Get(ctx, &org, getOrganizationBySubdomainQuery, subdomain)
+
+	return org, err
+}
+
 func (r *repository) GetOrganizationByName(ctx context.Context, name string) (Organization, error) {
 	var org Organization
 	err := r.db.Get(ctx, &org, getOrganizationByNameQuery, name)
@@ -61,13 +71,13 @@ func (r *repository) GetOrganizationByName(ctx context.Context, name string) (Or
 
 func (r *repository) CreateOrganization(ctx context.Context, org Organization) (int64, error) {
 	var id int64
-	err := r.db.Exec(ctx, &id, createOrganizationQuery, org.Name)
+	err := r.db.Exec(ctx, &id, createOrganizationQuery, org.Subdomain, org.Name)
 
 	return id, err
 }
 
 func (r *repository) UpdateOrganization(ctx context.Context, org Organization) error {
-	return r.db.Exec(ctx, nil, updateOrganizationQuery, org.ID, org.Name)
+	return r.db.Exec(ctx, nil, updateOrganizationQuery, org.ID, org.Subdomain, org.Name)
 }
 
 func (r *repository) DeleteOrganization(ctx context.Context, id int64) error {

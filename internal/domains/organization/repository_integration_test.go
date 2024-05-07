@@ -40,6 +40,37 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_GetOrganizationByID() 
 	})
 }
 
+func (s *OrganizationTestSuite) TestRepositoryIntegration_GetOrganizationBySubdomain() {
+	s.Run("should return an organization", func() {
+		s.T().Parallel()
+		r := organization.NewRepository(s.DB)
+
+		org := fake.NewOrganization(s.DB)
+
+		result, err := r.GetOrganizationBySubdomain(context.TODO(), org.Subdomain)
+
+		s.Require().NoError(err)
+		s.Equal(org.Organization, result)
+	})
+
+	s.Run("should return error when organization does not exist", func() {
+		s.T().Parallel()
+		repo := organization.NewRepository(s.DB)
+
+		_, err := repo.GetOrganizationBySubdomain(context.TODO(), randomOrganizationName())
+		s.ErrorIs(err, sql.ErrNoRows)
+	})
+
+	s.Run("should return error when organization is deleted", func() {
+		s.T().Parallel()
+		repo := organization.NewRepository(s.DB)
+		org := fake.NewOrganization(s.DB, fake.OrganizationDeleted())
+
+		_, err := repo.GetOrganizationBySubdomain(context.TODO(), org.Subdomain)
+		s.ErrorIs(err, sql.ErrNoRows)
+	})
+}
+
 func (s *OrganizationTestSuite) TestRepositoryIntegration_GetOrganizationByName() {
 	s.Run("should return an organization", func() {
 		s.T().Parallel()
@@ -57,7 +88,7 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_GetOrganizationByName(
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
 
-		_, err := repo.GetOrganizationByName(context.TODO(), gofakeit.Name())
+		_, err := repo.GetOrganizationByName(context.TODO(), randomOrganizationName())
 		s.ErrorIs(err, sql.ErrNoRows)
 	})
 
@@ -76,7 +107,8 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_CreateOrganization() {
 		s.T().Parallel()
 		r := organization.NewRepository(s.DB)
 		org := organization.Organization{
-			Name: gofakeit.Name(),
+			Subdomain: randomOrganizationSubdomain(),
+			Name:      randomOrganizationName(),
 		}
 
 		id, err := r.CreateOrganization(context.TODO(), org)
@@ -96,17 +128,45 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_CreateOrganization() {
 		s.Nil(result.Comment)
 	})
 
+	s.Run("should return error when organization with the same subdomain already exists", func() {
+		s.T().Parallel()
+		r := organization.NewRepository(s.DB)
+		org := fake.NewOrganization(s.DB)
+
+		_, err := r.CreateOrganization(context.TODO(), organization.Organization{
+			Subdomain: org.Subdomain,
+			Name:      randomOrganizationName(),
+		})
+
+		s.Require().Error(err)
+		s.ErrorContains(err, "duplicate key value violates unique constraint")
+	})
+
 	s.Run("should return error when organization with the same name already exists", func() {
 		s.T().Parallel()
 		r := organization.NewRepository(s.DB)
 		org := fake.NewOrganization(s.DB)
 
 		_, err := r.CreateOrganization(context.TODO(), organization.Organization{
-			Name: org.Name,
+			Subdomain: randomOrganizationSubdomain(),
+			Name:      org.Name,
 		})
 
 		s.Require().Error(err)
 		s.ErrorContains(err, "duplicate key value violates unique constraint")
+	})
+
+	s.Run("should return error when organization has empty subdomain", func() {
+		s.T().Parallel()
+		r := organization.NewRepository(s.DB)
+
+		_, err := r.CreateOrganization(context.TODO(), organization.Organization{
+			Subdomain: "",
+			Name:      randomOrganizationName(),
+		})
+
+		s.Require().Error(err)
+		s.ErrorContains(err, "violates check constraint")
 	})
 
 	s.Run("should return error when organization has empty name", func() {
@@ -114,7 +174,8 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_CreateOrganization() {
 		r := organization.NewRepository(s.DB)
 
 		_, err := r.CreateOrganization(context.TODO(), organization.Organization{
-			Name: "",
+			Subdomain: randomOrganizationSubdomain(),
+			Name:      "",
 		})
 
 		s.Require().Error(err)
@@ -130,13 +191,15 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_UpdateOrganization() {
 		org := fake.NewOrganization(s.DB)
 
 		err := r.UpdateOrganization(context.TODO(), organization.Organization{
-			ID:   org.ID,
-			Name: org.Name + " Updated",
+			ID:        org.ID,
+			Subdomain: "updated-subdomain",
+			Name:      "updated name",
 		})
 		s.Require().NoError(err)
 
 		result := org.FetchLatest(s.DB)
-		s.Equal(org.Name+" Updated", result.Name)
+		s.Equal("updated-subdomain", result.Subdomain)
+		s.Equal("updated name", result.Name)
 		s.Equal(org.CreatedAt, result.CreatedAt)
 		s.GreaterOrEqual(result.UpdatedAt, result.CreatedAt) // could be equal if the update is fast
 		s.Nil(result.DeletedAt)
@@ -152,12 +215,14 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_UpdateOrganization() {
 		org := fake.NewOrganization(s.DB, fake.OrganizationDeleted())
 
 		err := r.UpdateOrganization(context.TODO(), organization.Organization{
-			ID:   org.ID,
-			Name: org.Name + " delete_update",
+			ID:        org.ID,
+			Subdomain: "delete-update-subdomain",
+			Name:      "delete update org",
 		})
 		s.Require().NoError(err)
 
 		result := org.FetchLatest(s.DB)
+		s.Equal(org.Subdomain, result.Subdomain) // subdomain should not be updated
 		s.Equal(org.Name, result.Name)           // name should not be updated
 		s.Equal(org.UpdatedAt, result.UpdatedAt) // update time should not be updated
 		s.Equal(org.CreatedAt, result.CreatedAt)

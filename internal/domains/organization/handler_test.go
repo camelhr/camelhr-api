@@ -27,7 +27,7 @@ func TestHandler_GetOrganizationByID(t *testing.T) {
 		reqContext.URLParams.Add("orgID", "1")
 		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
 
-		expectedBody := `{"id": 1, "name": "org1",
+		expectedBody := `{"id": 1, "subdomain": "sub1", "name": "org1",
 		"suspended_at": null, "blacklisted_at": null,
 		"created_at": "0001-01-01T00:00:00Z", "updated_at": "0001-01-01T00:00:00Z"}`
 		mockService := organization.NewServiceMock(t)
@@ -36,7 +36,7 @@ func TestHandler_GetOrganizationByID(t *testing.T) {
 
 		// mock the GetOrganizationByID function
 		mockService.On("GetOrganizationByID", req.Context(), int64(1)).
-			Return(organization.Organization{ID: 1, Name: "org1"}, nil)
+			Return(organization.Organization{ID: 1, Subdomain: "sub1", Name: "org1"}, nil)
 
 		// call the GetOrganizationByID function
 		handler.GetOrganizationByID(rr, req)
@@ -98,11 +98,11 @@ func TestHandler_CreateOrganization(t *testing.T) {
 	t.Run("should create the organization", func(t *testing.T) {
 		t.Parallel()
 		// create a new request with a JSON payload
-		payload := `{"name": "org_create_test"}`
+		payload := `{"subdomain": "sub1", "name": "org_create_test"}`
 		req, err := http.NewRequest(http.MethodPost, "/organizations", strings.NewReader(payload))
 		require.NoError(t, err)
 
-		expectedBody := `{"id": 1, "name": "org_create_test", 
+		expectedBody := `{"id": 1, "subdomain": "sub1", "name": "org_create_test", 
 		"suspended_at": null, "blacklisted_at": null,
 		"created_at": "0001-01-01T00:00:00Z", "updated_at": "0001-01-01T00:00:00Z"}`
 		mockService := organization.NewServiceMock(t)
@@ -110,8 +110,10 @@ func TestHandler_CreateOrganization(t *testing.T) {
 		handler := organization.NewHandler(mockService)
 
 		// mock the CreateOrganization function
-		mockService.On("CreateOrganization", req.Context(), organization.Organization{Name: "org_create_test"}).
-			Return(int64(1), nil)
+		mockService.On("CreateOrganization", req.Context(), organization.Organization{
+			Subdomain: "sub1",
+			Name:      "org_create_test",
+		}).Return(int64(1), nil)
 
 		// call the CreateOrganization function
 		handler.CreateOrganization(rr, req)
@@ -124,7 +126,7 @@ func TestHandler_CreateOrganization(t *testing.T) {
 	t.Run("should return an error when the service call fails", func(t *testing.T) {
 		t.Parallel()
 		// create a new request with a JSON payload
-		payload := `{"name": "org_create_test"}`
+		payload := `{"subdomain": "sub1", "name": "org_create_test"}`
 		req, err := http.NewRequest(http.MethodPost, "/organizations", strings.NewReader(payload))
 		require.NoError(t, err)
 
@@ -133,8 +135,10 @@ func TestHandler_CreateOrganization(t *testing.T) {
 		handler := organization.NewHandler(mockService)
 
 		// mock the CreateOrganization function
-		mockService.On("CreateOrganization", req.Context(), organization.Organization{Name: "org_create_test"}).
-			Return(int64(0), assert.AnError)
+		mockService.On("CreateOrganization", req.Context(), organization.Organization{
+			Subdomain: "sub1",
+			Name:      "org_create_test",
+		}).Return(int64(0), assert.AnError)
 
 		// call the CreateOrganization function
 		handler.CreateOrganization(rr, req)
@@ -170,7 +174,7 @@ func TestHandler_UpdateOrganization(t *testing.T) {
 	t.Run("should update the organization", func(t *testing.T) {
 		t.Parallel()
 		// create a new request with a JSON payload
-		payload := `{"name": "org_update_test"}`
+		payload := `{"subdomain": "sub1", "name": "org_update_test"}`
 		req, err := http.NewRequest(http.MethodPut, "/organizations/{orgID}", strings.NewReader(payload))
 		require.NoError(t, err)
 
@@ -185,8 +189,9 @@ func TestHandler_UpdateOrganization(t *testing.T) {
 
 		// mock the UpdateOrganization function
 		mockService.On("UpdateOrganization", req.Context(), organization.Organization{
-			ID:   1,
-			Name: "org_update_test",
+			ID:        1,
+			Subdomain: "sub1",
+			Name:      "org_update_test",
 		}).Return(nil)
 
 		// call the UpdateOrganization function
@@ -200,7 +205,7 @@ func TestHandler_UpdateOrganization(t *testing.T) {
 	t.Run("should return an error when the service call fails", func(t *testing.T) {
 		t.Parallel()
 		// create a new request with a JSON payload
-		payload := `{"name": "org_update_test"}`
+		payload := `{"subdomain": "sub1", "name": "org_update_test"}`
 		req, err := http.NewRequest(http.MethodPut, "/organizations/{orgID}", strings.NewReader(payload))
 		require.NoError(t, err)
 
@@ -215,8 +220,9 @@ func TestHandler_UpdateOrganization(t *testing.T) {
 
 		// mock the UpdateOrganization function
 		mockService.On("UpdateOrganization", req.Context(), organization.Organization{
-			ID:   1,
-			Name: "org_update_test",
+			ID:        1,
+			Subdomain: "sub1",
+			Name:      "org_update_test",
 		}).Return(assert.AnError)
 
 		// call the UpdateOrganization function

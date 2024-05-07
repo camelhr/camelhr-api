@@ -1,5 +1,5 @@
--- getOrganizationByNameQuery
--- $1: name
+-- getOrganizationBySubdomainQuery
+-- $1: subdomain
 SELECT
     organization_id,
     subdomain,
@@ -13,5 +13,5 @@ SELECT
 FROM
     organizations
 WHERE
-    name = $1
+    subdomain = $1
     AND deleted_at IS NULL;

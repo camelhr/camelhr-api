@@ -2,6 +2,7 @@
 -- $1: organization_id
 SELECT
     organization_id,
+    subdomain,
     name,
     suspended_at,
     blacklisted_at,
