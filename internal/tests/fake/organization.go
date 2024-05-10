@@ -79,7 +79,7 @@ func NewOrganization(db database.Database, options ...OrganizationOption) *FakeO
 		}
 	}
 
-	if err := persist(db, org); err != nil {
+	if err := org.persist(db); err != nil {
 		panic(err)
 	}
 
@@ -96,25 +96,22 @@ func (o *FakeOrganization) setDefaults() {
 	o.UpdatedAt = o.CreatedAt
 }
 
-func persist(db database.Database, o *FakeOrganization) error {
+func (o *FakeOrganization) persist(db database.Database) error {
 	insertQuery := `INSERT INTO organizations
 			(subdomain, name, suspended_at, blacklisted_at, comment, created_at, updated_at, deleted_at) VALUES
 			($1, $2, $3, $4, $5, $6, $7, $8)
 			RETURNING *`
 
-	if err := db.Exec(context.TODO(), o, insertQuery, o.Subdomain, o.Name, o.SuspendedAt, o.BlacklistedAt,
-		o.Comment, o.CreatedAt, o.UpdatedAt, o.DeletedAt); err != nil {
-		return err
-	}
-
-	return nil
+	return db.Exec(context.Background(), o, insertQuery, o.Subdomain, o.Name, o.SuspendedAt, o.BlacklistedAt,
+		o.Comment, o.CreatedAt, o.UpdatedAt, o.DeletedAt)
 }
 
+// IsDeleted returns deleted status of the organization by querying the database.
 func (o *FakeOrganization) IsDeleted(db database.Database) bool {
 	var isDeleted bool
 
 	query := "SELECT deleted_at IS NOT NULL FROM organizations WHERE organization_id = $1"
-	err := db.Get(context.TODO(), &isDeleted, query, o.ID)
+	err := db.Get(context.Background(), &isDeleted, query, o.ID)
 
 	if database.SuppressNoRowsError(err) != nil {
 		panic(err)
@@ -128,7 +125,7 @@ func (o *FakeOrganization) IsSuspended(db database.Database) bool {
 	var isSuspended bool
 
 	query := "SELECT suspended_at IS NOT NULL FROM organizations WHERE organization_id = $1"
-	err := db.Get(context.TODO(), &isSuspended, query, o.ID)
+	err := db.Get(context.Background(), &isSuspended, query, o.ID)
 
 	if database.SuppressNoRowsError(err) != nil {
 		panic(err)
@@ -142,7 +139,7 @@ func (o *FakeOrganization) IsBlacklisted(db database.Database) bool {
 	var isBlacklisted bool
 
 	query := "SELECT blacklisted_at IS NOT NULL FROM organizations WHERE organization_id = $1"
-	err := db.Get(context.TODO(), &isBlacklisted, query, o.ID)
+	err := db.Get(context.Background(), &isBlacklisted, query, o.ID)
 
 	if database.SuppressNoRowsError(err) != nil {
 		panic(err)
@@ -151,6 +148,7 @@ func (o *FakeOrganization) IsBlacklisted(db database.Database) bool {
 	return isBlacklisted
 }
 
+// FetchLatest fetches and returns the latest version of organization by querying the database.
 func (o *FakeOrganization) FetchLatest(db database.Database) *FakeOrganization {
 	fakeOrg := &FakeOrganization{}
 
@@ -169,7 +167,7 @@ func (o *FakeOrganization) FetchLatest(db database.Database) *FakeOrganization {
 			WHERE organization_id = $1
 			`
 
-	if err := db.Get(context.TODO(), fakeOrg, query, o.ID); err != nil {
+	if err := db.Get(context.Background(), fakeOrg, query, o.ID); err != nil {
 		panic(err)
 	}
 

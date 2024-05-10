@@ -17,18 +17,19 @@ func (s *FakeTestSuite) TestFakeOrganization() {
 
 		// assert that the organization is created with the default values
 		s.Require().NotNil(o)
-		s.Empty(o.Comment)
 		s.NotEmpty(o.ID)
 		s.NotEmpty(o.Name)
-		s.NotNil(o.CreatedAt)
-		s.NotNil(o.UpdatedAt)
+		s.Nil(o.SuspendedAt)
+		s.Nil(o.BlacklistedAt)
+		s.Nil(o.Comment)
+		s.NotZero(o.CreatedAt)
+		s.NotZero(o.UpdatedAt)
+		s.Equal(o.CreatedAt, o.UpdatedAt)
 		s.Equal(time.UTC, o.CreatedAt.Location())
 		s.Equal(time.UTC, o.UpdatedAt.Location())
 		s.WithinDuration(time.Now().UTC(), o.CreatedAt, 1*time.Minute)
 		s.WithinDuration(time.Now().UTC(), o.UpdatedAt, 1*time.Minute)
 		s.Nil(o.DeletedAt)
-		s.Nil(o.SuspendedAt)
-		s.Nil(o.BlacklistedAt)
 	})
 
 	s.Run("should create an organization with custom subdomain", func() {
@@ -55,19 +56,6 @@ func (s *FakeTestSuite) TestFakeOrganization() {
 		s.Equal(name, o.Name)
 	})
 
-	s.Run("should create a deleted organization", func() {
-		s.T().Parallel()
-
-		// create a deleted organization
-		o := fake.NewOrganization(s.DB, fake.OrganizationDeleted())
-
-		// assert that the organization is set deleted
-		s.Require().NotNil(o)
-		s.Require().NotNil(o.DeletedAt)
-		s.Equal(time.UTC, o.DeletedAt.Location())
-		s.WithinDuration(time.Now().UTC(), *o.DeletedAt, 1*time.Minute)
-	})
-
 	s.Run("should create a suspended organization", func() {
 		s.T().Parallel()
 
@@ -81,18 +69,6 @@ func (s *FakeTestSuite) TestFakeOrganization() {
 		s.WithinDuration(time.Now().UTC(), *o.SuspendedAt, 1*time.Minute)
 		s.Nil(o.DeletedAt)
 		s.Nil(o.BlacklistedAt)
-	})
-
-	s.Run("should return true if organization is suspended", func() {
-		s.T().Parallel()
-
-		// create a suspended organization
-		o := fake.NewOrganization(s.DB, fake.OrganizationSuspended())
-		s.Require().NotNil(o)
-		isSuspended := o.IsSuspended(s.DB)
-
-		// assert that the organization is suspended
-		s.True(isSuspended)
 	})
 
 	s.Run("should created a blacklisted organization", func() {
@@ -110,6 +86,31 @@ func (s *FakeTestSuite) TestFakeOrganization() {
 		s.Nil(o.SuspendedAt)
 	})
 
+	s.Run("should create a deleted organization", func() {
+		s.T().Parallel()
+
+		// create a deleted organization
+		o := fake.NewOrganization(s.DB, fake.OrganizationDeleted())
+
+		// assert that the organization is set deleted
+		s.Require().NotNil(o)
+		s.Require().NotNil(o.DeletedAt)
+		s.Equal(time.UTC, o.DeletedAt.Location())
+		s.WithinDuration(time.Now().UTC(), *o.DeletedAt, 1*time.Minute)
+	})
+
+	s.Run("should return true if organization is suspended", func() {
+		s.T().Parallel()
+
+		// create a suspended organization
+		o := fake.NewOrganization(s.DB, fake.OrganizationSuspended())
+		s.Require().NotNil(o)
+		isSuspended := o.IsSuspended(s.DB)
+
+		// assert that the organization is suspended
+		s.True(isSuspended)
+	})
+
 	s.Run("should return true if organization is blacklisted", func() {
 		s.T().Parallel()
 
@@ -120,6 +121,18 @@ func (s *FakeTestSuite) TestFakeOrganization() {
 
 		// assert that the organization is blacklisted
 		s.True(isBlacklisted)
+	})
+
+	s.Run("should return true if organization is deleted", func() {
+		s.T().Parallel()
+
+		// create a deleted organization
+		o := fake.NewOrganization(s.DB, fake.OrganizationDeleted())
+		s.Require().NotNil(o)
+		isDeleted := o.IsDeleted(s.DB)
+
+		// assert that the organization is deleted
+		s.True(isDeleted)
 	})
 
 	s.Run("should panic if the organization option returns error", func() {
