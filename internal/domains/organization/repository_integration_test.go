@@ -28,12 +28,12 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_ForbiddenOperations() 
 }
 
 func (s *OrganizationTestSuite) TestRepositoryIntegration_GetOrganizationByID() {
-	s.Run("should return an organization", func() {
+	s.Run("should return an organization by id", func() {
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
 		org := fake.NewOrganization(s.DB)
 
-		result, err := repo.GetOrganizationByID(context.TODO(), org.ID)
+		result, err := repo.GetOrganizationByID(context.Background(), org.ID)
 		s.Require().NoError(err)
 		s.Equal(org.Organization, result)
 	})
@@ -42,7 +42,7 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_GetOrganizationByID() 
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
 
-		_, err := repo.GetOrganizationByID(context.TODO(), int64(gofakeit.Number(1000, 9999)))
+		_, err := repo.GetOrganizationByID(context.Background(), int64(gofakeit.Number(1000, 9999)))
 		s.ErrorIs(err, sql.ErrNoRows)
 	})
 
@@ -51,18 +51,18 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_GetOrganizationByID() 
 		repo := organization.NewRepository(s.DB)
 		org := fake.NewOrganization(s.DB, fake.OrganizationDeleted())
 
-		_, err := repo.GetOrganizationByID(context.TODO(), org.ID)
+		_, err := repo.GetOrganizationByID(context.Background(), org.ID)
 		s.ErrorIs(err, sql.ErrNoRows)
 	})
 }
 
 func (s *OrganizationTestSuite) TestRepositoryIntegration_GetOrganizationBySubdomain() {
-	s.Run("should return an organization", func() {
+	s.Run("should return an organization by subdomain", func() {
 		s.T().Parallel()
 		r := organization.NewRepository(s.DB)
 		org := fake.NewOrganization(s.DB)
 
-		result, err := r.GetOrganizationBySubdomain(context.TODO(), org.Subdomain)
+		result, err := r.GetOrganizationBySubdomain(context.Background(), org.Subdomain)
 		s.Require().NoError(err)
 		s.Equal(org.Organization, result)
 	})
@@ -71,7 +71,7 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_GetOrganizationBySubdo
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
 
-		_, err := repo.GetOrganizationBySubdomain(context.TODO(), randomOrganizationName())
+		_, err := repo.GetOrganizationBySubdomain(context.Background(), randomOrganizationName())
 		s.ErrorIs(err, sql.ErrNoRows)
 	})
 
@@ -80,18 +80,18 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_GetOrganizationBySubdo
 		repo := organization.NewRepository(s.DB)
 		org := fake.NewOrganization(s.DB, fake.OrganizationDeleted())
 
-		_, err := repo.GetOrganizationBySubdomain(context.TODO(), org.Subdomain)
+		_, err := repo.GetOrganizationBySubdomain(context.Background(), org.Subdomain)
 		s.ErrorIs(err, sql.ErrNoRows)
 	})
 }
 
 func (s *OrganizationTestSuite) TestRepositoryIntegration_GetOrganizationByName() {
-	s.Run("should return an organization", func() {
+	s.Run("should return an organization by name", func() {
 		s.T().Parallel()
 		r := organization.NewRepository(s.DB)
 		org := fake.NewOrganization(s.DB)
 
-		result, err := r.GetOrganizationByName(context.TODO(), org.Name)
+		result, err := r.GetOrganizationByName(context.Background(), org.Name)
 		s.Require().NoError(err)
 		s.Equal(org.Organization, result)
 	})
@@ -100,7 +100,7 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_GetOrganizationByName(
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
 
-		_, err := repo.GetOrganizationByName(context.TODO(), randomOrganizationName())
+		_, err := repo.GetOrganizationByName(context.Background(), randomOrganizationName())
 		s.ErrorIs(err, sql.ErrNoRows)
 	})
 
@@ -109,7 +109,7 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_GetOrganizationByName(
 		repo := organization.NewRepository(s.DB)
 		org := fake.NewOrganization(s.DB, fake.OrganizationDeleted())
 
-		_, err := repo.GetOrganizationByName(context.TODO(), org.Name)
+		_, err := repo.GetOrganizationByName(context.Background(), org.Name)
 		s.ErrorIs(err, sql.ErrNoRows)
 	})
 }
@@ -123,11 +123,11 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_CreateOrganization() {
 			Name:      randomOrganizationName(),
 		}
 
-		id, err := repo.CreateOrganization(context.TODO(), org)
+		id, err := repo.CreateOrganization(context.Background(), org)
 		s.Require().NoError(err)
 		s.NotEmpty(id)
 
-		result, err := repo.GetOrganizationByID(context.TODO(), id)
+		result, err := repo.GetOrganizationByID(context.Background(), id)
 		s.Require().NoError(err)
 		s.Equal(org.Name, result.Name)
 		s.NotZero(result.CreatedAt)
@@ -148,7 +148,7 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_CreateOrganization() {
 		repo := organization.NewRepository(s.DB)
 		org := fake.NewOrganization(s.DB)
 
-		_, err := repo.CreateOrganization(context.TODO(), organization.Organization{
+		_, err := repo.CreateOrganization(context.Background(), organization.Organization{
 			Subdomain: org.Subdomain,
 			Name:      randomOrganizationName(),
 		})
@@ -162,7 +162,7 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_CreateOrganization() {
 		repo := organization.NewRepository(s.DB)
 		org := fake.NewOrganization(s.DB)
 
-		_, err := repo.CreateOrganization(context.TODO(), organization.Organization{
+		_, err := repo.CreateOrganization(context.Background(), organization.Organization{
 			Subdomain: randomOrganizationSubdomain(),
 			Name:      org.Name,
 		})
@@ -175,7 +175,7 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_CreateOrganization() {
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
 
-		_, err := repo.CreateOrganization(context.TODO(), organization.Organization{
+		_, err := repo.CreateOrganization(context.Background(), organization.Organization{
 			Subdomain: "",
 			Name:      randomOrganizationName(),
 		})
@@ -188,7 +188,7 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_CreateOrganization() {
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
 
-		_, err := repo.CreateOrganization(context.TODO(), organization.Organization{
+		_, err := repo.CreateOrganization(context.Background(), organization.Organization{
 			Subdomain: randomOrganizationSubdomain(),
 			Name:      "",
 		})
@@ -204,7 +204,7 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_UpdateOrganization() {
 		repo := organization.NewRepository(s.DB)
 		org := fake.NewOrganization(s.DB)
 
-		err := repo.UpdateOrganization(context.TODO(), organization.Organization{
+		err := repo.UpdateOrganization(context.Background(), organization.Organization{
 			ID:        org.ID,
 			Subdomain: "updated-subdomain",
 			Name:      "updated name",
@@ -229,7 +229,7 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_UpdateOrganization() {
 		repo := organization.NewRepository(s.DB)
 		org := fake.NewOrganization(s.DB, fake.OrganizationDeleted())
 
-		err := repo.UpdateOrganization(context.TODO(), organization.Organization{
+		err := repo.UpdateOrganization(context.Background(), organization.Organization{
 			ID:        org.ID,
 			Subdomain: "delete-update-subdomain",
 			Name:      "delete update org",
@@ -254,7 +254,7 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_DeleteOrganization() {
 		repo := organization.NewRepository(s.DB)
 		org := fake.NewOrganization(s.DB)
 
-		err := repo.DeleteOrganization(context.TODO(), org.ID)
+		err := repo.DeleteOrganization(context.Background(), org.ID)
 		s.Require().NoError(err)
 
 		isDeleted := org.IsDeleted(s.DB)
@@ -271,7 +271,7 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_DeleteOrganization() {
 		repo := organization.NewRepository(s.DB)
 		org := fake.NewOrganization(s.DB, fake.OrganizationDeleted())
 
-		err := repo.DeleteOrganization(context.TODO(), org.ID)
+		err := repo.DeleteOrganization(context.Background(), org.ID)
 		s.Require().NoError(err)
 
 		result := org.FetchLatest(s.DB)
@@ -286,7 +286,7 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_SuspendOrganization() 
 		repo := organization.NewRepository(s.DB)
 		org := fake.NewOrganization(s.DB)
 
-		err := repo.SuspendOrganization(context.TODO(), org.ID, "test suspend comment")
+		err := repo.SuspendOrganization(context.Background(), org.ID, "test suspend comment")
 		s.Require().NoError(err)
 
 		isSuspended := org.IsSuspended(s.DB)
@@ -309,7 +309,7 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_SuspendOrganization() 
 		repo := organization.NewRepository(s.DB)
 		org := fake.NewOrganization(s.DB, fake.OrganizationDeleted())
 
-		err := repo.SuspendOrganization(context.TODO(), org.ID, "test suspend comment")
+		err := repo.SuspendOrganization(context.Background(), org.ID, "test suspend comment")
 		s.Require().NoError(err)
 
 		isSuspended := org.IsSuspended(s.DB)
@@ -323,7 +323,7 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_UnsuspendOrganization(
 		repo := organization.NewRepository(s.DB)
 		org := fake.NewOrganization(s.DB, fake.OrganizationSuspended())
 
-		err := repo.UnsuspendOrganization(context.TODO(), org.ID, "test unsuspend comment")
+		err := repo.UnsuspendOrganization(context.Background(), org.ID, "test unsuspend comment")
 		s.Require().NoError(err)
 
 		result := org.FetchLatest(s.DB)
@@ -341,7 +341,7 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_UnsuspendOrganization(
 		repo := organization.NewRepository(s.DB)
 		org := fake.NewOrganization(s.DB, fake.OrganizationSuspended(), fake.OrganizationDeleted())
 
-		err := repo.UnsuspendOrganization(context.TODO(), org.ID, "test unsuspend comment")
+		err := repo.UnsuspendOrganization(context.Background(), org.ID, "test unsuspend comment")
 		s.Require().NoError(err)
 
 		isSuspended := org.IsSuspended(s.DB)
@@ -355,7 +355,7 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_BlacklistOrganization(
 		repo := organization.NewRepository(s.DB)
 		org := fake.NewOrganization(s.DB)
 
-		err := repo.BlacklistOrganization(context.TODO(), org.ID, "test blacklist comment")
+		err := repo.BlacklistOrganization(context.Background(), org.ID, "test blacklist comment")
 		s.Require().NoError(err)
 
 		result := org.FetchLatest(s.DB)
@@ -375,7 +375,7 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_BlacklistOrganization(
 		repo := organization.NewRepository(s.DB)
 		org := fake.NewOrganization(s.DB, fake.OrganizationDeleted())
 
-		err := repo.BlacklistOrganization(context.TODO(), org.ID, "test blacklist comment")
+		err := repo.BlacklistOrganization(context.Background(), org.ID, "test blacklist comment")
 		s.Require().NoError(err)
 
 		isBlacklisted := org.IsBlacklisted(s.DB)
@@ -389,7 +389,7 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_UnblacklistOrganizatio
 		repo := organization.NewRepository(s.DB)
 		org := fake.NewOrganization(s.DB, fake.OrganizationBlacklisted())
 
-		err := repo.UnblacklistOrganization(context.TODO(), org.ID, "test unblacklist comment")
+		err := repo.UnblacklistOrganization(context.Background(), org.ID, "test unblacklist comment")
 		s.Require().NoError(err)
 
 		result := org.FetchLatest(s.DB)
@@ -407,7 +407,7 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_UnblacklistOrganizatio
 		repo := organization.NewRepository(s.DB)
 		org := fake.NewOrganization(s.DB, fake.OrganizationBlacklisted(), fake.OrganizationDeleted())
 
-		err := repo.UnblacklistOrganization(context.TODO(), org.ID, "test unblacklist comment")
+		err := repo.UnblacklistOrganization(context.Background(), org.ID, "test unblacklist comment")
 		s.Require().NoError(err)
 
 		isBlacklisted := org.IsBlacklisted(s.DB)

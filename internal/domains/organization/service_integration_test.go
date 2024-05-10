@@ -14,7 +14,7 @@ func (s *OrganizationTestSuite) TestServiceIntegration_GetOrganizationByID() {
 		svc := organization.NewService(repo)
 		org := fake.NewOrganization(s.DB)
 
-		result, err := svc.GetOrganizationByID(context.TODO(), org.ID)
+		result, err := svc.GetOrganizationByID(context.Background(), org.ID)
 		s.Require().NoError(err)
 		s.Equal(org.ID, result.ID)
 		s.Equal(org.Name, result.Name)
@@ -35,7 +35,7 @@ func (s *OrganizationTestSuite) TestServiceIntegration_GetOrganizationBySubdomai
 		svc := organization.NewService(repo)
 		org := fake.NewOrganization(s.DB)
 
-		result, err := svc.GetOrganizationBySubdomain(context.TODO(), org.Subdomain)
+		result, err := svc.GetOrganizationBySubdomain(context.Background(), org.Subdomain)
 		s.Require().NoError(err)
 		s.Equal(org.Subdomain, result.Subdomain)
 		s.Nil(result.DeletedAt)
@@ -55,7 +55,7 @@ func (s *OrganizationTestSuite) TestServiceIntegration_GetOrganizationByName() {
 		svc := organization.NewService(repo)
 		org := fake.NewOrganization(s.DB)
 
-		result, err := svc.GetOrganizationByName(context.TODO(), org.Name)
+		result, err := svc.GetOrganizationByName(context.Background(), org.Name)
 		s.Require().NoError(err)
 		s.Equal(org.Name, result.Name)
 		s.Nil(result.DeletedAt)
@@ -78,10 +78,10 @@ func (s *OrganizationTestSuite) TestServiceIntegration_CreateOrganization() {
 			Name:      randomOrganizationName(),
 		}
 
-		id, err := svc.CreateOrganization(context.TODO(), org)
+		id, err := svc.CreateOrganization(context.Background(), org)
 		s.Require().NoError(err)
 
-		result, err := svc.GetOrganizationByID(context.TODO(), id)
+		result, err := svc.GetOrganizationByID(context.Background(), id)
 		s.Require().NoError(err)
 		s.Equal(org.Name, result.Name)
 		s.Nil(result.DeletedAt)
@@ -106,7 +106,7 @@ func (s *OrganizationTestSuite) TestServiceIntegration_UpdateOrganization() {
 			Subdomain: randomOrganizationSubdomain(),
 			Name:      randomOrganizationName(),
 		}
-		err := svc.UpdateOrganization(context.TODO(), updateOrg)
+		err := svc.UpdateOrganization(context.Background(), updateOrg)
 		s.Require().NoError(err)
 
 		result := org.FetchLatest(s.DB)
@@ -128,7 +128,7 @@ func (s *OrganizationTestSuite) TestServiceIntegration_DeleteOrganization() {
 		svc := organization.NewService(repo)
 		org := fake.NewOrganization(s.DB)
 
-		err := svc.DeleteOrganization(context.TODO(), org.ID)
+		err := svc.DeleteOrganization(context.Background(), org.ID)
 		s.Require().NoError(err)
 
 		result := org.FetchLatest(s.DB)
@@ -143,7 +143,7 @@ func (s *OrganizationTestSuite) TestServiceIntegration_SuspendOrganization() {
 		svc := organization.NewService(repo)
 		org := fake.NewOrganization(s.DB)
 
-		err := svc.SuspendOrganization(context.TODO(), org.ID, "test suspend")
+		err := svc.SuspendOrganization(context.Background(), org.ID, "test suspend")
 		s.Require().NoError(err)
 
 		result := org.FetchLatest(s.DB)
@@ -164,7 +164,7 @@ func (s *OrganizationTestSuite) TestServiceIntegration_UnsuspendOrganization() {
 		svc := organization.NewService(repo)
 		org := fake.NewOrganization(s.DB, fake.OrganizationSuspended())
 
-		err := svc.UnsuspendOrganization(context.TODO(), org.ID, "test unsuspend")
+		err := svc.UnsuspendOrganization(context.Background(), org.ID, "test unsuspend")
 		s.Require().NoError(err)
 
 		result := org.FetchLatest(s.DB)
@@ -185,7 +185,7 @@ func (s *OrganizationTestSuite) TestServiceIntegration_BlacklistOrganization() {
 		svc := organization.NewService(repo)
 		org := fake.NewOrganization(s.DB)
 
-		err := svc.BlacklistOrganization(context.TODO(), org.ID, "test blacklist")
+		err := svc.BlacklistOrganization(context.Background(), org.ID, "test blacklist")
 		s.Require().NoError(err)
 
 		result := org.FetchLatest(s.DB)
@@ -206,7 +206,7 @@ func (s *OrganizationTestSuite) TestServiceIntegration_UnblacklistOrganization()
 		svc := organization.NewService(repo)
 		org := fake.NewOrganization(s.DB, fake.OrganizationBlacklisted())
 
-		err := svc.UnblacklistOrganization(context.TODO(), org.ID, "test unblacklist")
+		err := svc.UnblacklistOrganization(context.Background(), org.ID, "test unblacklist")
 		s.Require().NoError(err)
 
 		result := org.FetchLatest(s.DB)

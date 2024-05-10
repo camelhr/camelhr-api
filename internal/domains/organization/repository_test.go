@@ -33,10 +33,10 @@ func TestRepository_GetOrganizationByID(t *testing.T) {
 		mockDB := &database.DatabaseMock{}
 		repo := organization.NewRepository(mockDB)
 
-		mockDB.On("Get", context.TODO(), mock.Anything, queryMatcher("getOrganizationByIDQuery"), int64(1)).
+		mockDB.On("Get", context.Background(), mock.Anything, queryMatcher("getOrganizationByIDQuery"), int64(1)).
 			Return(assert.AnError)
 
-		_, err := repo.GetOrganizationByID(context.TODO(), 1)
+		_, err := repo.GetOrganizationByID(context.Background(), 1)
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
@@ -55,14 +55,15 @@ func TestRepository_GetOrganizationByID(t *testing.T) {
 			Name:      randomOrganizationName(),
 		}
 
-		mockDB.On("Get", context.TODO(), &emptyOrg, queryMatcher("getOrganizationByIDQuery"), int64(1)).
+		mockDB.On("Get", context.Background(), &emptyOrg, queryMatcher("getOrganizationByIDQuery"), int64(1)).
 			Run(func(args mock.Arguments) {
+				// populate the passed argument with the organization
 				arg, ok := args.Get(1).(*organization.Organization)
 				require.True(t, ok)
 				*arg = org
 			}).Return(nil)
 
-		result, err := repo.GetOrganizationByID(context.TODO(), 1)
+		result, err := repo.GetOrganizationByID(context.Background(), 1)
 		require.NoError(t, err)
 		assert.Equal(t, org, result)
 	})
@@ -77,10 +78,10 @@ func TestRepository_GetOrganizationBySubdomain(t *testing.T) {
 		mockDB := &database.DatabaseMock{}
 		repo := organization.NewRepository(mockDB)
 
-		mockDB.On("Get", context.TODO(), mock.Anything, queryMatcher("getOrganizationBySubdomainQuery"), "org1").
+		mockDB.On("Get", context.Background(), mock.Anything, queryMatcher("getOrganizationBySubdomainQuery"), "org1").
 			Return(assert.AnError)
 
-		_, err := repo.GetOrganizationBySubdomain(context.TODO(), "org1")
+		_, err := repo.GetOrganizationBySubdomain(context.Background(), "org1")
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
@@ -99,14 +100,15 @@ func TestRepository_GetOrganizationBySubdomain(t *testing.T) {
 			Name:      randomOrganizationName(),
 		}
 
-		mockDB.On("Get", context.TODO(), &emptyOrg, queryMatcher("getOrganizationBySubdomainQuery"), "org1").
+		mockDB.On("Get", context.Background(), &emptyOrg, queryMatcher("getOrganizationBySubdomainQuery"), "org1").
 			Run(func(args mock.Arguments) {
+				// populate the passed argument with the organization
 				arg, ok := args.Get(1).(*organization.Organization)
 				require.True(t, ok)
 				*arg = org
 			}).Return(nil)
 
-		result, err := repo.GetOrganizationBySubdomain(context.TODO(), "org1")
+		result, err := repo.GetOrganizationBySubdomain(context.Background(), "org1")
 		require.NoError(t, err)
 		assert.Equal(t, org, result)
 	})
@@ -121,10 +123,10 @@ func TestRepository_GetOrganizationByName(t *testing.T) {
 		mockDB := &database.DatabaseMock{}
 		repo := organization.NewRepository(mockDB)
 
-		mockDB.On("Get", context.TODO(), mock.Anything, queryMatcher("getOrganizationByNameQuery"), "org1").
+		mockDB.On("Get", context.Background(), mock.Anything, queryMatcher("getOrganizationByNameQuery"), "org1").
 			Return(assert.AnError)
 
-		_, err := repo.GetOrganizationByName(context.TODO(), "org1")
+		_, err := repo.GetOrganizationByName(context.Background(), "org1")
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
@@ -143,14 +145,15 @@ func TestRepository_GetOrganizationByName(t *testing.T) {
 			Name:      randomOrganizationName(),
 		}
 
-		mockDB.On("Get", context.TODO(), &emptyOrg, queryMatcher("getOrganizationByNameQuery"), "org1").
+		mockDB.On("Get", context.Background(), &emptyOrg, queryMatcher("getOrganizationByNameQuery"), "org1").
 			Run(func(args mock.Arguments) {
+				// populate the passed argument with the organization
 				arg, ok := args.Get(1).(*organization.Organization)
 				require.True(t, ok)
 				*arg = org
 			}).Return(nil)
 
-		result, err := repo.GetOrganizationByName(context.TODO(), "org1")
+		result, err := repo.GetOrganizationByName(context.Background(), "org1")
 		require.NoError(t, err)
 		assert.Equal(t, org, result)
 	})
@@ -169,10 +172,11 @@ func TestRepository_CreateOrganization(t *testing.T) {
 			Name:      randomOrganizationName(),
 		}
 
-		mockDB.On("Exec", context.TODO(), mock.Anything, queryMatcher("createOrganizationQuery"), org.Subdomain, org.Name).
+		mockDB.On("Exec", context.Background(), mock.Anything,
+			queryMatcher("createOrganizationQuery"), org.Subdomain, org.Name).
 			Return(assert.AnError)
 
-		_, err := repo.CreateOrganization(context.TODO(), org)
+		_, err := repo.CreateOrganization(context.Background(), org)
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
@@ -189,10 +193,10 @@ func TestRepository_CreateOrganization(t *testing.T) {
 			Name:      randomOrganizationName(),
 		}
 
-		mockDB.On("Exec", context.TODO(), &id, queryMatcher("createOrganizationQuery"), org.Subdomain, org.Name).
+		mockDB.On("Exec", context.Background(), &id, queryMatcher("createOrganizationQuery"), org.Subdomain, org.Name).
 			Return(nil)
 
-		result, err := repo.CreateOrganization(context.TODO(), org)
+		result, err := repo.CreateOrganization(context.Background(), org)
 		require.NoError(t, err)
 		assert.Equal(t, id, result)
 	})
@@ -212,10 +216,11 @@ func TestRepository_UpdateOrganization(t *testing.T) {
 			Name:      randomOrganizationName(),
 		}
 
-		mockDB.On("Exec", context.TODO(), nil, queryMatcher("updateOrganizationQuery"), org.ID, org.Subdomain, org.Name).
+		mockDB.On("Exec", context.Background(), nil,
+			queryMatcher("updateOrganizationQuery"), org.ID, org.Subdomain, org.Name).
 			Return(assert.AnError)
 
-		err := repo.UpdateOrganization(context.TODO(), org)
+		err := repo.UpdateOrganization(context.Background(), org)
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
@@ -231,10 +236,11 @@ func TestRepository_UpdateOrganization(t *testing.T) {
 			Name:      randomOrganizationName(),
 		}
 
-		mockDB.On("Exec", context.TODO(), nil, queryMatcher("updateOrganizationQuery"), org.ID, org.Subdomain, org.Name).
+		mockDB.On("Exec", context.Background(), nil,
+			queryMatcher("updateOrganizationQuery"), org.ID, org.Subdomain, org.Name).
 			Return(nil)
 
-		err := repo.UpdateOrganization(context.TODO(), org)
+		err := repo.UpdateOrganization(context.Background(), org)
 		require.NoError(t, err)
 	})
 }
@@ -248,10 +254,10 @@ func TestRepository_DeleteOrganization(t *testing.T) {
 		mockDB := &database.DatabaseMock{}
 		repo := organization.NewRepository(mockDB)
 
-		mockDB.On("Exec", context.TODO(), nil, queryMatcher("deleteOrganizationQuery"), int64(1)).
+		mockDB.On("Exec", context.Background(), nil, queryMatcher("deleteOrganizationQuery"), int64(1)).
 			Return(assert.AnError)
 
-		err := repo.DeleteOrganization(context.TODO(), 1)
+		err := repo.DeleteOrganization(context.Background(), 1)
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
@@ -262,10 +268,10 @@ func TestRepository_DeleteOrganization(t *testing.T) {
 		mockDB := database.NewDatabaseMock(t)
 		repo := organization.NewRepository(mockDB)
 
-		mockDB.On("Exec", context.TODO(), nil, queryMatcher("deleteOrganizationQuery"), int64(1)).
+		mockDB.On("Exec", context.Background(), nil, queryMatcher("deleteOrganizationQuery"), int64(1)).
 			Return(nil)
 
-		err := repo.DeleteOrganization(context.TODO(), 1)
+		err := repo.DeleteOrganization(context.Background(), 1)
 		require.NoError(t, err)
 	})
 }
@@ -279,10 +285,10 @@ func TestRepository_SuspendOrganization(t *testing.T) {
 		mockDB := &database.DatabaseMock{}
 		repo := organization.NewRepository(mockDB)
 
-		mockDB.On("Exec", context.TODO(), nil, queryMatcher("suspendOrganizationQuery"), int64(1), "test suspended").
+		mockDB.On("Exec", context.Background(), nil, queryMatcher("suspendOrganizationQuery"), int64(1), "test suspended").
 			Return(assert.AnError)
 
-		err := repo.SuspendOrganization(context.TODO(), 1, "test suspended")
+		err := repo.SuspendOrganization(context.Background(), 1, "test suspended")
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
@@ -293,10 +299,10 @@ func TestRepository_SuspendOrganization(t *testing.T) {
 		mockDB := database.NewDatabaseMock(t)
 		repo := organization.NewRepository(mockDB)
 
-		mockDB.On("Exec", context.TODO(), nil, queryMatcher("suspendOrganizationQuery"), int64(1), "test suspended").
+		mockDB.On("Exec", context.Background(), nil, queryMatcher("suspendOrganizationQuery"), int64(1), "test suspended").
 			Return(nil)
 
-		err := repo.SuspendOrganization(context.TODO(), 1, "test suspended")
+		err := repo.SuspendOrganization(context.Background(), 1, "test suspended")
 		require.NoError(t, err)
 	})
 }
@@ -310,10 +316,11 @@ func TestRepository_UnsuspendOrganization(t *testing.T) {
 		mockDB := &database.DatabaseMock{}
 		repo := organization.NewRepository(mockDB)
 
-		mockDB.On("Exec", context.TODO(), nil, queryMatcher("unsuspendOrganizationQuery"), int64(1), "test unsuspended").
+		mockDB.On("Exec", context.Background(), nil,
+			queryMatcher("unsuspendOrganizationQuery"), int64(1), "test unsuspended").
 			Return(assert.AnError)
 
-		err := repo.UnsuspendOrganization(context.TODO(), 1, "test unsuspended")
+		err := repo.UnsuspendOrganization(context.Background(), 1, "test unsuspended")
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
@@ -324,10 +331,11 @@ func TestRepository_UnsuspendOrganization(t *testing.T) {
 		mockDB := database.NewDatabaseMock(t)
 		repo := organization.NewRepository(mockDB)
 
-		mockDB.On("Exec", context.TODO(), nil, queryMatcher("unsuspendOrganizationQuery"), int64(1), "test unsuspended").
+		mockDB.On("Exec", context.Background(), nil,
+			queryMatcher("unsuspendOrganizationQuery"), int64(1), "test unsuspended").
 			Return(nil)
 
-		err := repo.UnsuspendOrganization(context.TODO(), 1, "test unsuspended")
+		err := repo.UnsuspendOrganization(context.Background(), 1, "test unsuspended")
 		require.NoError(t, err)
 	})
 }
@@ -341,10 +349,11 @@ func TestRepository_BlacklistOrganization(t *testing.T) {
 		mockDB := &database.DatabaseMock{}
 		repo := organization.NewRepository(mockDB)
 
-		mockDB.On("Exec", context.TODO(), nil, queryMatcher("blacklistOrganizationQuery"), int64(1), "test blacklisted").
+		mockDB.On("Exec", context.Background(), nil,
+			queryMatcher("blacklistOrganizationQuery"), int64(1), "test blacklisted").
 			Return(assert.AnError)
 
-		err := repo.BlacklistOrganization(context.TODO(), 1, "test blacklisted")
+		err := repo.BlacklistOrganization(context.Background(), 1, "test blacklisted")
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
@@ -355,10 +364,11 @@ func TestRepository_BlacklistOrganization(t *testing.T) {
 		mockDB := database.NewDatabaseMock(t)
 		repo := organization.NewRepository(mockDB)
 
-		mockDB.On("Exec", context.TODO(), nil, queryMatcher("blacklistOrganizationQuery"), int64(1), "test blacklisted").
+		mockDB.On("Exec", context.Background(), nil,
+			queryMatcher("blacklistOrganizationQuery"), int64(1), "test blacklisted").
 			Return(nil)
 
-		err := repo.BlacklistOrganization(context.TODO(), 1, "test blacklisted")
+		err := repo.BlacklistOrganization(context.Background(), 1, "test blacklisted")
 		require.NoError(t, err)
 	})
 }
@@ -372,10 +382,11 @@ func TestRepository_UnblacklistOrganization(t *testing.T) {
 		mockDB := &database.DatabaseMock{}
 		repo := organization.NewRepository(mockDB)
 
-		mockDB.On("Exec", context.TODO(), nil, queryMatcher("unblacklistOrganizationQuery"), int64(1), "test unblacklisted").
+		mockDB.On("Exec", context.Background(), nil,
+			queryMatcher("unblacklistOrganizationQuery"), int64(1), "test unblacklisted").
 			Return(assert.AnError)
 
-		err := repo.UnblacklistOrganization(context.TODO(), 1, "test unblacklisted")
+		err := repo.UnblacklistOrganization(context.Background(), 1, "test unblacklisted")
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
@@ -386,10 +397,11 @@ func TestRepository_UnblacklistOrganization(t *testing.T) {
 		mockDB := database.NewDatabaseMock(t)
 		repo := organization.NewRepository(mockDB)
 
-		mockDB.On("Exec", context.TODO(), nil, queryMatcher("unblacklistOrganizationQuery"), int64(1), "test unblacklisted").
+		mockDB.On("Exec", context.Background(), nil,
+			queryMatcher("unblacklistOrganizationQuery"), int64(1), "test unblacklisted").
 			Return(nil)
 
-		err := repo.UnblacklistOrganization(context.TODO(), 1, "test unblacklisted")
+		err := repo.UnblacklistOrganization(context.Background(), 1, "test unblacklisted")
 		require.NoError(t, err)
 	})
 }
