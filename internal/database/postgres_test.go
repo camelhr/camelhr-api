@@ -30,7 +30,7 @@ func TestExec(t *testing.T) {
 			WithArgs("John Doe", 30).
 			WillReturnResult(sqlmock.NewResult(1, 1))
 
-		err = pgDB.Exec(context.TODO(), nil, "INSERT INTO users (name, age) VALUES ($1, $2)", "John Doe", 30)
+		err = pgDB.Exec(context.Background(), nil, "INSERT INTO users (name, age) VALUES ($1, $2)", "John Doe", 30)
 		require.NoError(t, err)
 	})
 
@@ -55,7 +55,7 @@ func TestExec(t *testing.T) {
 			Age  int    `db:"age"`
 		}
 
-		err = pgDB.Exec(context.TODO(), &users,
+		err = pgDB.Exec(context.Background(), &users,
 			"INSERT INTO users (name, age) VALUES ($1, $2) RETURNING name, age", "John Doe", 30)
 		require.NoError(t, err)
 		assert.Len(t, users, 1)
@@ -80,7 +80,7 @@ func TestExec(t *testing.T) {
 			WillReturnRows(rows)
 
 		var id *int64
-		err = pgDB.Exec(context.TODO(), &id,
+		err = pgDB.Exec(context.Background(), &id,
 			"INSERT INTO users (name, age) VALUES ($1, $2) RETURNING id", "John Doe", 30)
 		require.NoError(t, err)
 		require.NotNil(t, id)
@@ -102,7 +102,7 @@ func TestExec(t *testing.T) {
 			WithArgs("John Doe", 30).
 			WillReturnError(assert.AnError)
 
-		err = pgDB.Exec(context.TODO(), nil, "INSERT INTO users (name, age) VALUES ($1, $2)", "John Doe", 30)
+		err = pgDB.Exec(context.Background(), nil, "INSERT INTO users (name, age) VALUES ($1, $2)", "John Doe", 30)
 		require.Error(t, err)
 		assert.ErrorIs(t, err, assert.AnError)
 	})
@@ -127,7 +127,7 @@ func TestExec(t *testing.T) {
 			Age  int    `db:"age"`
 		}
 
-		err = pgDB.Exec(context.TODO(), &users,
+		err = pgDB.Exec(context.Background(), &users,
 			"INSERT INTO users (name, age) VALUES ($1, $2) RETURNING name, age", "John Doe", 30)
 		require.Error(t, err)
 		assert.ErrorIs(t, err, assert.AnError)
@@ -149,7 +149,7 @@ func TestExec(t *testing.T) {
 			WillReturnError(assert.AnError)
 
 		var id *int64
-		err = pgDB.Exec(context.TODO(), &id,
+		err = pgDB.Exec(context.Background(), &id,
 			"INSERT INTO users (name, age) VALUES ($1, $2) RETURNING id", "John Doe", 30)
 		require.Error(t, err)
 		assert.ErrorIs(t, err, assert.AnError)
@@ -180,7 +180,7 @@ func TestGet(t *testing.T) {
 			Age  int    `db:"age"`
 		}
 
-		err = pgDB.Get(context.TODO(), &user, "SELECT name, age FROM users WHERE id = $1", 1)
+		err = pgDB.Get(context.Background(), &user, "SELECT name, age FROM users WHERE id = $1", 1)
 		require.NoError(t, err)
 		assert.Equal(t, "John Doe", user.Name)
 		assert.Equal(t, 30, user.Age)
@@ -211,7 +211,7 @@ func TestList(t *testing.T) {
 			Age  int    `db:"age"`
 		}
 
-		err = pgDB.List(context.TODO(), &users, "SELECT name, age FROM users WHERE age > $1", 25)
+		err = pgDB.List(context.Background(), &users, "SELECT name, age FROM users WHERE age > $1", 25)
 		require.NoError(t, err)
 		assert.Len(t, users, 1)
 		assert.Equal(t, "John Doe", users[0].Name)
@@ -239,7 +239,7 @@ func TestTransact(t *testing.T) {
 			WillReturnResult(sqlmock.NewResult(1, 1))
 		mock.ExpectCommit()
 
-		err = pgDB.Transact(context.TODO(), func(tx *sql.Tx) error {
+		err = pgDB.Transact(context.Background(), func(tx *sql.Tx) error {
 			_, err := tx.Exec("INSERT INTO users (name, age) VALUES ($1, $2)", "John Doe", 30)
 			return err
 		})
@@ -263,7 +263,7 @@ func TestTransact(t *testing.T) {
 			WillReturnError(assert.AnError)
 		mock.ExpectRollback()
 
-		err = pgDB.Transact(context.TODO(), func(tx *sql.Tx) error {
+		err = pgDB.Transact(context.Background(), func(tx *sql.Tx) error {
 			_, err := tx.Exec("INSERT INTO users (name, age) VALUES ($1, $2)", "John Doe", 30)
 			return err
 		})
@@ -285,7 +285,7 @@ func TestTransact(t *testing.T) {
 		mock.ExpectRollback()
 
 		assert.Panics(t, func() {
-			_ = pgDB.Transact(context.TODO(), func(tx *sql.Tx) error {
+			_ = pgDB.Transact(context.Background(), func(tx *sql.Tx) error {
 				panic("panic")
 			})
 		})
@@ -309,7 +309,7 @@ func TestTransact(t *testing.T) {
 		mock.ExpectCommit().WillReturnError(assert.AnError)
 		mock.ExpectRollback()
 
-		err = pgDB.Transact(context.TODO(), func(tx *sql.Tx) error {
+		err = pgDB.Transact(context.Background(), func(tx *sql.Tx) error {
 			_, err := tx.Exec("INSERT INTO users (name, age) VALUES ($1, $2)", "John Doe", 30)
 			return err
 		})

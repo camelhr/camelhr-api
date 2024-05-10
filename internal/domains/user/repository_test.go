@@ -2,26 +2,16 @@ package user_test
 
 import (
 	"context"
-	"strings"
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/camelhr/camelhr-api/internal/database"
 	"github.com/camelhr/camelhr-api/internal/domains/user"
+	"github.com/camelhr/camelhr-api/internal/tests"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
-
-var queryMatcher = func(queryLabel string) any {
-	return mock.MatchedBy(func(a any) bool {
-		if query, ok := a.(string); ok {
-			return strings.Contains(query, queryLabel)
-		}
-
-		return false
-	})
-}
 
 func TestRepository_GetUserByID(t *testing.T) {
 	t.Parallel()
@@ -32,7 +22,7 @@ func TestRepository_GetUserByID(t *testing.T) {
 		mockDB := &database.DatabaseMock{}
 		repo := user.NewRepository(mockDB)
 
-		mockDB.On("Get", context.Background(), mock.Anything, queryMatcher("getUserByIDQuery"), int64(1)).
+		mockDB.On("Get", context.Background(), mock.Anything, tests.QueryMatcher("getUserByIDQuery"), int64(1)).
 			Return(assert.AnError)
 
 		_, err := repo.GetUserByID(context.Background(), 1)
@@ -50,7 +40,7 @@ func TestRepository_GetUserByID(t *testing.T) {
 
 		u := user.User{ID: 1}
 
-		mockDB.On("Get", context.Background(), &emptyUser, queryMatcher("getUserByIDQuery"), int64(1)).
+		mockDB.On("Get", context.Background(), &emptyUser, tests.QueryMatcher("getUserByIDQuery"), int64(1)).
 			Run(func(args mock.Arguments) {
 				// populate the passed argument with the user
 				arg, ok := args.Get(1).(*user.User)
@@ -73,7 +63,7 @@ func TestRepository_GetUserByAPIToken(t *testing.T) {
 		mockDB := &database.DatabaseMock{}
 		repo := user.NewRepository(mockDB)
 
-		mockDB.On("Get", context.Background(), mock.Anything, queryMatcher("getUserByAPITokenQuery"), "token").
+		mockDB.On("Get", context.Background(), mock.Anything, tests.QueryMatcher("getUserByAPITokenQuery"), "token").
 			Return(assert.AnError)
 
 		_, err := repo.GetUserByAPIToken(context.Background(), "token")
@@ -91,7 +81,7 @@ func TestRepository_GetUserByAPIToken(t *testing.T) {
 
 		u := user.User{ID: 1}
 
-		mockDB.On("Get", context.Background(), &emptyUser, queryMatcher("getUserByAPITokenQuery"), "token").
+		mockDB.On("Get", context.Background(), &emptyUser, tests.QueryMatcher("getUserByAPITokenQuery"), "token").
 			Run(func(args mock.Arguments) {
 				// populate the passed argument with the user
 				arg, ok := args.Get(1).(*user.User)
@@ -114,7 +104,8 @@ func TestRepository_GetUserByOrgIDEmail(t *testing.T) {
 		mockDB := &database.DatabaseMock{}
 		repo := user.NewRepository(mockDB)
 
-		mockDB.On("Get", context.Background(), mock.Anything, queryMatcher("getUserByOrgIDEmailQuery"), int64(1), "email").
+		mockDB.On("Get", context.Background(), mock.Anything,
+			tests.QueryMatcher("getUserByOrgIDEmailQuery"), int64(1), "email").
 			Return(assert.AnError)
 
 		_, err := repo.GetUserByOrgIDEmail(context.Background(), 1, "email")
@@ -132,7 +123,7 @@ func TestRepository_GetUserByOrgIDEmail(t *testing.T) {
 
 		u := user.User{ID: 1}
 
-		mockDB.On("Get", context.Background(), &emptyUser, queryMatcher("getUserByOrgIDEmailQuery"), int64(1), "email").
+		mockDB.On("Get", context.Background(), &emptyUser, tests.QueryMatcher("getUserByOrgIDEmailQuery"), int64(1), "email").
 			Run(func(args mock.Arguments) {
 				// populate the passed argument with the user
 				arg, ok := args.Get(1).(*user.User)
@@ -155,7 +146,7 @@ func TestRepository_GetUserByOrgSubdomainEmail(t *testing.T) {
 		mockDB := &database.DatabaseMock{}
 		repo := user.NewRepository(mockDB)
 
-		mockDB.On("Get", context.Background(), mock.Anything, queryMatcher("getUserByOrgSubdomainEmailQuery"),
+		mockDB.On("Get", context.Background(), mock.Anything, tests.QueryMatcher("getUserByOrgSubdomainEmailQuery"),
 			"subdomain", "email").Return(assert.AnError)
 
 		_, err := repo.GetUserByOrgSubdomainEmail(context.Background(), "subdomain", "email")
@@ -174,7 +165,7 @@ func TestRepository_GetUserByOrgSubdomainEmail(t *testing.T) {
 		u := user.User{ID: 1}
 
 		mockDB.On("Get", context.Background(), &emptyUser,
-			queryMatcher("getUserByOrgSubdomainEmailQuery"), "subdomain", "email").
+			tests.QueryMatcher("getUserByOrgSubdomainEmailQuery"), "subdomain", "email").
 			Run(func(args mock.Arguments) {
 				// populate the passed argument with the user
 				arg, ok := args.Get(1).(*user.User)
@@ -198,7 +189,7 @@ func TestRepository_CreateUser(t *testing.T) {
 		repo := user.NewRepository(mockDB)
 
 		mockDB.On("Exec", context.Background(), mock.Anything,
-			queryMatcher("createUserQuery"), int64(1), "email", "password", true).Return(assert.AnError)
+			tests.QueryMatcher("createUserQuery"), int64(1), "email", "password", true).Return(assert.AnError)
 
 		_, err := repo.CreateUser(context.Background(), 1, "email", "password", true)
 		require.Error(t, err)
@@ -216,7 +207,7 @@ func TestRepository_CreateUser(t *testing.T) {
 		u := user.User{ID: 1}
 
 		mockDB.On("Exec", context.Background(), &emptyUser,
-			queryMatcher("createUserQuery"), int64(1), "email", "password", false).
+			tests.QueryMatcher("createUserQuery"), int64(1), "email", "password", false).
 			Run(func(args mock.Arguments) {
 				// populate the passed argument with the user
 				arg, ok := args.Get(1).(*user.User)
@@ -239,7 +230,7 @@ func TestRepository_ResetPassword(t *testing.T) {
 		mockDB := &database.DatabaseMock{}
 		repo := user.NewRepository(mockDB)
 
-		mockDB.On("Exec", context.Background(), nil, queryMatcher("resetPasswordQuery"), int64(1), "password").
+		mockDB.On("Exec", context.Background(), nil, tests.QueryMatcher("resetPasswordQuery"), int64(1), "password").
 			Return(assert.AnError)
 
 		err := repo.ResetPassword(context.Background(), 1, "password")
@@ -253,7 +244,7 @@ func TestRepository_ResetPassword(t *testing.T) {
 		mockDB := &database.DatabaseMock{}
 		repo := user.NewRepository(mockDB)
 
-		mockDB.On("Exec", context.Background(), nil, queryMatcher("resetPasswordQuery"), int64(1), "password").
+		mockDB.On("Exec", context.Background(), nil, tests.QueryMatcher("resetPasswordQuery"), int64(1), "password").
 			Return(nil)
 
 		err := repo.ResetPassword(context.Background(), 1, "password")
@@ -270,7 +261,7 @@ func TestRepository_DeleteUser(t *testing.T) {
 		mockDB := &database.DatabaseMock{}
 		repo := user.NewRepository(mockDB)
 
-		mockDB.On("Exec", context.Background(), nil, queryMatcher("deleteUserQuery"), int64(1)).
+		mockDB.On("Exec", context.Background(), nil, tests.QueryMatcher("deleteUserQuery"), int64(1)).
 			Return(assert.AnError)
 
 		err := repo.DeleteUser(context.Background(), 1)
@@ -284,7 +275,7 @@ func TestRepository_DeleteUser(t *testing.T) {
 		mockDB := &database.DatabaseMock{}
 		repo := user.NewRepository(mockDB)
 
-		mockDB.On("Exec", context.Background(), nil, queryMatcher("deleteUserQuery"), int64(1)).
+		mockDB.On("Exec", context.Background(), nil, tests.QueryMatcher("deleteUserQuery"), int64(1)).
 			Return(nil)
 
 		err := repo.DeleteUser(context.Background(), 1)
@@ -302,7 +293,7 @@ func TestRepository_DisableUser(t *testing.T) {
 		repo := user.NewRepository(mockDB)
 		comment := gofakeit.SentenceSimple()
 
-		mockDB.On("Exec", context.Background(), nil, queryMatcher("disableUserQuery"), int64(1), comment).
+		mockDB.On("Exec", context.Background(), nil, tests.QueryMatcher("disableUserQuery"), int64(1), comment).
 			Return(assert.AnError)
 
 		err := repo.DisableUser(context.Background(), 1, comment)
@@ -317,7 +308,7 @@ func TestRepository_DisableUser(t *testing.T) {
 		repo := user.NewRepository(mockDB)
 		comment := gofakeit.SentenceSimple()
 
-		mockDB.On("Exec", context.Background(), nil, queryMatcher("disableUserQuery"), int64(1), comment).
+		mockDB.On("Exec", context.Background(), nil, tests.QueryMatcher("disableUserQuery"), int64(1), comment).
 			Return(nil)
 
 		err := repo.DisableUser(context.Background(), 1, comment)
@@ -335,7 +326,7 @@ func TestRepository_EnableUser(t *testing.T) {
 		repo := user.NewRepository(mockDB)
 		comment := gofakeit.SentenceSimple()
 
-		mockDB.On("Exec", context.Background(), nil, queryMatcher("enableUserQuery"), int64(1), comment).
+		mockDB.On("Exec", context.Background(), nil, tests.QueryMatcher("enableUserQuery"), int64(1), comment).
 			Return(assert.AnError)
 
 		err := repo.EnableUser(context.Background(), 1, comment)
@@ -350,7 +341,7 @@ func TestRepository_EnableUser(t *testing.T) {
 		repo := user.NewRepository(mockDB)
 		comment := gofakeit.SentenceSimple()
 
-		mockDB.On("Exec", context.Background(), nil, queryMatcher("enableUserQuery"), int64(1), comment).
+		mockDB.On("Exec", context.Background(), nil, tests.QueryMatcher("enableUserQuery"), int64(1), comment).
 			Return(nil)
 
 		err := repo.EnableUser(context.Background(), 1, comment)
@@ -367,7 +358,7 @@ func TestRepository_GenerateAPIToken(t *testing.T) {
 		mockDB := &database.DatabaseMock{}
 		repo := user.NewRepository(mockDB)
 
-		mockDB.On("Exec", context.Background(), nil, queryMatcher("generateAPITokenQuery"), int64(1)).
+		mockDB.On("Exec", context.Background(), nil, tests.QueryMatcher("generateAPITokenQuery"), int64(1)).
 			Return(assert.AnError)
 
 		err := repo.GenerateAPIToken(context.Background(), 1)
@@ -381,7 +372,7 @@ func TestRepository_GenerateAPIToken(t *testing.T) {
 		mockDB := &database.DatabaseMock{}
 		repo := user.NewRepository(mockDB)
 
-		mockDB.On("Exec", context.Background(), nil, queryMatcher("generateAPITokenQuery"), int64(1)).
+		mockDB.On("Exec", context.Background(), nil, tests.QueryMatcher("generateAPITokenQuery"), int64(1)).
 			Return(nil)
 
 		err := repo.GenerateAPIToken(context.Background(), 1)
@@ -398,7 +389,7 @@ func TestRepository_ResetAPIToken(t *testing.T) {
 		mockDB := &database.DatabaseMock{}
 		repo := user.NewRepository(mockDB)
 
-		mockDB.On("Exec", context.Background(), nil, queryMatcher("resetAPITokenQuery"), int64(1)).
+		mockDB.On("Exec", context.Background(), nil, tests.QueryMatcher("resetAPITokenQuery"), int64(1)).
 			Return(assert.AnError)
 
 		err := repo.ResetAPIToken(context.Background(), 1)
@@ -412,7 +403,7 @@ func TestRepository_ResetAPIToken(t *testing.T) {
 		mockDB := &database.DatabaseMock{}
 		repo := user.NewRepository(mockDB)
 
-		mockDB.On("Exec", context.Background(), nil, queryMatcher("resetAPITokenQuery"), int64(1)).
+		mockDB.On("Exec", context.Background(), nil, tests.QueryMatcher("resetAPITokenQuery"), int64(1)).
 			Return(nil)
 
 		err := repo.ResetAPIToken(context.Background(), 1)
