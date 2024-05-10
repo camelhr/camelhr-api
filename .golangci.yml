@@ -59,6 +59,8 @@ linters-settings:
     case:
       rules:
         json: snake
+  interfacebloat:
+    max: 15
   depguard:
     rules:
       main:
