@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/camelhr/camelhr-api/internal/tests/fake"
 	"github.com/stretchr/testify/assert"
 )
@@ -133,6 +134,40 @@ func (s *FakeTestSuite) TestFakeOrganization() {
 
 		// assert that the organization is deleted
 		s.True(isDeleted)
+	})
+
+	s.Run("should add user to organization", func() {
+		s.T().Parallel()
+
+		// create an organization
+		o := fake.NewOrganization(s.DB)
+
+		// add a user to the organization
+		u := fake.NewUser(s.DB, o.ID)
+
+		// assert that the user is added to the organization
+		s.Require().NotNil(u)
+		s.Equal(o.ID, u.OrganizationID)
+		s.NotZero(u.ID)
+	})
+
+	s.Run("should add user with custom options to organization", func() {
+		s.T().Parallel()
+
+		// create an organization
+		o := fake.NewOrganization(s.DB)
+
+		// add a user to the organization
+		email := gofakeit.Email()
+		u := fake.NewUser(s.DB, o.ID, fake.UserEmail(email), fake.UserIsOwner(), fake.UserDisabled())
+
+		// assert that the user is added to the organization
+		s.Require().NotNil(u)
+		s.Equal(o.ID, u.OrganizationID)
+		s.NotZero(u.ID)
+		s.Equal(email, u.Email)
+		s.True(u.IsOwner)
+		s.NotNil(u.DisabledAt)
 	})
 
 	s.Run("should panic if the organization option returns error", func() {

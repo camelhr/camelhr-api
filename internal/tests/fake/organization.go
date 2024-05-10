@@ -148,6 +148,12 @@ func (o *FakeOrganization) IsBlacklisted(db database.Database) bool {
 	return isBlacklisted
 }
 
+// AddUser creates a fake user under the organization.
+func (o *FakeOrganization) AddUser(db database.Database, userOptions ...UserOption) *FakeUser {
+	user := NewUser(db, o.ID, userOptions...)
+	return user
+}
+
 // FetchLatest fetches and returns the latest version of organization by querying the database.
 func (o *FakeOrganization) FetchLatest(db database.Database) *FakeOrganization {
 	fakeOrg := &FakeOrganization{}
