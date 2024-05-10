@@ -17,6 +17,8 @@ CREATE TABLE users (
 
 -- create unique constraint on organization_id and email
 ALTER TABLE users ADD CONSTRAINT unique_organization_id_email UNIQUE (organization_id, email);
+-- create partial unique index to ensure one owner per organization
+CREATE UNIQUE INDEX idx_users_owner_per_organization ON users(organization_id) WHERE is_owner = TRUE;
 
 -- create indexes
 CREATE INDEX idx_users_organization_id ON users(organization_id);
