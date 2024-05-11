@@ -14,6 +14,8 @@ import (
 	"github.com/pressly/goose/v3"
 )
 
+const resourceExpirationTime = 900
+
 type PostgreSQLContainer struct {
 	resource *dockertest.Resource
 	pool     *dockertest.Pool
@@ -60,6 +62,12 @@ func NewPostgresContainer() (*PostgreSQLContainer, error) {
 	})
 	if err != nil {
 		return nil, fmt.Errorf("could not start resource: %w", err)
+	}
+
+	// tell docker to hard kill the container after specified time
+	// this is useful in case a test panics and suite teardown is not called to remove the container
+	if err := resource.Expire(resourceExpirationTime); err != nil {
+		return nil, fmt.Errorf("could not set resource expiration time: %w", err)
 	}
 
 	container.resource = resource
