@@ -35,6 +35,7 @@ func SetupRoutes(db database.Database) http.Handler {
 		r.Get("/status", func(w http.ResponseWriter, r *http.Request) {
 			response.Text(w, http.StatusOK, "OK")
 		})
+		r.Get("/organizations/subdomain/{subdomain}", orgHandler.GetOrganizationBySubdomain)
 	})
 
 	// protected routes. auth required

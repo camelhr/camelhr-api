@@ -46,6 +46,40 @@ func (s *OrganizationTestSuite) TestHandlerIntegration_GetOrganizationByID() {
 	})
 }
 
+func (s *OrganizationTestSuite) TestHandlerIntegration_GetOrganizationBySubdomain() {
+	s.Run("should return organization successfully", func() {
+		s.T().Parallel()
+
+		fakeOrg := fake.NewOrganization(s.DB)
+		orgJSON, err := json.Marshal(toOrganizationResponse(fakeOrg.Organization))
+		s.Require().NoError(err)
+
+		// create a new request
+		req, err := http.NewRequest(http.MethodGet, "/api/v1/organizations/subdomain/"+fakeOrg.Organization.Subdomain, nil)
+		s.Require().NoError(err)
+
+		rr := httptest.NewRecorder()
+		h := web.SetupRoutes(s.DB)
+		h.ServeHTTP(rr, req)
+
+		// assert the response
+		s.Equal(http.StatusOK, rr.Code)
+		s.JSONEq(string(orgJSON), rr.Body.String())
+
+		// parse the response body
+		var resp organization.Response
+		err = json.Unmarshal(rr.Body.Bytes(), &resp)
+		s.Require().NoError(err)
+
+		// assert the response
+		s.Equal(fakeOrg.Organization.ID, resp.ID)
+		s.Equal(fakeOrg.Organization.Name, resp.Name)
+		s.NotZero(resp.CreatedAt)
+		s.NotZero(resp.UpdatedAt)
+		s.Equal(resp.CreatedAt, resp.UpdatedAt)
+	})
+}
+
 func (s *OrganizationTestSuite) TestHandlerIntegration_CreateOrganization() {
 	s.Run("should create organization successfully", func() {
 		s.T().Parallel()

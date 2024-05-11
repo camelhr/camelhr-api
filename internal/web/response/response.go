@@ -8,6 +8,7 @@ import (
 
 	"github.com/camelhr/camelhr-api/internal/base"
 	"github.com/camelhr/log"
+	"github.com/go-playground/validator/v10"
 )
 
 type errorResponse struct {
@@ -20,10 +21,15 @@ type errorResponse struct {
 func ErrorResponse(w http.ResponseWriter, statusCode int, err error) {
 	var message string
 
-	// if err is an APIError, use the error message
 	var apiErr *base.APIError
+
+	var validationErr validator.ValidationErrors
+
+	// send the error message if error is an APIError or a validation error
 	if ok := errors.As(err, &apiErr); ok {
 		message = apiErr.Error()
+	} else if ok := errors.As(err, &validationErr); ok {
+		message = validationErr.Error()
 	} else {
 		log.Error("%v", err)
 	}

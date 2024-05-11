@@ -32,6 +32,19 @@ func (h *handler) GetOrganizationByID(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusOK, resp)
 }
 
+func (h *handler) GetOrganizationBySubdomain(w http.ResponseWriter, r *http.Request) {
+	subdomain := request.URLParam(r, "subdomain")
+
+	org, err := h.service.GetOrganizationBySubdomain(r.Context(), subdomain)
+	if err != nil {
+		response.ErrorResponse(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	resp := h.toResponse(org)
+	response.JSON(w, http.StatusOK, resp)
+}
+
 func (h *handler) CreateOrganization(w http.ResponseWriter, r *http.Request) {
 	var reqPayload Request
 	if err := request.DecodeJSON(r.Body, &reqPayload); err != nil {
