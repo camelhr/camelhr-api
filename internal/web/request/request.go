@@ -13,20 +13,40 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-// DecodeJSON decodes a JSON payload from the given reader into the given value.
+// decodeJSON decodes a JSON payload from the given reader into the given value.
 // It also validates the fields using the validator.
-func DecodeJSON(r io.Reader, v any) error {
+func decodeJSON(r io.Reader, v any) error {
 	defer io.Copy(io.Discard, r) //nolint:errcheck // ignore the error as we are discarding the body
 
 	if err := json.NewDecoder(r).Decode(v); err != nil {
 		return fmt.Errorf("failed to decode JSON payload: %w", err)
 	}
 
+	return nil
+}
+
+// validateRequestPayload validates the given value using the validator.
+func validateRequestPayload(v any) error {
 	// validate the request payload if it is a struct
 	if reflect.TypeOf(v).Kind() == reflect.Ptr && reflect.TypeOf(v).Elem().Kind() == reflect.Struct {
 		if err := base.Validator().Struct(v); err != nil {
 			return fmt.Errorf("invalid request payload: %w", err)
 		}
+	}
+
+	return nil
+}
+
+// DecodeAndValidateJSON decodes a JSON payload from the given reader into the given value.
+// It also validates the fields using the validator.
+// If the validation fails, it returns a validation error.
+func DecodeAndValidateJSON(r io.Reader, v any) error {
+	if err := decodeJSON(r, v); err != nil {
+		return err
+	}
+
+	if err := validateRequestPayload(v); err != nil {
+		return err
 	}
 
 	return nil

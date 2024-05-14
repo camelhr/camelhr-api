@@ -166,30 +166,37 @@ func TestRepository_CreateOrganization(t *testing.T) {
 			tests.QueryMatcher("createOrganizationQuery"), org.Subdomain, org.Name).
 			Return(assert.AnError)
 
-		_, err := repo.CreateOrganization(context.Background(), org)
+		_, err := repo.CreateOrganization(context.Background(), org.Subdomain, org.Name)
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
 
-	t.Run("should return the organization ID", func(t *testing.T) {
+	t.Run("should return the created organization", func(t *testing.T) {
 		t.Parallel()
 
-		var id int64
+		var emptyOrg organization.Organization
 
 		mockDB := database.NewDatabaseMock(t)
 		repo := organization.NewRepository(mockDB)
 		org := organization.Organization{
+			ID:        gofakeit.Int64(),
 			Subdomain: randomOrganizationSubdomain(),
 			Name:      randomOrganizationName(),
 		}
 
-		mockDB.On("Exec", context.Background(), &id,
+		mockDB.On("Exec", context.Background(), &emptyOrg,
 			tests.QueryMatcher("createOrganizationQuery"), org.Subdomain, org.Name).
+			Run(func(args mock.Arguments) {
+				// populate the passed argument with the organization
+				arg, ok := args.Get(1).(*organization.Organization)
+				require.True(t, ok)
+				*arg = org
+			}).
 			Return(nil)
 
-		result, err := repo.CreateOrganization(context.Background(), org)
+		result, err := repo.CreateOrganization(context.Background(), org.Subdomain, org.Name)
 		require.NoError(t, err)
-		assert.Equal(t, id, result)
+		assert.Equal(t, org, result)
 	})
 }
 
@@ -201,17 +208,14 @@ func TestRepository_UpdateOrganization(t *testing.T) {
 
 		mockDB := &database.DatabaseMock{}
 		repo := organization.NewRepository(mockDB)
-		org := organization.Organization{
-			ID:        gofakeit.Int64(),
-			Subdomain: randomOrganizationSubdomain(),
-			Name:      randomOrganizationName(),
-		}
+		orgID := gofakeit.Int64()
+		orgName := randomOrganizationName()
 
 		mockDB.On("Exec", context.Background(), nil,
-			tests.QueryMatcher("updateOrganizationQuery"), org.ID, org.Subdomain, org.Name).
+			tests.QueryMatcher("updateOrganizationQuery"), orgID, orgName).
 			Return(assert.AnError)
 
-		err := repo.UpdateOrganization(context.Background(), org)
+		err := repo.UpdateOrganization(context.Background(), orgID, orgName)
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
@@ -221,17 +225,14 @@ func TestRepository_UpdateOrganization(t *testing.T) {
 
 		mockDB := database.NewDatabaseMock(t)
 		repo := organization.NewRepository(mockDB)
-		org := organization.Organization{
-			ID:        gofakeit.Int64(),
-			Subdomain: randomOrganizationSubdomain(),
-			Name:      randomOrganizationName(),
-		}
+		orgID := gofakeit.Int64()
+		orgName := randomOrganizationName()
 
 		mockDB.On("Exec", context.Background(), nil,
-			tests.QueryMatcher("updateOrganizationQuery"), org.ID, org.Subdomain, org.Name).
+			tests.QueryMatcher("updateOrganizationQuery"), orgID, orgName).
 			Return(nil)
 
-		err := repo.UpdateOrganization(context.Background(), org)
+		err := repo.UpdateOrganization(context.Background(), orgID, orgName)
 		require.NoError(t, err)
 	})
 }

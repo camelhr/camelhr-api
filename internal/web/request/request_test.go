@@ -24,7 +24,7 @@ func TestDecodeJSON(t *testing.T) {
 
 	// call the DecodeJSON function
 	var data map[string]any
-	err = request.DecodeJSON(req.Body, &data)
+	err = request.DecodeAndValidateJSON(req.Body, &data)
 	require.NoError(t, err)
 
 	// assert that the decoded JSON matches the expected values

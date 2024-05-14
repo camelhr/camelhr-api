@@ -30,24 +30,26 @@ func SetupRoutes(db database.Database) http.Handler {
 	v1 := chi.NewRouter()
 	r.Mount("/api/v1", v1)
 
-	// open routes. no auth required
+	// v1 open routes. no auth required
 	v1.Group(func(r chi.Router) {
 		r.Get("/status", func(w http.ResponseWriter, r *http.Request) {
 			response.Text(w, http.StatusOK, "OK")
 		})
-		r.Get("/organizations/subdomain/{subdomain}", orgHandler.GetOrganizationBySubdomain)
 	})
 
-	// protected routes. auth required
-	v1.Group(func(r chi.Router) {
-		// TODO: add auth middleware
-		r.Route("/organizations", func(r chi.Router) {
-			r.Post("/", orgHandler.CreateOrganization)
-			r.Route("/{orgID:[0-9]+}", func(r chi.Router) {
-				r.Get("/", orgHandler.GetOrganizationByID)
-				r.Put("/", orgHandler.UpdateOrganization)
-				r.Delete("/", orgHandler.DeleteOrganization)
-			})
+	// create a sub-router for v1 subdomain endpoints
+	v1Subdomain := chi.NewRouter()
+	v1.Mount("/subdomains/{subdomain}", v1Subdomain)
+
+	v1Subdomain.Route("/organizations", func(r chi.Router) {
+		// open routes. no auth required
+		r.Get("/", orgHandler.GetOrganizationBySubdomain)
+
+		// protected routes. auth required
+		r.Group(func(r chi.Router) {
+			// TODO: add auth middleware
+			r.Put("/", orgHandler.UpdateOrganization)
+			r.Delete("/", orgHandler.DeleteOrganization)
 		})
 	})
 

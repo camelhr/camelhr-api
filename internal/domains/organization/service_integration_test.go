@@ -78,11 +78,9 @@ func (s *OrganizationTestSuite) TestServiceIntegration_CreateOrganization() {
 			Name:      randomOrganizationName(),
 		}
 
-		id, err := svc.CreateOrganization(context.Background(), org)
+		result, err := svc.CreateOrganization(context.Background(), org.Subdomain, org.Name)
 		s.Require().NoError(err)
-
-		result, err := svc.GetOrganizationByID(context.Background(), id)
-		s.Require().NoError(err)
+		s.NotZero(result.ID)
 		s.Equal(org.Name, result.Name)
 		s.Nil(result.DeletedAt)
 		s.NotZero(result.CreatedAt)
@@ -100,17 +98,13 @@ func (s *OrganizationTestSuite) TestServiceIntegration_UpdateOrganization() {
 		repo := organization.NewRepository(s.DB)
 		svc := organization.NewService(repo)
 		org := fake.NewOrganization(s.DB)
+		newOrgName := randomOrganizationName()
 
-		updateOrg := organization.Organization{
-			ID:        org.ID,
-			Subdomain: randomOrganizationSubdomain(),
-			Name:      randomOrganizationName(),
-		}
-		err := svc.UpdateOrganization(context.Background(), updateOrg)
+		err := svc.UpdateOrganization(context.Background(), org.ID, newOrgName)
 		s.Require().NoError(err)
 
 		result := org.FetchLatest(s.DB)
-		s.Equal(updateOrg.Name, result.Name)
+		s.Equal(newOrgName, result.Name)
 		s.Nil(result.DeletedAt)
 		s.NotZero(result.CreatedAt)
 		s.NotZero(result.UpdatedAt)

@@ -23,11 +23,15 @@ func ErrorResponse(w http.ResponseWriter, statusCode int, err error) {
 
 	var apiErr *base.APIError
 
+	var notFoundErr *base.NotFoundError
+
 	var validationErr validator.ValidationErrors
 
-	// send the error message if error is an APIError or a validation error
+	// send the error message for known errors
 	if ok := errors.As(err, &apiErr); ok {
 		message = apiErr.Error()
+	} else if ok := errors.As(err, &notFoundErr); ok {
+		message = notFoundErr.Error()
 	} else if ok := errors.As(err, &validationErr); ok {
 		message = validationErr.Error()
 	} else {

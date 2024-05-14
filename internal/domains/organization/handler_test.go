@@ -7,92 +7,21 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/brianvoe/gofakeit/v7"
+	"github.com/camelhr/camelhr-api/internal/base"
 	"github.com/camelhr/camelhr-api/internal/domains/organization"
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestHandler_GetOrganizationByID(t *testing.T) {
-	t.Parallel()
-
-	t.Run("should return the organization by id", func(t *testing.T) {
-		t.Parallel()
-		// create a new request with a URL parameter
-		req, err := http.NewRequest(http.MethodGet, "/organizations/{orgID}", nil)
-		require.NoError(t, err)
-
-		// simulate chi's URL parameters
-		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("orgID", "1")
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
-
-		expectedBody := `{"id": 1, "subdomain": "sub1", "name": "org1",
-		"suspended_at": null, "blacklisted_at": null,
-		"created_at": "0001-01-01T00:00:00Z", "updated_at": "0001-01-01T00:00:00Z"}`
-		mockService := organization.NewServiceMock(t)
-		rr := httptest.NewRecorder()
-		handler := organization.NewHandler(mockService)
-
-		// mock the GetOrganizationByID function
-		mockService.On("GetOrganizationByID", req.Context(), int64(1)).
-			Return(organization.Organization{ID: 1, Subdomain: "sub1", Name: "org1"}, nil)
-
-		// call the GetOrganizationByID function
-		handler.GetOrganizationByID(rr, req)
-
-		// check the result
-		require.Equal(t, http.StatusOK, rr.Code)
-		assert.JSONEq(t, expectedBody, rr.Body.String())
-	})
-
-	t.Run("should return an error when the service call fails", func(t *testing.T) {
-		t.Parallel()
-		// create a new request with a URL parameter
-		req, err := http.NewRequest(http.MethodGet, "/organizations/{orgID}", nil)
-		require.NoError(t, err)
-
-		// simulate chi's URL parameters
-		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("orgID", "1")
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
-
-		mockService := organization.NewServiceMock(t)
-		rr := httptest.NewRecorder()
-		handler := organization.NewHandler(mockService)
-
-		// mock the GetOrganizationByID function
-		mockService.On("GetOrganizationByID", req.Context(), int64(1)).
-			Return(organization.Organization{}, assert.AnError)
-
-		// call the GetOrganizationByID function
-		handler.GetOrganizationByID(rr, req)
-
-		// check the result
-		require.Equal(t, http.StatusInternalServerError, rr.Code)
-		assert.JSONEq(t, `{"error": ""}`, rr.Body.String())
-	})
-
-	t.Run("should return an error when the organization ID is invalid", func(t *testing.T) {
-		t.Parallel()
-		// create a new request with an invalid URL parameter
-		req, err := http.NewRequest(http.MethodGet, "/organizations/invalid", nil)
-		require.NoError(t, err)
-
-		mockService := organization.NewServiceMock(t)
-		rr := httptest.NewRecorder()
-		handler := organization.NewHandler(mockService)
-
-		// call the GetOrganizationByID function
-		handler.GetOrganizationByID(rr, req)
-
-		// check the result
-		require.Equal(t, http.StatusBadRequest, rr.Code)
-		assert.JSONEq(t, `{"error": ""}`, rr.Body.String())
-	})
-}
+const (
+	getOrganizationBySubdomainPath = "/api/v1/subdomains/{subdomain}/organizations"
+	updateOrganizationPath         = "/api/v1/subdomains/{subdomain}/organizations"
+	deleteOrganizationPath         = "/api/v1/subdomains/{subdomain}/organizations"
+)
 
 func TestHandler_GetOrganizationBySubdomain(t *testing.T) {
 	t.Parallel()
@@ -100,24 +29,33 @@ func TestHandler_GetOrganizationBySubdomain(t *testing.T) {
 	t.Run("should return the organization by subdomain", func(t *testing.T) {
 		t.Parallel()
 		// create a new request with a URL parameter
-		req, err := http.NewRequest(http.MethodGet, "/organizations/subdomain/{subdomain}", nil)
+		req, err := http.NewRequest(http.MethodGet, getOrganizationBySubdomainPath, nil)
 		require.NoError(t, err)
 
+		org := organization.Organization{
+			ID:        1,
+			Subdomain: "sub1",
+			Name:      "org1",
+			Timestamps: base.Timestamps{
+				CreatedAt: time.Now().UTC(),
+				UpdatedAt: time.Now().UTC(),
+			},
+		}
 		// simulate chi's URL parameters
 		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("subdomain", "sub1")
+		reqContext.URLParams.Add("subdomain", org.Subdomain)
 		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
 
-		expectedBody := `{"id": 1, "subdomain": "sub1", "name": "org1",
-		"suspended_at": null, "blacklisted_at": null,
-		"created_at": "0001-01-01T00:00:00Z", "updated_at": "0001-01-01T00:00:00Z"}`
+		expectedBody := fmt.Sprintf(`{"id": %d, "subdomain": "%s", "name": "%s",
+		"suspended_at": null, "blacklisted_at": null, "created_at": "%s", "updated_at": "%s"}`,
+			org.ID, org.Subdomain, org.Name, org.CreatedAt.Format(time.RFC3339Nano), org.UpdatedAt.Format(time.RFC3339Nano))
 		mockService := organization.NewServiceMock(t)
 		rr := httptest.NewRecorder()
 		handler := organization.NewHandler(mockService)
 
 		// mock the GetOrganizationBySubdomain function
-		mockService.On("GetOrganizationBySubdomain", req.Context(), "sub1").
-			Return(organization.Organization{ID: 1, Subdomain: "sub1", Name: "org1"}, nil)
+		mockService.On("GetOrganizationBySubdomain", req.Context(), org.Subdomain).
+			Return(org, nil)
 
 		// call the GetOrganizationBySubdomain function
 		handler.GetOrganizationBySubdomain(rr, req)
@@ -127,10 +65,38 @@ func TestHandler_GetOrganizationBySubdomain(t *testing.T) {
 		assert.JSONEq(t, expectedBody, rr.Body.String())
 	})
 
+	t.Run("should return an error when the organization is not found", func(t *testing.T) {
+		t.Parallel()
+
+		// create a new request with a URL parameter
+		req, err := http.NewRequest(http.MethodGet, getOrganizationBySubdomainPath, nil)
+		require.NoError(t, err)
+
+		// simulate chi's URL parameters
+		reqContext := chi.NewRouteContext()
+		reqContext.URLParams.Add("subdomain", "sub1")
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
+
+		mockService := organization.NewServiceMock(t)
+		rr := httptest.NewRecorder()
+		handler := organization.NewHandler(mockService)
+
+		// mock the GetOrganizationBySubdomain function
+		mockService.On("GetOrganizationBySubdomain", req.Context(), "sub1").
+			Return(organization.Organization{}, base.NewNotFoundError("organization not found for the given subdomain"))
+
+		// call the GetOrganizationBySubdomain function
+		handler.GetOrganizationBySubdomain(rr, req)
+
+		// check the result
+		require.Equal(t, http.StatusNotFound, rr.Code)
+		assert.JSONEq(t, `{"error": "organization not found for the given subdomain"}`, rr.Body.String())
+	})
+
 	t.Run("should return an error when the service call fails", func(t *testing.T) {
 		t.Parallel()
 		// create a new request with a URL parameter
-		req, err := http.NewRequest(http.MethodGet, "/organizations/subdomain/{subdomain}", nil)
+		req, err := http.NewRequest(http.MethodGet, getOrganizationBySubdomainPath, nil)
 		require.NoError(t, err)
 
 		// simulate chi's URL parameters
@@ -152,127 +118,6 @@ func TestHandler_GetOrganizationBySubdomain(t *testing.T) {
 		// check the result
 		require.Equal(t, http.StatusInternalServerError, rr.Code)
 		assert.JSONEq(t, `{"error": ""}`, rr.Body.String())
-	})
-}
-
-func TestHandler_CreateOrganization(t *testing.T) {
-	t.Parallel()
-
-	t.Run("should create the organization", func(t *testing.T) {
-		t.Parallel()
-		// create a new request with a JSON payload
-		payload := `{"subdomain": "sub1", "name": "org_create_test"}`
-		req, err := http.NewRequest(http.MethodPost, "/organizations", strings.NewReader(payload))
-		require.NoError(t, err)
-
-		expectedBody := `{"id": 1, "subdomain": "sub1", "name": "org_create_test", 
-		"suspended_at": null, "blacklisted_at": null,
-		"created_at": "0001-01-01T00:00:00Z", "updated_at": "0001-01-01T00:00:00Z"}`
-		mockService := organization.NewServiceMock(t)
-		rr := httptest.NewRecorder()
-		handler := organization.NewHandler(mockService)
-
-		// mock the CreateOrganization function
-		mockService.On("CreateOrganization", req.Context(), organization.Organization{
-			Subdomain: "sub1",
-			Name:      "org_create_test",
-		}).Return(int64(1), nil)
-
-		// call the CreateOrganization function
-		handler.CreateOrganization(rr, req)
-
-		// check the result
-		require.Equal(t, http.StatusCreated, rr.Code)
-		assert.JSONEq(t, expectedBody, rr.Body.String())
-	})
-
-	t.Run("should return an error when the service call fails", func(t *testing.T) {
-		t.Parallel()
-		// create a new request with a JSON payload
-		payload := `{"subdomain": "sub1", "name": "org_create_test"}`
-		req, err := http.NewRequest(http.MethodPost, "/organizations", strings.NewReader(payload))
-		require.NoError(t, err)
-
-		mockService := organization.NewServiceMock(t)
-		rr := httptest.NewRecorder()
-		handler := organization.NewHandler(mockService)
-
-		// mock the CreateOrganization function
-		mockService.On("CreateOrganization", req.Context(), organization.Organization{
-			Subdomain: "sub1",
-			Name:      "org_create_test",
-		}).Return(int64(0), assert.AnError)
-
-		// call the CreateOrganization function
-		handler.CreateOrganization(rr, req)
-
-		// check the result
-		require.Equal(t, http.StatusInternalServerError, rr.Code)
-		assert.JSONEq(t, `{"error": ""}`, rr.Body.String())
-	})
-
-	//nolint:lll // ignore long line length
-	t.Run("should return an error when the request payload is invalid", func(t *testing.T) {
-		t.Parallel()
-
-		tests := []struct {
-			name    string
-			payload string
-			err     string
-		}{
-			{
-				name:    "subdomain is missing",
-				payload: `{"name": "test org pvt ltd."}`,
-				err:     `{"error": "Key: 'Request.subdomain' Error:Field validation for 'subdomain' failed on the 'required' tag"}`,
-			},
-			{
-				name:    "name is missing",
-				payload: `{"subdomain": "sub1"}`,
-				err:     `{"error": "Key: 'Request.name' Error:Field validation for 'name' failed on the 'required' tag"}`,
-			},
-			{
-				name:    "subdomain is too long",
-				payload: fmt.Sprintf(`{"subdomain": "%s", "name": "test org pvt ltd."}`, gofakeit.LetterN(31)),
-				err:     `{"error": "Key: 'Request.subdomain' Error:Field validation for 'subdomain' failed on the 'max' tag"}`,
-			},
-			{
-				name:    "name is too long",
-				payload: fmt.Sprintf(`{"subdomain": "sub", "name": "%s"}`, gofakeit.LetterN(61)),
-				err:     `{"error": "Key: 'Request.name' Error:Field validation for 'name' failed on the 'max' tag"}`,
-			},
-			{
-				name:    "subdomain is not alphanumeric",
-				payload: `{"subdomain": "sub1!", "name": "test org pvt ltd."}`,
-				err:     `{"error": "Key: 'Request.subdomain' Error:Field validation for 'subdomain' failed on the 'alphanum' tag"}`,
-			},
-			{
-				name:    "name contains non ascii characters",
-				payload: `{"subdomain": "sub1", "name": "€€"}`,
-				err:     `{"error": "Key: 'Request.name' Error:Field validation for 'name' failed on the 'ascii' tag"}`,
-			},
-		}
-
-		for _, tt := range tests {
-			// avoid loop closure issue by defining the variables here
-			payload := tt.payload
-			errResponse := tt.err
-
-			t.Run(tt.name, func(t *testing.T) {
-				t.Parallel()
-
-				req, err := http.NewRequest(http.MethodPost, "/organizations", strings.NewReader(payload))
-				require.NoError(t, err)
-
-				mockService := organization.NewServiceMock(t)
-				rr := httptest.NewRecorder()
-				handler := organization.NewHandler(mockService)
-
-				handler.CreateOrganization(rr, req)
-
-				require.Equal(t, http.StatusBadRequest, rr.Code)
-				assert.JSONEq(t, errResponse, rr.Body.String())
-			})
-		}
 	})
 }
 
@@ -281,26 +126,30 @@ func TestHandler_UpdateOrganization(t *testing.T) {
 
 	t.Run("should update the organization", func(t *testing.T) {
 		t.Parallel()
+
+		subdomain := randomOrganizationSubdomain()
+		currentOrg := organization.Organization{
+			ID:        gofakeit.Int64(),
+			Subdomain: subdomain,
+		}
+		newOrgName := randomOrganizationName()
 		// create a new request with a JSON payload
-		payload := `{"subdomain": "sub1", "name": "org_update_test"}`
-		req, err := http.NewRequest(http.MethodPut, "/organizations/{orgID}", strings.NewReader(payload))
+		payload := fmt.Sprintf(`{"name": "%s"}`, newOrgName)
+		req, err := http.NewRequest(http.MethodPut, updateOrganizationPath, strings.NewReader(payload))
 		require.NoError(t, err)
 
 		// simulate chi's URL parameters
 		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("orgID", "1")
+		reqContext.URLParams.Add("subdomain", subdomain)
 		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
 
 		mockService := organization.NewServiceMock(t)
 		rr := httptest.NewRecorder()
 		handler := organization.NewHandler(mockService)
 
-		// mock the UpdateOrganization function
-		mockService.On("UpdateOrganization", req.Context(), organization.Organization{
-			ID:        1,
-			Subdomain: "sub1",
-			Name:      "org_update_test",
-		}).Return(nil)
+		// mock the service calls
+		mockService.On("GetOrganizationBySubdomain", req.Context(), subdomain).Return(currentOrg, nil)
+		mockService.On("UpdateOrganization", req.Context(), currentOrg.ID, newOrgName).Return(nil)
 
 		// call the UpdateOrganization function
 		handler.UpdateOrganization(rr, req)
@@ -310,28 +159,27 @@ func TestHandler_UpdateOrganization(t *testing.T) {
 		assert.Empty(t, rr.Body.String())
 	})
 
-	t.Run("should return an error when the service call fails", func(t *testing.T) {
+	t.Run("should return an error when get service call fails", func(t *testing.T) {
 		t.Parallel()
+
+		subdomain := randomOrganizationSubdomain()
 		// create a new request with a JSON payload
-		payload := `{"subdomain": "sub1", "name": "org_update_test"}`
-		req, err := http.NewRequest(http.MethodPut, "/organizations/{orgID}", strings.NewReader(payload))
+		payload := fmt.Sprintf(`{"name": "%s"}`, randomOrganizationName())
+		req, err := http.NewRequest(http.MethodPut, updateOrganizationPath, strings.NewReader(payload))
 		require.NoError(t, err)
 
 		// simulate chi's URL parameters
 		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("orgID", "1")
+		reqContext.URLParams.Add("subdomain", subdomain)
 		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
 
 		mockService := organization.NewServiceMock(t)
 		rr := httptest.NewRecorder()
 		handler := organization.NewHandler(mockService)
 
-		// mock the UpdateOrganization function
-		mockService.On("UpdateOrganization", req.Context(), organization.Organization{
-			ID:        1,
-			Subdomain: "sub1",
-			Name:      "org_update_test",
-		}).Return(assert.AnError)
+		// mock the service calls
+		mockService.On("GetOrganizationBySubdomain", req.Context(), subdomain).
+			Return(organization.Organization{}, assert.AnError)
 
 		// call the UpdateOrganization function
 		handler.UpdateOrganization(rr, req)
@@ -341,44 +189,115 @@ func TestHandler_UpdateOrganization(t *testing.T) {
 		assert.JSONEq(t, `{"error": ""}`, rr.Body.String())
 	})
 
-	//nolint:lll // ignore long line length
-	t.Run("should return an error when the request payload is invalid", func(t *testing.T) {
+	t.Run("should return an error when the organization is not found", func(t *testing.T) {
+		t.Parallel()
+
+		subdomain := randomOrganizationSubdomain()
+		// create a new request with a JSON payload
+		payload := fmt.Sprintf(`{"name": "%s"}`, randomOrganizationName())
+		req, err := http.NewRequest(http.MethodPut, updateOrganizationPath, strings.NewReader(payload))
+		require.NoError(t, err)
+
+		// simulate chi's URL parameters
+		reqContext := chi.NewRouteContext()
+		reqContext.URLParams.Add("subdomain", subdomain)
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
+
+		mockService := organization.NewServiceMock(t)
+		rr := httptest.NewRecorder()
+		handler := organization.NewHandler(mockService)
+
+		// mock the service calls
+		mockService.On("GetOrganizationBySubdomain", req.Context(), subdomain).
+			Return(organization.Organization{}, base.NewNotFoundError("organization not found for the given subdomain"))
+
+		// call the UpdateOrganization function
+		handler.UpdateOrganization(rr, req)
+
+		// check the result
+		require.Equal(t, http.StatusNotFound, rr.Code)
+		assert.JSONEq(t, `{"error": "organization not found for the given subdomain"}`, rr.Body.String())
+	})
+
+	t.Run("should return an error when update service call fails", func(t *testing.T) {
+		t.Parallel()
+
+		subdomain := randomOrganizationSubdomain()
+		currentOrg := organization.Organization{
+			ID:        gofakeit.Int64(),
+			Subdomain: subdomain,
+		}
+		newOrgName := randomOrganizationName()
+		// create a new request with a JSON payload
+		payload := fmt.Sprintf(`{"name": "%s"}`, newOrgName)
+		req, err := http.NewRequest(http.MethodPut, updateOrganizationPath, strings.NewReader(payload))
+		require.NoError(t, err)
+
+		// simulate chi's URL parameters
+		reqContext := chi.NewRouteContext()
+		reqContext.URLParams.Add("subdomain", subdomain)
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
+
+		mockService := organization.NewServiceMock(t)
+		rr := httptest.NewRecorder()
+		handler := organization.NewHandler(mockService)
+
+		// mock the service calls
+		mockService.On("GetOrganizationBySubdomain", req.Context(), subdomain).Return(currentOrg, nil)
+		mockService.On("UpdateOrganization", req.Context(), currentOrg.ID, newOrgName).Return(assert.AnError)
+
+		// call the UpdateOrganization function
+		handler.UpdateOrganization(rr, req)
+
+		// check the result
+		require.Equal(t, http.StatusInternalServerError, rr.Code)
+		assert.JSONEq(t, `{"error": ""}`, rr.Body.String())
+	})
+
+	t.Run("should return an error when the request is invalid", func(t *testing.T) {
 		t.Parallel()
 
 		tests := []struct {
-			name    string
-			payload string
-			err     string
+			testName  string
+			payload   string
+			subdomain string
+			err       string
 		}{
 			{
-				name:    "subdomain is missing",
-				payload: `{"name": "test org pvt ltd."}`,
-				err:     `{"error": "Key: 'Request.subdomain' Error:Field validation for 'subdomain' failed on the 'required' tag"}`,
+				testName:  "subdomain is missing",
+				payload:   `{"name": "test org pvt ltd."}`,
+				subdomain: "",
+				err:       `{"error": "subdomain should not be empty"}`,
 			},
 			{
-				name:    "name is missing",
-				payload: `{"subdomain": "sub1"}`,
-				err:     `{"error": "Key: 'Request.name' Error:Field validation for 'name' failed on the 'required' tag"}`,
+				testName:  "name is missing",
+				payload:   `{}`,
+				subdomain: "sub1",
+				err:       `{"error": "Key: 'Request.name' Error:Field validation for 'name' failed on the 'required' tag"}`,
 			},
 			{
-				name:    "subdomain is too long",
-				payload: fmt.Sprintf(`{"subdomain": "%s", "name": "test org pvt ltd."}`, gofakeit.LetterN(31)),
-				err:     `{"error": "Key: 'Request.subdomain' Error:Field validation for 'subdomain' failed on the 'max' tag"}`,
+				testName:  "subdomain is too long",
+				payload:   `{"name": "test org pvt ltd."}`,
+				subdomain: gofakeit.LetterN(31),
+				err:       `{"error": "subdomain length must be less than or equal to 30"}`,
 			},
 			{
-				name:    "name is too long",
-				payload: fmt.Sprintf(`{"subdomain": "sub", "name": "%s"}`, gofakeit.LetterN(61)),
-				err:     `{"error": "Key: 'Request.name' Error:Field validation for 'name' failed on the 'max' tag"}`,
+				testName:  "name is too long",
+				payload:   fmt.Sprintf(`{"name": "%s"}`, gofakeit.LetterN(61)),
+				subdomain: "sub1",
+				err:       `{"error": "Key: 'Request.name' Error:Field validation for 'name' failed on the 'max' tag"}`,
 			},
 			{
-				name:    "subdomain is not alphanumeric",
-				payload: `{"subdomain": "sub1!", "name": "test org pvt ltd."}`,
-				err:     `{"error": "Key: 'Request.subdomain' Error:Field validation for 'subdomain' failed on the 'alphanum' tag"}`,
+				testName:  "subdomain is not alphanumeric",
+				payload:   `{"name": "test org pvt ltd."}`,
+				subdomain: "sub1!",
+				err:       `{"error": "subdomain must be alphanumeric"}`,
 			},
 			{
-				name:    "name contains non ascii characters",
-				payload: `{"subdomain": "sub1", "name": "€€"}`,
-				err:     `{"error": "Key: 'Request.name' Error:Field validation for 'name' failed on the 'ascii' tag"}`,
+				testName:  "name contains non ascii characters",
+				payload:   `{"name": "€€"}`,
+				subdomain: "sub1",
+				err:       `{"error": "Key: 'Request.name' Error:Field validation for 'name' failed on the 'ascii' tag"}`,
 			},
 		}
 
@@ -386,16 +305,17 @@ func TestHandler_UpdateOrganization(t *testing.T) {
 			// avoid loop closure issue by defining the variables here
 			payload := tt.payload
 			errResponse := tt.err
+			subdomain := tt.subdomain
 
-			t.Run(tt.name, func(t *testing.T) {
+			t.Run(tt.testName, func(t *testing.T) {
 				t.Parallel()
 
-				req, err := http.NewRequest(http.MethodPut, "/organizations/{orgID}", strings.NewReader(payload))
+				req, err := http.NewRequest(http.MethodPut, updateOrganizationPath, strings.NewReader(payload))
 				require.NoError(t, err)
 
 				// simulate chi's URL parameters
 				reqContext := chi.NewRouteContext()
-				reqContext.URLParams.Add("orgID", "1")
+				reqContext.URLParams.Add("subdomain", subdomain)
 				req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
 
 				mockService := organization.NewServiceMock(t)
@@ -417,12 +337,16 @@ func TestHandler_DeleteOrganization(t *testing.T) {
 	t.Run("should delete the organization", func(t *testing.T) {
 		t.Parallel()
 		// create a new request with a URL parameter
-		req, err := http.NewRequest(http.MethodDelete, "/organizations/{orgID}", nil)
+		req, err := http.NewRequest(http.MethodDelete, deleteOrganizationPath, nil)
 		require.NoError(t, err)
 
+		org := organization.Organization{
+			ID:        gofakeit.Int64(),
+			Subdomain: randomOrganizationSubdomain(),
+		}
 		// simulate chi's URL parameters
 		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("orgID", "1")
+		reqContext.URLParams.Add("subdomain", org.Subdomain)
 		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
 
 		mockService := organization.NewServiceMock(t)
@@ -430,8 +354,8 @@ func TestHandler_DeleteOrganization(t *testing.T) {
 		handler := organization.NewHandler(mockService)
 
 		// mock the DeleteOrganization function
-		mockService.On("DeleteOrganization", req.Context(), int64(1)).
-			Return(nil)
+		mockService.On("GetOrganizationBySubdomain", req.Context(), org.Subdomain).Return(org, nil)
+		mockService.On("DeleteOrganization", req.Context(), org.ID).Return(nil)
 
 		// call the DeleteOrganization function
 		handler.DeleteOrganization(rr, req)
@@ -441,24 +365,28 @@ func TestHandler_DeleteOrganization(t *testing.T) {
 		assert.Empty(t, rr.Body.String())
 	})
 
-	t.Run("should return an error when the service call fails", func(t *testing.T) {
+	t.Run("should return an error when get service call fails", func(t *testing.T) {
 		t.Parallel()
 		// create a new request with a URL parameter
-		req, err := http.NewRequest(http.MethodDelete, "/organizations/{orgID}", nil)
+		req, err := http.NewRequest(http.MethodDelete, deleteOrganizationPath, nil)
 		require.NoError(t, err)
 
+		org := organization.Organization{
+			ID:        gofakeit.Int64(),
+			Subdomain: randomOrganizationSubdomain(),
+		}
 		// simulate chi's URL parameters
 		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("orgID", "1")
+		reqContext.URLParams.Add("subdomain", org.Subdomain)
 		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
 
 		mockService := organization.NewServiceMock(t)
 		rr := httptest.NewRecorder()
 		handler := organization.NewHandler(mockService)
 
-		// mock the DeleteOrganization function
-		mockService.On("DeleteOrganization", req.Context(), int64(1)).
-			Return(assert.AnError)
+		// mock the GetOrganizationBySubdomain function
+		mockService.On("GetOrganizationBySubdomain", req.Context(), org.Subdomain).
+			Return(organization.Organization{}, assert.AnError)
 
 		// call the DeleteOrganization function
 		handler.DeleteOrganization(rr, req)
@@ -468,21 +396,66 @@ func TestHandler_DeleteOrganization(t *testing.T) {
 		assert.JSONEq(t, `{"error": ""}`, rr.Body.String())
 	})
 
-	t.Run("should return an error when the organization ID is invalid", func(t *testing.T) {
+	t.Run("should return an error when the organization is not found", func(t *testing.T) {
 		t.Parallel()
-		// create a new request with an invalid URL parameter
-		req, err := http.NewRequest(http.MethodDelete, "/organizations/invalid", nil)
+		// create a new request with a URL parameter
+		req, err := http.NewRequest(http.MethodDelete, deleteOrganizationPath, nil)
 		require.NoError(t, err)
+
+		org := organization.Organization{
+			ID:        gofakeit.Int64(),
+			Subdomain: randomOrganizationSubdomain(),
+		}
+		// simulate chi's URL parameters
+		reqContext := chi.NewRouteContext()
+		reqContext.URLParams.Add("subdomain", org.Subdomain)
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
 
 		mockService := organization.NewServiceMock(t)
 		rr := httptest.NewRecorder()
 		handler := organization.NewHandler(mockService)
 
+		// mock the GetOrganizationBySubdomain function
+		mockService.On("GetOrganizationBySubdomain", req.Context(), org.Subdomain).
+			Return(organization.Organization{}, base.NewNotFoundError("organization not found for the given subdomain"))
+
 		// call the DeleteOrganization function
 		handler.DeleteOrganization(rr, req)
 
 		// check the result
-		require.Equal(t, http.StatusBadRequest, rr.Code)
+		require.Equal(t, http.StatusNotFound, rr.Code)
+		assert.JSONEq(t, `{"error": "organization not found for the given subdomain"}`, rr.Body.String())
+	})
+
+	t.Run("should return an error when delete service call fails", func(t *testing.T) {
+		t.Parallel()
+		// create a new request with a URL parameter
+		req, err := http.NewRequest(http.MethodDelete, deleteOrganizationPath, nil)
+		require.NoError(t, err)
+
+		org := organization.Organization{
+			ID:        gofakeit.Int64(),
+			Subdomain: randomOrganizationSubdomain(),
+		}
+		// simulate chi's URL parameters
+		reqContext := chi.NewRouteContext()
+		reqContext.URLParams.Add("subdomain", org.Subdomain)
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
+
+		mockService := organization.NewServiceMock(t)
+		rr := httptest.NewRecorder()
+		handler := organization.NewHandler(mockService)
+
+		// mock the DeleteOrganization function
+		mockService.On("GetOrganizationBySubdomain", req.Context(), org.Subdomain).Return(org, nil)
+		mockService.On("DeleteOrganization", req.Context(), org.ID).
+			Return(assert.AnError)
+
+		// call the DeleteOrganization function
+		handler.DeleteOrganization(rr, req)
+
+		// check the result
+		require.Equal(t, http.StatusInternalServerError, rr.Code)
 		assert.JSONEq(t, `{"error": ""}`, rr.Body.String())
 	})
 }

@@ -31,27 +31,27 @@ func (_m *ServiceMock) BlacklistOrganization(ctx context.Context, id int64, comm
 	return r0
 }
 
-// CreateOrganization provides a mock function with given fields: ctx, org
-func (_m *ServiceMock) CreateOrganization(ctx context.Context, org Organization) (int64, error) {
-	ret := _m.Called(ctx, org)
+// CreateOrganization provides a mock function with given fields: ctx, subdomain, name
+func (_m *ServiceMock) CreateOrganization(ctx context.Context, subdomain string, name string) (Organization, error) {
+	ret := _m.Called(ctx, subdomain, name)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreateOrganization")
 	}
 
-	var r0 int64
+	var r0 Organization
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, Organization) (int64, error)); ok {
-		return rf(ctx, org)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) (Organization, error)); ok {
+		return rf(ctx, subdomain, name)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, Organization) int64); ok {
-		r0 = rf(ctx, org)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) Organization); ok {
+		r0 = rf(ctx, subdomain, name)
 	} else {
-		r0 = ret.Get(0).(int64)
+		r0 = ret.Get(0).(Organization)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, Organization) error); ok {
-		r1 = rf(ctx, org)
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, subdomain, name)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -215,17 +215,17 @@ func (_m *ServiceMock) UnsuspendOrganization(ctx context.Context, id int64, comm
 	return r0
 }
 
-// UpdateOrganization provides a mock function with given fields: ctx, org
-func (_m *ServiceMock) UpdateOrganization(ctx context.Context, org Organization) error {
-	ret := _m.Called(ctx, org)
+// UpdateOrganization provides a mock function with given fields: ctx, id, name
+func (_m *ServiceMock) UpdateOrganization(ctx context.Context, id int64, name string) error {
+	ret := _m.Called(ctx, id, name)
 
 	if len(ret) == 0 {
 		panic("no return value specified for UpdateOrganization")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, Organization) error); ok {
-		r0 = rf(ctx, org)
+	if rf, ok := ret.Get(0).(func(context.Context, int64, string) error); ok {
+		r0 = rf(ctx, id, name)
 	} else {
 		r0 = ret.Error(0)
 	}

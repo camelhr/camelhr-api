@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"testing"
 
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/camelhr/camelhr-api/internal/base"
 	"github.com/camelhr/camelhr-api/internal/domains/organization"
 	"github.com/stretchr/testify/assert"
@@ -56,10 +57,10 @@ func TestService_GetOrganizationByID(t *testing.T) {
 			Name:      randomOrganizationName(),
 		}
 
-		mockRepo.On("GetOrganizationByID", context.Background(), int64(1)).
+		mockRepo.On("GetOrganizationByID", context.Background(), org.ID).
 			Return(org, nil)
 
-		result, err := service.GetOrganizationByID(context.Background(), int64(1))
+		result, err := service.GetOrganizationByID(context.Background(), org.ID)
 		require.NoError(t, err)
 		assert.Equal(t, org, result)
 	})
@@ -185,20 +186,15 @@ func TestService_CreateOrganization(t *testing.T) {
 		mockRepo := organization.NewRepositoryMock(t)
 		service := organization.NewService(mockRepo)
 
-		org := organization.Organization{
-			Subdomain: randomOrganizationSubdomain(),
-			Name:      randomOrganizationName(),
-		}
+		mockRepo.On("CreateOrganization", context.Background(), "sub1", "org1").
+			Return(organization.Organization{}, assert.AnError)
 
-		mockRepo.On("CreateOrganization", context.Background(), org).
-			Return(int64(0), assert.AnError)
-
-		_, err := service.CreateOrganization(context.Background(), org)
+		_, err := service.CreateOrganization(context.Background(), "sub1", "org1")
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
 
-	t.Run("should return the ID of the created organization", func(t *testing.T) {
+	t.Run("should return the created organization", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := organization.NewRepositoryMock(t)
@@ -209,12 +205,12 @@ func TestService_CreateOrganization(t *testing.T) {
 			Name:      randomOrganizationName(),
 		}
 
-		mockRepo.On("CreateOrganization", context.Background(), org).
-			Return(int64(1), nil)
+		mockRepo.On("CreateOrganization", context.Background(), org.Subdomain, org.Name).
+			Return(org, nil)
 
-		result, err := service.CreateOrganization(context.Background(), org)
+		result, err := service.CreateOrganization(context.Background(), org.Subdomain, org.Name)
 		require.NoError(t, err)
-		assert.Equal(t, int64(1), result)
+		assert.Equal(t, org, result)
 	})
 }
 
@@ -226,16 +222,13 @@ func TestService_UpdateOrganization(t *testing.T) {
 
 		mockRepo := organization.NewRepositoryMock(t)
 		service := organization.NewService(mockRepo)
+		orgID := gofakeit.Int64()
+		newOrgName := randomOrganizationName()
 
-		org := organization.Organization{
-			Subdomain: randomOrganizationSubdomain(),
-			Name:      randomOrganizationName(),
-		}
-
-		mockRepo.On("UpdateOrganization", context.Background(), org).
+		mockRepo.On("UpdateOrganization", context.Background(), orgID, newOrgName).
 			Return(assert.AnError)
 
-		err := service.UpdateOrganization(context.Background(), org)
+		err := service.UpdateOrganization(context.Background(), orgID, newOrgName)
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
@@ -245,16 +238,13 @@ func TestService_UpdateOrganization(t *testing.T) {
 
 		mockRepo := organization.NewRepositoryMock(t)
 		service := organization.NewService(mockRepo)
+		orgID := gofakeit.Int64()
+		newOrgName := randomOrganizationName()
 
-		org := organization.Organization{
-			Subdomain: randomOrganizationSubdomain(),
-			Name:      randomOrganizationName(),
-		}
-
-		mockRepo.On("UpdateOrganization", context.Background(), org).
+		mockRepo.On("UpdateOrganization", context.Background(), orgID, newOrgName).
 			Return(nil)
 
-		err := service.UpdateOrganization(context.Background(), org)
+		err := service.UpdateOrganization(context.Background(), orgID, newOrgName)
 		require.NoError(t, err)
 	})
 }
@@ -267,11 +257,12 @@ func TestService_DeleteOrganization(t *testing.T) {
 
 		mockRepo := organization.NewRepositoryMock(t)
 		service := organization.NewService(mockRepo)
+		orgID := gofakeit.Int64()
 
-		mockRepo.On("DeleteOrganization", context.Background(), int64(1)).
+		mockRepo.On("DeleteOrganization", context.Background(), orgID).
 			Return(assert.AnError)
 
-		err := service.DeleteOrganization(context.Background(), int64(1))
+		err := service.DeleteOrganization(context.Background(), orgID)
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
@@ -281,11 +272,12 @@ func TestService_DeleteOrganization(t *testing.T) {
 
 		mockRepo := organization.NewRepositoryMock(t)
 		service := organization.NewService(mockRepo)
+		orgID := gofakeit.Int64()
 
-		mockRepo.On("DeleteOrganization", context.Background(), int64(1)).
+		mockRepo.On("DeleteOrganization", context.Background(), orgID).
 			Return(nil)
 
-		err := service.DeleteOrganization(context.Background(), int64(1))
+		err := service.DeleteOrganization(context.Background(), orgID)
 		require.NoError(t, err)
 	})
 }
@@ -298,11 +290,13 @@ func TestService_SuspendOrganization(t *testing.T) {
 
 		mockRepo := organization.NewRepositoryMock(t)
 		service := organization.NewService(mockRepo)
+		orgID := gofakeit.Int64()
+		comment := "test suspend"
 
-		mockRepo.On("SuspendOrganization", context.Background(), int64(1), "test suspend").
+		mockRepo.On("SuspendOrganization", context.Background(), orgID, comment).
 			Return(assert.AnError)
 
-		err := service.SuspendOrganization(context.Background(), int64(1), "test suspend")
+		err := service.SuspendOrganization(context.Background(), orgID, comment)
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
@@ -312,11 +306,13 @@ func TestService_SuspendOrganization(t *testing.T) {
 
 		mockRepo := organization.NewRepositoryMock(t)
 		service := organization.NewService(mockRepo)
+		orgID := gofakeit.Int64()
+		comment := "test suspend"
 
-		mockRepo.On("SuspendOrganization", context.Background(), int64(1), "test suspend").
+		mockRepo.On("SuspendOrganization", context.Background(), orgID, comment).
 			Return(nil)
 
-		err := service.SuspendOrganization(context.Background(), int64(1), "test suspend")
+		err := service.SuspendOrganization(context.Background(), orgID, comment)
 		require.NoError(t, err)
 	})
 }
@@ -329,11 +325,13 @@ func TestService_UnsuspendOrganization(t *testing.T) {
 
 		mockRepo := organization.NewRepositoryMock(t)
 		service := organization.NewService(mockRepo)
+		orgID := gofakeit.Int64()
+		comment := "test unsuspend"
 
-		mockRepo.On("UnsuspendOrganization", context.Background(), int64(1), "test unsuspend").
+		mockRepo.On("UnsuspendOrganization", context.Background(), orgID, comment).
 			Return(assert.AnError)
 
-		err := service.UnsuspendOrganization(context.Background(), int64(1), "test unsuspend")
+		err := service.UnsuspendOrganization(context.Background(), orgID, comment)
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
@@ -343,11 +341,13 @@ func TestService_UnsuspendOrganization(t *testing.T) {
 
 		mockRepo := organization.NewRepositoryMock(t)
 		service := organization.NewService(mockRepo)
+		orgID := gofakeit.Int64()
+		comment := "test unsuspend"
 
-		mockRepo.On("UnsuspendOrganization", context.Background(), int64(1), "test unsuspend").
+		mockRepo.On("UnsuspendOrganization", context.Background(), orgID, comment).
 			Return(nil)
 
-		err := service.UnsuspendOrganization(context.Background(), int64(1), "test unsuspend")
+		err := service.UnsuspendOrganization(context.Background(), orgID, comment)
 		require.NoError(t, err)
 	})
 }
@@ -360,11 +360,13 @@ func TestService_BlacklistOrganization(t *testing.T) {
 
 		mockRepo := organization.NewRepositoryMock(t)
 		service := organization.NewService(mockRepo)
+		orgID := gofakeit.Int64()
+		comment := "test blacklist"
 
-		mockRepo.On("BlacklistOrganization", context.Background(), int64(1), "test blacklist").
+		mockRepo.On("BlacklistOrganization", context.Background(), orgID, comment).
 			Return(assert.AnError)
 
-		err := service.BlacklistOrganization(context.Background(), int64(1), "test blacklist")
+		err := service.BlacklistOrganization(context.Background(), orgID, comment)
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
@@ -374,11 +376,13 @@ func TestService_BlacklistOrganization(t *testing.T) {
 
 		mockRepo := organization.NewRepositoryMock(t)
 		service := organization.NewService(mockRepo)
+		orgID := gofakeit.Int64()
+		comment := "test blacklist"
 
-		mockRepo.On("BlacklistOrganization", context.Background(), int64(1), "test blacklist").
+		mockRepo.On("BlacklistOrganization", context.Background(), orgID, comment).
 			Return(nil)
 
-		err := service.BlacklistOrganization(context.Background(), int64(1), "test blacklist")
+		err := service.BlacklistOrganization(context.Background(), orgID, comment)
 		require.NoError(t, err)
 	})
 }
@@ -391,11 +395,13 @@ func TestService_UnblacklistOrganization(t *testing.T) {
 
 		mockRepo := organization.NewRepositoryMock(t)
 		service := organization.NewService(mockRepo)
+		orgID := gofakeit.Int64()
+		comment := "test unblacklist"
 
-		mockRepo.On("UnblacklistOrganization", context.Background(), int64(1), "test unblacklist").
+		mockRepo.On("UnblacklistOrganization", context.Background(), orgID, comment).
 			Return(assert.AnError)
 
-		err := service.UnblacklistOrganization(context.Background(), int64(1), "test unblacklist")
+		err := service.UnblacklistOrganization(context.Background(), orgID, comment)
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
@@ -405,11 +411,13 @@ func TestService_UnblacklistOrganization(t *testing.T) {
 
 		mockRepo := organization.NewRepositoryMock(t)
 		service := organization.NewService(mockRepo)
+		orgID := gofakeit.Int64()
+		comment := "test unblacklist"
 
-		mockRepo.On("UnblacklistOrganization", context.Background(), int64(1), "test unblacklist").
+		mockRepo.On("UnblacklistOrganization", context.Background(), orgID, comment).
 			Return(nil)
 
-		err := service.UnblacklistOrganization(context.Background(), int64(1), "test unblacklist")
+		err := service.UnblacklistOrganization(context.Background(), orgID, comment)
 		require.NoError(t, err)
 	})
 }

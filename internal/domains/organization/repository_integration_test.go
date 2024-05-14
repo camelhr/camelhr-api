@@ -123,12 +123,9 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_CreateOrganization() {
 			Name:      randomOrganizationName(),
 		}
 
-		id, err := repo.CreateOrganization(context.Background(), org)
+		result, err := repo.CreateOrganization(context.Background(), org.Subdomain, org.Name)
 		s.Require().NoError(err)
-		s.NotEmpty(id)
-
-		result, err := repo.GetOrganizationByID(context.Background(), id)
-		s.Require().NoError(err)
+		s.NotEmpty(result.ID)
 		s.Equal(org.Name, result.Name)
 		s.NotZero(result.CreatedAt)
 		s.NotZero(result.UpdatedAt)
@@ -148,10 +145,7 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_CreateOrganization() {
 		repo := organization.NewRepository(s.DB)
 		org := fake.NewOrganization(s.DB)
 
-		_, err := repo.CreateOrganization(context.Background(), organization.Organization{
-			Subdomain: org.Subdomain,
-			Name:      randomOrganizationName(),
-		})
+		_, err := repo.CreateOrganization(context.Background(), org.Subdomain, randomOrganizationName())
 
 		s.Require().Error(err)
 		s.ErrorContains(err, "duplicate key value violates unique constraint")
@@ -162,10 +156,7 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_CreateOrganization() {
 		repo := organization.NewRepository(s.DB)
 		org := fake.NewOrganization(s.DB)
 
-		_, err := repo.CreateOrganization(context.Background(), organization.Organization{
-			Subdomain: randomOrganizationSubdomain(),
-			Name:      org.Name,
-		})
+		_, err := repo.CreateOrganization(context.Background(), randomOrganizationSubdomain(), org.Name)
 
 		s.Require().Error(err)
 		s.ErrorContains(err, "duplicate key value violates unique constraint")
@@ -175,10 +166,7 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_CreateOrganization() {
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
 
-		_, err := repo.CreateOrganization(context.Background(), organization.Organization{
-			Subdomain: "",
-			Name:      randomOrganizationName(),
-		})
+		_, err := repo.CreateOrganization(context.Background(), "", randomOrganizationName())
 
 		s.Require().Error(err)
 		s.ErrorContains(err, "violates check constraint")
@@ -188,10 +176,7 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_CreateOrganization() {
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
 
-		_, err := repo.CreateOrganization(context.Background(), organization.Organization{
-			Subdomain: randomOrganizationSubdomain(),
-			Name:      "",
-		})
+		_, err := repo.CreateOrganization(context.Background(), randomOrganizationSubdomain(), "")
 
 		s.Require().Error(err)
 		s.ErrorContains(err, "violates check constraint")
@@ -203,17 +188,13 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_UpdateOrganization() {
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
 		org := fake.NewOrganization(s.DB)
+		newOrgName := randomOrganizationName()
 
-		err := repo.UpdateOrganization(context.Background(), organization.Organization{
-			ID:        org.ID,
-			Subdomain: "updated-subdomain",
-			Name:      "updated name",
-		})
+		err := repo.UpdateOrganization(context.Background(), org.ID, newOrgName)
 		s.Require().NoError(err)
 
 		result := org.FetchLatest(s.DB)
-		s.Equal("updated-subdomain", result.Subdomain)
-		s.Equal("updated name", result.Name)
+		s.Equal(newOrgName, result.Name)
 		s.Equal(org.CreatedAt, result.CreatedAt)
 		s.GreaterOrEqual(result.UpdatedAt, result.CreatedAt) // could be equal if the update is fast
 		s.Equal(time.UTC, result.UpdatedAt.Location())
@@ -228,17 +209,14 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_UpdateOrganization() {
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
 		org := fake.NewOrganization(s.DB, fake.OrganizationDeleted())
+		newOrgName := randomOrganizationName()
 
-		err := repo.UpdateOrganization(context.Background(), organization.Organization{
-			ID:        org.ID,
-			Subdomain: "delete-update-subdomain",
-			Name:      "delete update org",
-		})
+		err := repo.UpdateOrganization(context.Background(), org.ID, newOrgName)
 		s.Require().NoError(err)
 
 		result := org.FetchLatest(s.DB)
-		s.Equal(org.Subdomain, result.Subdomain) // subdomain should not be updated
-		s.Equal(org.Name, result.Name)           // name should not be updated
+		s.Equal(org.Name, result.Name) // name should not be updated
+		s.Equal(org.Subdomain, result.Subdomain)
 		s.Equal(org.UpdatedAt, result.UpdatedAt) // update time should not be updated
 		s.Equal(org.CreatedAt, result.CreatedAt)
 		s.NotNil(result.DeletedAt)

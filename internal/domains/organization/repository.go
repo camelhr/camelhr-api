@@ -19,10 +19,10 @@ type Repository interface {
 	GetOrganizationByName(ctx context.Context, name string) (Organization, error)
 
 	// CreateOrganization creates a new organization.
-	CreateOrganization(ctx context.Context, org Organization) (int64, error)
+	CreateOrganization(ctx context.Context, subdomain string, name string) (Organization, error)
 
 	// UpdateOrganization updates an organization.
-	UpdateOrganization(ctx context.Context, org Organization) error
+	UpdateOrganization(ctx context.Context, id int64, name string) error
 
 	// DeleteOrganization deletes an organization by its ID.
 	DeleteOrganization(ctx context.Context, id int64) error
@@ -69,15 +69,15 @@ func (r *repository) GetOrganizationByName(ctx context.Context, name string) (Or
 	return org, err
 }
 
-func (r *repository) CreateOrganization(ctx context.Context, org Organization) (int64, error) {
-	var id int64
-	err := r.db.Exec(ctx, &id, createOrganizationQuery, org.Subdomain, org.Name)
+func (r *repository) CreateOrganization(ctx context.Context, subdomain string, name string) (Organization, error) {
+	var org Organization
+	err := r.db.Exec(ctx, &org, createOrganizationQuery, subdomain, name)
 
-	return id, err
+	return org, err
 }
 
-func (r *repository) UpdateOrganization(ctx context.Context, org Organization) error {
-	return r.db.Exec(ctx, nil, updateOrganizationQuery, org.ID, org.Subdomain, org.Name)
+func (r *repository) UpdateOrganization(ctx context.Context, id int64, name string) error {
+	return r.db.Exec(ctx, nil, updateOrganizationQuery, id, name)
 }
 
 func (r *repository) DeleteOrganization(ctx context.Context, id int64) error {

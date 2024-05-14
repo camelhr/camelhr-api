@@ -31,8 +31,7 @@ type Organization struct {
 
 // Request represents a http request to create or update an organization.
 type Request struct {
-	Subdomain string `json:"subdomain" validate:"required,alphanum,max=30"`
-	Name      string `json:"name" validate:"required,ascii,max=60"`
+	Name string `json:"name" validate:"required,ascii,max=60"`
 }
 
 // Response represents a response of an http response organization.

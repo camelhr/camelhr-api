@@ -21,10 +21,10 @@ type Service interface {
 	GetOrganizationByName(ctx context.Context, name string) (Organization, error)
 
 	// CreateOrganization creates a new organization.
-	CreateOrganization(ctx context.Context, org Organization) (int64, error)
+	CreateOrganization(ctx context.Context, subdomain string, name string) (Organization, error)
 
 	// UpdateOrganization updates an organization.
-	UpdateOrganization(ctx context.Context, org Organization) error
+	UpdateOrganization(ctx context.Context, id int64, name string) error
 
 	// DeleteOrganization deletes an organization by its ID.
 	DeleteOrganization(ctx context.Context, id int64) error
@@ -79,12 +79,12 @@ func (s *service) GetOrganizationByName(ctx context.Context, name string) (Organ
 	return o, err
 }
 
-func (s *service) CreateOrganization(ctx context.Context, org Organization) (int64, error) {
-	return s.repo.CreateOrganization(ctx, org)
+func (s *service) CreateOrganization(ctx context.Context, subdomain string, name string) (Organization, error) {
+	return s.repo.CreateOrganization(ctx, subdomain, name)
 }
 
-func (s *service) UpdateOrganization(ctx context.Context, org Organization) error {
-	return s.repo.UpdateOrganization(ctx, org)
+func (s *service) UpdateOrganization(ctx context.Context, id int64, name string) error {
+	return s.repo.UpdateOrganization(ctx, id, name)
 }
 
 func (s *service) DeleteOrganization(ctx context.Context, id int64) error {
