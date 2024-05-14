@@ -2,8 +2,10 @@ package organization_test
 
 import (
 	"context"
+	"database/sql"
 	"testing"
 
+	"github.com/camelhr/camelhr-api/internal/base"
 	"github.com/camelhr/camelhr-api/internal/domains/organization"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -24,6 +26,22 @@ func TestService_GetOrganizationByID(t *testing.T) {
 		_, err := service.GetOrganizationByID(context.Background(), int64(1))
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
+	})
+
+	t.Run("should return an error when the organization is not found", func(t *testing.T) {
+		t.Parallel()
+
+		var notFoundErr *base.NotFoundError
+
+		mockRepo := organization.NewRepositoryMock(t)
+		service := organization.NewService(mockRepo)
+
+		mockRepo.On("GetOrganizationByID", context.Background(), int64(1)).
+			Return(organization.Organization{}, sql.ErrNoRows)
+
+		_, err := service.GetOrganizationByID(context.Background(), int64(1))
+		require.Error(t, err)
+		assert.ErrorAs(t, err, &notFoundErr)
 	})
 
 	t.Run("should return the organization by ID", func(t *testing.T) {
@@ -65,6 +83,23 @@ func TestService_GetOrganizationBySubdomain(t *testing.T) {
 		assert.ErrorIs(t, assert.AnError, err)
 	})
 
+	t.Run("should return an error when the organization is not found", func(t *testing.T) {
+		t.Parallel()
+
+		var notFoundErr *base.NotFoundError
+
+		mockRepo := organization.NewRepositoryMock(t)
+		service := organization.NewService(mockRepo)
+		orgSubdomain := randomOrganizationSubdomain()
+
+		mockRepo.On("GetOrganizationBySubdomain", context.Background(), orgSubdomain).
+			Return(organization.Organization{}, sql.ErrNoRows)
+
+		_, err := service.GetOrganizationBySubdomain(context.Background(), orgSubdomain)
+		require.Error(t, err)
+		assert.ErrorAs(t, err, &notFoundErr)
+	})
+
 	t.Run("should return the organization by subdomain", func(t *testing.T) {
 		t.Parallel()
 
@@ -102,6 +137,23 @@ func TestService_GetOrganizationByName(t *testing.T) {
 		_, err := service.GetOrganizationByName(context.Background(), orgName)
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
+	})
+
+	t.Run("should return an error when the organization is not found", func(t *testing.T) {
+		t.Parallel()
+
+		var notFoundErr *base.NotFoundError
+
+		mockRepo := organization.NewRepositoryMock(t)
+		service := organization.NewService(mockRepo)
+		orgName := randomOrganizationName()
+
+		mockRepo.On("GetOrganizationByName", context.Background(), orgName).
+			Return(organization.Organization{}, sql.ErrNoRows)
+
+		_, err := service.GetOrganizationByName(context.Background(), orgName)
+		require.Error(t, err)
+		assert.ErrorAs(t, err, &notFoundErr)
 	})
 
 	t.Run("should return the organization by name", func(t *testing.T) {

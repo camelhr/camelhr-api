@@ -1,6 +1,12 @@
 package organization
 
-import "context"
+import (
+	"context"
+	"database/sql"
+	"errors"
+
+	"github.com/camelhr/camelhr-api/internal/base"
+)
 
 //go:generate mockery --name=Service --structname=ServiceMock --inpackage --filename=service_mock.go
 
@@ -47,15 +53,30 @@ func NewService(repo Repository) Service {
 }
 
 func (s *service) GetOrganizationByID(ctx context.Context, id int64) (Organization, error) {
-	return s.repo.GetOrganizationByID(ctx, id)
+	o, err := s.repo.GetOrganizationByID(ctx, id)
+	if errors.Is(err, sql.ErrNoRows) {
+		return Organization{}, base.NewNotFoundError("organization not found for the given id")
+	}
+
+	return o, err
 }
 
 func (s *service) GetOrganizationBySubdomain(ctx context.Context, subdomain string) (Organization, error) {
-	return s.repo.GetOrganizationBySubdomain(ctx, subdomain)
+	o, err := s.repo.GetOrganizationBySubdomain(ctx, subdomain)
+	if errors.Is(err, sql.ErrNoRows) {
+		return Organization{}, base.NewNotFoundError("organization not found for the given subdomain")
+	}
+
+	return o, err
 }
 
 func (s *service) GetOrganizationByName(ctx context.Context, name string) (Organization, error) {
-	return s.repo.GetOrganizationByName(ctx, name)
+	o, err := s.repo.GetOrganizationByName(ctx, name)
+	if errors.Is(err, sql.ErrNoRows) {
+		return Organization{}, base.NewNotFoundError("organization not found for the given name")
+	}
+
+	return o, err
 }
 
 func (s *service) CreateOrganization(ctx context.Context, org Organization) (int64, error) {
