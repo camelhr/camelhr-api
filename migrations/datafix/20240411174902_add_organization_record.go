@@ -12,7 +12,7 @@ func init() {
 }
 
 func upAddOrganizationRecord(ctx context.Context, tx *sql.Tx) error {
-	_, err := tx.ExecContext(ctx, "INSERT INTO organizations(name) VALUES('org1');")
+	_, err := tx.ExecContext(ctx, "INSERT INTO organizations(subdomain, name) VALUES('sub1', 'org1');")
 	return err
 }
 
