@@ -70,6 +70,17 @@ func (s *FakeTestSuite) TestFakeUser() {
 		s.True(u.IsOwner)
 	})
 
+	s.Run("should create a user with email not verified", func() {
+		s.T().Parallel()
+
+		o := fake.NewOrganization(s.DB)
+		u := fake.NewUser(s.DB, o.ID, fake.UserEmailNotVerified())
+
+		// assert that the user is created with email not verified
+		s.Require().NotNil(u)
+		s.False(u.IsEmailVerified)
+	})
+
 	s.Run("should create a disabled user", func() {
 		s.T().Parallel()
 

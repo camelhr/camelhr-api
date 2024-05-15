@@ -44,6 +44,9 @@ type Service interface {
 
 	// ResetAPIToken resets the API token of a user.
 	ResetAPIToken(ctx context.Context, id int64) error
+
+	// SetEmailVerified sets the email_verified flag of a user.
+	SetEmailVerified(ctx context.Context, id int64) error
 }
 
 type service struct {
@@ -149,4 +152,9 @@ func (s *service) bcryptPassword(password string) (string, error) {
 
 	// return the hashed password as a string
 	return string(passwordHashBytes), nil
+}
+
+// SetEmailVerified sets the email_verified flag of a user.
+func (s *service) SetEmailVerified(ctx context.Context, id int64) error {
+	return s.repo.SetEmailVerified(ctx, id)
 }

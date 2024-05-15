@@ -169,10 +169,11 @@ func (s *UserTestSuite) TestRepositoryIntegration_CreateUser() {
 
 		result, err := repo.CreateUser(context.Background(), u.OrganizationID, u.Email, u.PasswordHash, false)
 		s.Require().NoError(err)
+		s.Equal(u.OrganizationID, result.OrganizationID)
 		s.Equal(u.Email, result.Email)
 		s.Equal(u.PasswordHash, result.PasswordHash)
-		s.Equal(u.OrganizationID, result.OrganizationID)
 		s.False(result.IsOwner)
+		s.False(result.IsEmailVerified) // email is not verified by default
 		s.Nil(result.APIToken)
 		s.Nil(result.DisabledAt)
 		s.Nil(result.Comment)
@@ -468,5 +469,39 @@ func (s *UserTestSuite) TestRepositoryIntegration_ResetAPIToken() {
 		s.Require().NotNil(result)
 		s.Require().NotNil(result.DisabledAt)
 		s.Equal(u.APIToken, result.APIToken)
+	})
+}
+
+func (s *UserTestSuite) TestRepositoryIntegration_SetEmailVerified() {
+	s.Run("should set email verified flag", func() {
+		s.T().Parallel()
+		repo := user.NewRepository(s.DB)
+		o := fake.NewOrganization(s.DB)
+		u := fake.NewUser(s.DB, o.ID, fake.UserEmailNotVerified())
+
+		err := repo.SetEmailVerified(context.Background(), u.ID)
+		s.Require().NoError(err)
+
+		result := u.FetchLatest(s.DB)
+		s.Require().NotNil(result)
+		s.True(result.IsEmailVerified)
+		s.Equal(time.UTC, result.UpdatedAt.Location())
+		s.WithinDuration(time.Now().UTC(), result.UpdatedAt, 1*time.Minute)
+		s.GreaterOrEqual(result.UpdatedAt.Unix(), result.CreatedAt.Unix())
+	})
+
+	s.Run("should not set email verified flag for deleted user", func() {
+		s.T().Parallel()
+		repo := user.NewRepository(s.DB)
+		o := fake.NewOrganization(s.DB)
+		u := fake.NewUser(s.DB, o.ID, fake.UserDeleted(), fake.UserEmailNotVerified())
+
+		err := repo.SetEmailVerified(context.Background(), u.ID)
+		s.Require().NoError(err)
+
+		result := u.FetchLatest(s.DB)
+		s.Require().NotNil(result)
+		s.Require().NotNil(result.DeletedAt)
+		s.False(result.IsEmailVerified)
 	})
 }

@@ -446,3 +446,34 @@ func TestService_ResetAPIToken(t *testing.T) {
 		require.NoError(t, err)
 	})
 }
+
+func TestService_SetEmailVerified(t *testing.T) {
+	t.Parallel()
+
+	t.Run("should return error when repository return error", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := user.NewRepositoryMock(t)
+		service := user.NewService(mockRepo)
+
+		mockRepo.On("SetEmailVerified", context.Background(), int64(1)).
+			Return(assert.AnError)
+
+		err := service.SetEmailVerified(context.Background(), int64(1))
+		require.Error(t, err)
+		assert.ErrorIs(t, assert.AnError, err)
+	})
+
+	t.Run("should set email verified", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := user.NewRepositoryMock(t)
+		service := user.NewService(mockRepo)
+
+		mockRepo.On("SetEmailVerified", context.Background(), int64(1)).
+			Return(nil)
+
+		err := service.SetEmailVerified(context.Background(), int64(1))
+		require.NoError(t, err)
+	})
+}

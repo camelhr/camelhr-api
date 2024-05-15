@@ -410,3 +410,34 @@ func TestRepository_ResetAPIToken(t *testing.T) {
 		require.NoError(t, err)
 	})
 }
+
+func TestRepository_SetEmailVerified(t *testing.T) {
+	t.Parallel()
+
+	t.Run("should return an error when the database call fails", func(t *testing.T) {
+		t.Parallel()
+
+		mockDB := &database.DatabaseMock{}
+		repo := user.NewRepository(mockDB)
+
+		mockDB.On("Exec", context.Background(), nil, tests.QueryMatcher("setEmailVerifiedQuery"), int64(1)).
+			Return(assert.AnError)
+
+		err := repo.SetEmailVerified(context.Background(), 1)
+		require.Error(t, err)
+		assert.ErrorIs(t, assert.AnError, err)
+	})
+
+	t.Run("should return nil when email is verified", func(t *testing.T) {
+		t.Parallel()
+
+		mockDB := &database.DatabaseMock{}
+		repo := user.NewRepository(mockDB)
+
+		mockDB.On("Exec", context.Background(), nil, tests.QueryMatcher("setEmailVerifiedQuery"), int64(1)).
+			Return(nil)
+
+		err := repo.SetEmailVerified(context.Background(), 1)
+		require.NoError(t, err)
+	})
+}

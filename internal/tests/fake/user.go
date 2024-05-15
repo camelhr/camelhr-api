@@ -37,6 +37,14 @@ func UserIsOwner() UserOption {
 	}
 }
 
+// UserEmailNotVerified sets is_email_verified to false.
+func UserEmailNotVerified() UserOption {
+	return func(u *FakeUser) (*FakeUser, error) {
+		u.IsEmailVerified = false
+		return u, nil
+	}
+}
+
 // UserWithoutToken sets the API token to null.
 func UserWithoutToken() UserOption {
 	return func(u *FakeUser) (*FakeUser, error) {
@@ -114,6 +122,7 @@ func (u *FakeUser) setDefaults() {
 
 	u.PasswordHash = string(hashedPassword)
 	u.IsOwner = false
+	u.IsEmailVerified = true
 	u.CreatedAt = time.Now().UTC()
 	u.UpdatedAt = u.CreatedAt
 	u.setAPIToken = true
@@ -122,13 +131,13 @@ func (u *FakeUser) setDefaults() {
 // persist saves the fake user to the database.
 func (u *FakeUser) persist(db database.Database) error {
 	insertQuery := `INSERT INTO users
-	(organization_id, email, password_hash, api_token, is_owner, disabled_at, comment, 
-	created_at, updated_at, deleted_at) VALUES
-	($1, $2, $3, CASE WHEN $4 THEN random_token() ELSE null END, $5, $6, $7, $8, $9, $10)
+	(organization_id, email, password_hash, api_token, is_owner, is_email_verified,
+		disabled_at, comment, created_at, updated_at, deleted_at) VALUES
+	($1, $2, $3, CASE WHEN $4 THEN random_token() ELSE null END, $5, $6, $7, $8, $9, $10, $11)
 	RETURNING *`
 
 	return db.Exec(context.Background(), u, insertQuery,
-		u.OrganizationID, u.Email, u.PasswordHash, u.setAPIToken, u.IsOwner,
+		u.OrganizationID, u.Email, u.PasswordHash, u.setAPIToken, u.IsOwner, u.IsEmailVerified,
 		u.DisabledAt, u.Comment, u.CreatedAt, u.UpdatedAt, u.DeletedAt)
 }
 
@@ -144,6 +153,7 @@ func (u *FakeUser) FetchLatest(db database.Database) *FakeUser {
 				password_hash,
 				api_token,
 				is_owner,
+				is_email_verified,
 				disabled_at,
 				comment,
 				created_at,

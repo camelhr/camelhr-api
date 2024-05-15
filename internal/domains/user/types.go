@@ -26,6 +26,9 @@ type User struct {
 	// IsOwner represents whether the user is the owner of the organization.
 	IsOwner bool `db:"is_owner"`
 
+	// IsEmailVerified represents whether the user's email is verified.
+	IsEmailVerified bool `db:"is_email_verified"`
+
 	// DisabledAt is the timestamp when the user was disabled.
 	DisabledAt *time.Time `db:"disabled_at"`
 

@@ -41,6 +41,9 @@ type Repository interface {
 
 	// ResetAPIToken resets the API token of a user.
 	ResetAPIToken(ctx context.Context, id int64) error
+
+	// SetEmailVerified sets the email_verified flag of a user.
+	SetEmailVerified(ctx context.Context, id int64) error
 }
 
 type repository struct {
@@ -108,4 +111,8 @@ func (r *repository) GenerateAPIToken(ctx context.Context, id int64) error {
 
 func (r *repository) ResetAPIToken(ctx context.Context, id int64) error {
 	return r.db.Exec(ctx, nil, resetAPITokenQuery, id)
+}
+
+func (r *repository) SetEmailVerified(ctx context.Context, id int64) error {
+	return r.db.Exec(ctx, nil, setEmailVerifiedQuery, id)
 }

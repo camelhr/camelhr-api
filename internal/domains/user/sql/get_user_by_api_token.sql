@@ -7,6 +7,7 @@ SELECT
     password_hash,
     api_token,
     is_owner,
+    is_email_verified,
     disabled_at,
     comment,
     created_at,

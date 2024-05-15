@@ -261,6 +261,24 @@ func (_m *RepositoryMock) ResetPassword(ctx context.Context, id int64, passwordH
 	return r0
 }
 
+// SetEmailVerified provides a mock function with given fields: ctx, id
+func (_m *RepositoryMock) SetEmailVerified(ctx context.Context, id int64) error {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SetEmailVerified")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, int64) error); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // NewRepositoryMock creates a new instance of RepositoryMock. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewRepositoryMock(t interface {

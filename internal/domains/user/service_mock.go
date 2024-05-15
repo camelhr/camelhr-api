@@ -13,9 +13,9 @@ type ServiceMock struct {
 	mock.Mock
 }
 
-// CreateOwner provides a mock function with given fields: ctx, orgID, email, passwordHash
-func (_m *ServiceMock) CreateOwner(ctx context.Context, orgID int64, email string, passwordHash string) (User, error) {
-	ret := _m.Called(ctx, orgID, email, passwordHash)
+// CreateOwner provides a mock function with given fields: ctx, orgID, email, password
+func (_m *ServiceMock) CreateOwner(ctx context.Context, orgID int64, email string, password string) (User, error) {
+	ret := _m.Called(ctx, orgID, email, password)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreateOwner")
@@ -24,16 +24,16 @@ func (_m *ServiceMock) CreateOwner(ctx context.Context, orgID int64, email strin
 	var r0 User
 	var r1 error
 	if rf, ok := ret.Get(0).(func(context.Context, int64, string, string) (User, error)); ok {
-		return rf(ctx, orgID, email, passwordHash)
+		return rf(ctx, orgID, email, password)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, int64, string, string) User); ok {
-		r0 = rf(ctx, orgID, email, passwordHash)
+		r0 = rf(ctx, orgID, email, password)
 	} else {
 		r0 = ret.Get(0).(User)
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, int64, string, string) error); ok {
-		r1 = rf(ctx, orgID, email, passwordHash)
+		r1 = rf(ctx, orgID, email, password)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -41,9 +41,9 @@ func (_m *ServiceMock) CreateOwner(ctx context.Context, orgID int64, email strin
 	return r0, r1
 }
 
-// CreateUser provides a mock function with given fields: ctx, orgID, email, passwordHash
-func (_m *ServiceMock) CreateUser(ctx context.Context, orgID int64, email string, passwordHash string) (User, error) {
-	ret := _m.Called(ctx, orgID, email, passwordHash)
+// CreateUser provides a mock function with given fields: ctx, orgID, email, password
+func (_m *ServiceMock) CreateUser(ctx context.Context, orgID int64, email string, password string) (User, error) {
+	ret := _m.Called(ctx, orgID, email, password)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreateUser")
@@ -52,16 +52,16 @@ func (_m *ServiceMock) CreateUser(ctx context.Context, orgID int64, email string
 	var r0 User
 	var r1 error
 	if rf, ok := ret.Get(0).(func(context.Context, int64, string, string) (User, error)); ok {
-		return rf(ctx, orgID, email, passwordHash)
+		return rf(ctx, orgID, email, password)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, int64, string, string) User); ok {
-		r0 = rf(ctx, orgID, email, passwordHash)
+		r0 = rf(ctx, orgID, email, password)
 	} else {
 		r0 = ret.Get(0).(User)
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, int64, string, string) error); ok {
-		r1 = rf(ctx, orgID, email, passwordHash)
+		r1 = rf(ctx, orgID, email, password)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -271,9 +271,9 @@ func (_m *ServiceMock) ResetAPIToken(ctx context.Context, id int64) error {
 	return r0
 }
 
-// ResetPassword provides a mock function with given fields: ctx, id, passwordHash
-func (_m *ServiceMock) ResetPassword(ctx context.Context, id int64, passwordHash string) error {
-	ret := _m.Called(ctx, id, passwordHash)
+// ResetPassword provides a mock function with given fields: ctx, id, newPassword
+func (_m *ServiceMock) ResetPassword(ctx context.Context, id int64, newPassword string) error {
+	ret := _m.Called(ctx, id, newPassword)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ResetPassword")
@@ -281,7 +281,7 @@ func (_m *ServiceMock) ResetPassword(ctx context.Context, id int64, passwordHash
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, int64, string) error); ok {
-		r0 = rf(ctx, id, passwordHash)
+		r0 = rf(ctx, id, newPassword)
 	} else {
 		r0 = ret.Error(0)
 	}

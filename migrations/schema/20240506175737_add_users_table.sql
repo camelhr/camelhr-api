@@ -7,6 +7,7 @@ CREATE TABLE users (
     password_hash TEXT,
     api_token text UNIQUE,
     is_owner BOOLEAN NOT NULL DEFAULT FALSE,
+    is_email_verified BOOLEAN NOT NULL DEFAULT FALSE,
     disabled_at TIMESTAMP WITHOUT TIME ZONE,
     comment VARCHAR(255),
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),

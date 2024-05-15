@@ -34,3 +34,6 @@ var generateAPITokenQuery string
 
 //go:embed sql/reset_api_token.sql
 var resetAPITokenQuery string
+
+//go:embed sql/set_email_verified.sql
+var setEmailVerifiedQuery string

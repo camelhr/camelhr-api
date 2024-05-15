@@ -240,3 +240,20 @@ func (s *UserTestSuite) TestServiceIntegration_ResetAPIToken() {
 		s.NotNil(result.APIToken)
 	})
 }
+
+func (s *UserTestSuite) TestServiceIntegration_SetEmailVerified() {
+	s.Run("should set email verified", func() {
+		s.T().Parallel()
+		repo := user.NewRepository(s.DB)
+		svc := user.NewService(repo)
+		o := fake.NewOrganization(s.DB)
+		u := fake.NewUser(s.DB, o.ID, fake.UserEmailNotVerified())
+
+		err := svc.SetEmailVerified(context.Background(), u.ID)
+		s.Require().NoError(err)
+
+		result, err := svc.GetUserByID(context.Background(), u.ID)
+		s.Require().NoError(err)
+		s.True(result.IsEmailVerified)
+	})
+}

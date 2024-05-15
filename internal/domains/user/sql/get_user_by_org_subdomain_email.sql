@@ -8,6 +8,7 @@ SELECT
     u.password_hash,
     u.api_token,
     u.is_owner,
+    is_email_verified,
     u.disabled_at,
     u.comment,
     u.created_at,
