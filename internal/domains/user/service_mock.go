@@ -289,6 +289,24 @@ func (_m *ServiceMock) ResetPassword(ctx context.Context, id int64, newPassword 
 	return r0
 }
 
+// SetEmailVerified provides a mock function with given fields: ctx, id
+func (_m *ServiceMock) SetEmailVerified(ctx context.Context, id int64) error {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SetEmailVerified")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, int64) error); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // NewServiceMock creates a new instance of ServiceMock. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewServiceMock(t interface {
