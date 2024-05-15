@@ -32,6 +32,7 @@ func TestExec(t *testing.T) {
 
 		err = pgDB.Exec(context.Background(), nil, "INSERT INTO users (name, age) VALUES ($1, $2)", "John Doe", 30)
 		require.NoError(t, err)
+		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 
 	t.Run("should call underlying SelectContext when dest is slice", func(t *testing.T) {
@@ -58,6 +59,7 @@ func TestExec(t *testing.T) {
 		err = pgDB.Exec(context.Background(), &users,
 			"INSERT INTO users (name, age) VALUES ($1, $2) RETURNING name, age", "John Doe", 30)
 		require.NoError(t, err)
+		assert.NoError(t, mock.ExpectationsWereMet())
 		assert.Len(t, users, 1)
 		assert.Equal(t, "John Doe", users[0].Name)
 		assert.Equal(t, 30, users[0].Age)
@@ -83,6 +85,7 @@ func TestExec(t *testing.T) {
 		err = pgDB.Exec(context.Background(), &id,
 			"INSERT INTO users (name, age) VALUES ($1, $2) RETURNING id", "John Doe", 30)
 		require.NoError(t, err)
+		assert.NoError(t, mock.ExpectationsWereMet())
 		require.NotNil(t, id)
 		assert.Equal(t, int64(1), *id)
 	})
@@ -104,7 +107,8 @@ func TestExec(t *testing.T) {
 
 		err = pgDB.Exec(context.Background(), nil, "INSERT INTO users (name, age) VALUES ($1, $2)", "John Doe", 30)
 		require.Error(t, err)
-		assert.ErrorIs(t, err, assert.AnError)
+		require.ErrorIs(t, err, assert.AnError)
+		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 
 	t.Run("should return an error when the underlying SelectContext fails", func(t *testing.T) {
@@ -130,7 +134,8 @@ func TestExec(t *testing.T) {
 		err = pgDB.Exec(context.Background(), &users,
 			"INSERT INTO users (name, age) VALUES ($1, $2) RETURNING name, age", "John Doe", 30)
 		require.Error(t, err)
-		assert.ErrorIs(t, err, assert.AnError)
+		require.ErrorIs(t, err, assert.AnError)
+		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 
 	t.Run("should return an error when the underlying GetContext fails", func(t *testing.T) {
@@ -152,7 +157,8 @@ func TestExec(t *testing.T) {
 		err = pgDB.Exec(context.Background(), &id,
 			"INSERT INTO users (name, age) VALUES ($1, $2) RETURNING id", "John Doe", 30)
 		require.Error(t, err)
-		assert.ErrorIs(t, err, assert.AnError)
+		require.ErrorIs(t, err, assert.AnError)
+		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 }
 
@@ -184,6 +190,7 @@ func TestGet(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, "John Doe", user.Name)
 		assert.Equal(t, 30, user.Age)
+		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 }
 
@@ -216,6 +223,7 @@ func TestList(t *testing.T) {
 		assert.Len(t, users, 1)
 		assert.Equal(t, "John Doe", users[0].Name)
 		assert.Equal(t, 30, users[0].Age)
+		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 }
 
@@ -243,7 +251,8 @@ func TestTransact(t *testing.T) {
 			_, err := tx.Exec("INSERT INTO users (name, age) VALUES ($1, $2)", "John Doe", 30)
 			return err
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
+		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 
 	t.Run("should rollback the transaction if an error occurs", func(t *testing.T) {
@@ -267,7 +276,8 @@ func TestTransact(t *testing.T) {
 			_, err := tx.Exec("INSERT INTO users (name, age) VALUES ($1, $2)", "John Doe", 30)
 			return err
 		})
-		assert.Error(t, err)
+		require.Error(t, err)
+		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 
 	t.Run("should rollback the transaction if a panic occurs", func(t *testing.T) {
@@ -284,35 +294,11 @@ func TestTransact(t *testing.T) {
 		mock.ExpectBegin()
 		mock.ExpectRollback()
 
-		assert.Panics(t, func() {
+		require.Panics(t, func() {
 			_ = pgDB.Transact(context.Background(), func(tx *sql.Tx) error {
 				panic("panic")
 			})
 		})
-	})
-
-	t.Run("should rollback the transaction if an error occurs during commit", func(t *testing.T) {
-		t.Parallel()
-
-		mockDB, mock, err := sqlmock.New()
-		require.NoError(t, err)
-		defer mockDB.Close()
-
-		sqlxDB := sqlx.NewDb(mockDB, "sqlmock")
-		defer sqlxDB.Close()
-		pgDB := database.NewPostgresDatabase(sqlxDB)
-
-		mock.ExpectBegin()
-		mock.ExpectExec("INSERT INTO users (.+) VALUES (.+)").
-			WithArgs("John Doe", 30).
-			WillReturnResult(sqlmock.NewResult(1, 1))
-		mock.ExpectCommit().WillReturnError(assert.AnError)
-		mock.ExpectRollback()
-
-		err = pgDB.Transact(context.Background(), func(tx *sql.Tx) error {
-			_, err := tx.Exec("INSERT INTO users (name, age) VALUES ($1, $2)", "John Doe", 30)
-			return err
-		})
-		assert.Error(t, err)
+		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 }

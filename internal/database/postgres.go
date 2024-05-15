@@ -41,7 +41,7 @@ func (p *postgresDatabase) List(ctx context.Context, dest any, query string, arg
 	return p.db.SelectContext(ctx, dest, query, args...)
 }
 
-func (p *postgresDatabase) Transact( //nolint:nonamedreturns // named return is used to simplify the error handling
+func (p *postgresDatabase) Transact(
 	ctx context.Context,
 	fn func(*sql.Tx) error,
 ) (err error) {
@@ -56,14 +56,16 @@ func (p *postgresDatabase) Transact( //nolint:nonamedreturns // named return is 
 			panic(p)      // re-throw panic after Rollback
 		} else if err != nil {
 			tx.Rollback() //nolint:errcheck // err is non-nil, don't update the err
+		} else {
+			// err is nil, commit the transaction
+			// if commit fails, return the error but do not call rollback
+			// since the transaction won't be valid after commit is called
+			// irrespective of the commit result
+			err = tx.Commit()
 		}
 	}()
 
-	if err = fn(tx); err != nil {
-		return err
-	}
-
-	err = tx.Commit()
+	err = fn(tx)
 
 	return err
 }
