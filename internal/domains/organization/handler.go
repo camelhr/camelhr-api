@@ -3,7 +3,6 @@ package organization
 import (
 	"errors"
 	"net/http"
-	"regexp"
 
 	"github.com/camelhr/camelhr-api/internal/base"
 	"github.com/camelhr/camelhr-api/internal/web/request"
@@ -20,8 +19,8 @@ func NewHandler(service Service) *handler {
 
 func (h *handler) GetOrganizationBySubdomain(w http.ResponseWriter, r *http.Request) {
 	subdomain := request.URLParam(r, "subdomain")
-	if err := validateSubdomain(subdomain); err != nil {
-		response.ErrorResponse(w, http.StatusBadRequest, err)
+	if err := ValidateSubdomain(subdomain); err != nil {
+		response.ErrorResponse(w, http.StatusBadRequest, base.WrapError(err))
 		return
 	}
 
@@ -44,8 +43,8 @@ func (h *handler) GetOrganizationBySubdomain(w http.ResponseWriter, r *http.Requ
 
 func (h *handler) UpdateOrganization(w http.ResponseWriter, r *http.Request) {
 	subdomain := request.URLParam(r, "subdomain")
-	if err := validateSubdomain(subdomain); err != nil {
-		response.ErrorResponse(w, http.StatusBadRequest, err)
+	if err := ValidateSubdomain(subdomain); err != nil {
+		response.ErrorResponse(w, http.StatusBadRequest, base.WrapError(err))
 		return
 	}
 
@@ -78,8 +77,8 @@ func (h *handler) UpdateOrganization(w http.ResponseWriter, r *http.Request) {
 
 func (h *handler) DeleteOrganization(w http.ResponseWriter, r *http.Request) {
 	subdomain := request.URLParam(r, "subdomain")
-	if err := validateSubdomain(subdomain); err != nil {
-		response.ErrorResponse(w, http.StatusBadRequest, err)
+	if err := ValidateSubdomain(subdomain); err != nil {
+		response.ErrorResponse(w, http.StatusBadRequest, base.WrapError(err))
 		return
 	}
 
@@ -113,26 +112,4 @@ func (h *handler) toResponse(org Organization) *Response {
 		BlacklistedAt: org.BlacklistedAt,
 		Timestamps:    org.Timestamps,
 	}
-}
-
-func validateSubdomain(subdomain string) error {
-	const allowedMaxLength = 30
-
-	// validate that subdomain is not empty
-	if subdomain == "" {
-		return base.NewAPIError("subdomain should not be empty")
-	}
-
-	// validate that subdomain length is less than or equal to 30
-	if len(subdomain) > allowedMaxLength {
-		return base.NewAPIError("subdomain length must be less than or equal to 30")
-	}
-
-	// validate that subdomain is alphanumeric
-	match, err := regexp.MatchString(`^[a-zA-Z0-9]+$`, subdomain)
-	if err != nil || !match {
-		return base.NewAPIError("subdomain must be alphanumeric")
-	}
-
-	return nil
 }
