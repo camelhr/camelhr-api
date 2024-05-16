@@ -1,9 +1,11 @@
 package base
 
 type APIError struct {
-	msg string
+	cause error
+	msg   string
 }
 
+// Error returns the error message.
 func (e *APIError) Error() string {
 	return e.msg
 }
@@ -14,11 +16,22 @@ func NewAPIError(msg string) error {
 	return &APIError{msg: msg}
 }
 
+// WrapError wraps the given error into an API error.
+func WrapError(err error) error {
+	return &APIError{msg: err.Error(), cause: err}
+}
+
+// Unwrap unwraps the cause of the API error.
+func (e *APIError) Unwrap() error {
+	return e.cause
+}
+
 // NotFoundError is an error type that represents a not found error.
 type NotFoundError struct {
 	msg string
 }
 
+// Error returns the error message.
 func (e *NotFoundError) Error() string {
 	return e.msg
 }
