@@ -5,7 +5,7 @@ CREATE TABLE users (
     organization_id INTEGER NOT NULL,
     email VARCHAR(255) NOT NULL CHECK (email ~* '^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'),
     password_hash TEXT,
-    api_token text UNIQUE,
+    api_token TEXT UNIQUE,
     is_owner BOOLEAN NOT NULL DEFAULT FALSE,
     is_email_verified BOOLEAN NOT NULL DEFAULT FALSE,
     disabled_at TIMESTAMP WITHOUT TIME ZONE,
