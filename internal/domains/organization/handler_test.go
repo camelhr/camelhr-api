@@ -267,37 +267,37 @@ func TestHandler_UpdateOrganization(t *testing.T) {
 				testName:  "subdomain is missing",
 				payload:   `{"name": "test org pvt ltd."}`,
 				subdomain: "",
-				err:       `{"error": "subdomain should not be empty"}`,
+				err:       `{"error": "subdomain is a required"}`,
 			},
 			{
 				testName:  "name is missing",
 				payload:   `{}`,
 				subdomain: "sub1",
-				err:       `{"error": "Key: 'Request.name' Error:Field validation for 'name' failed on the 'required' tag"}`,
+				err:       `{"error": "name is a required field"}`,
 			},
 			{
 				testName:  "subdomain is too long",
 				payload:   `{"name": "test org pvt ltd."}`,
 				subdomain: gofakeit.LetterN(31),
-				err:       `{"error": "subdomain length must be less than or equal to 30"}`,
+				err:       `{"error": "subdomain must be a maximum of 30 characters in length"}`,
 			},
 			{
 				testName:  "name is too long",
 				payload:   fmt.Sprintf(`{"name": "%s"}`, gofakeit.LetterN(61)),
 				subdomain: "sub1",
-				err:       `{"error": "Key: 'Request.name' Error:Field validation for 'name' failed on the 'max' tag"}`,
+				err:       `{"error": "name must be a maximum of 60 characters in length"}`,
 			},
 			{
 				testName:  "subdomain is not alphanumeric",
 				payload:   `{"name": "test org pvt ltd."}`,
 				subdomain: "sub1!",
-				err:       `{"error": "subdomain must be alphanumeric"}`,
+				err:       `{"error": "subdomain can only contain alphanumeric characters"}`,
 			},
 			{
 				testName:  "name contains non ascii characters",
 				payload:   `{"name": "€€"}`,
 				subdomain: "sub1",
-				err:       `{"error": "Key: 'Request.name' Error:Field validation for 'name' failed on the 'ascii' tag"}`,
+				err:       `{"error": "name must contain only ascii characters"}`,
 			},
 		}
 

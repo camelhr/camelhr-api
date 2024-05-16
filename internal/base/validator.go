@@ -5,16 +5,22 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/camelhr/log"
+	"github.com/go-playground/locales/en"
+	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
+	entranslations "github.com/go-playground/validator/v10/translations/en"
 )
 
 type (
 	InvalidValidationErr = validator.InvalidValidationError
 )
 
+//nolint:gochecknoglobals // global variable is used to initialize the validator once
 var (
-	once sync.Once           //nolint:gochecknoglobals // global variable is used to initialize the validator once
-	v    *validator.Validate //nolint:gochecknoglobals // global variable is used to initialize the validator once
+	once sync.Once
+	v    *validator.Validate
+	uni  *ut.UniversalTranslator
 )
 
 // Validator returns a new instance of the validator. It is thread-safe.
@@ -37,5 +43,22 @@ func initValidator() {
 
 			return name
 		})
+
+		enTranslator := en.New()
+		uni = ut.New(enTranslator, enTranslator)
+		trans, _ := uni.GetTranslator("en")
+
+		if err := entranslations.RegisterDefaultTranslations(v, trans); err != nil {
+			log.Error("failed to register default translations: %v", err)
+		}
 	})
+}
+
+func ValidationTranslator() ut.Translator {
+	initValidator()
+
+	lang := "en"
+	trans, _ := uni.GetTranslator(lang)
+
+	return trans
 }

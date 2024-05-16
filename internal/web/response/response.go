@@ -33,7 +33,16 @@ func ErrorResponse(w http.ResponseWriter, statusCode int, err error) {
 	} else if ok := errors.As(err, &notFoundErr); ok {
 		message = notFoundErr.Error()
 	} else if ok := errors.As(err, &validationErr); ok {
-		message = validationErr.Error()
+		trans := base.ValidationTranslator()
+		message = ""
+
+		for _, fieldErr := range validationErr {
+			if message != "" {
+				message += ". "
+			}
+
+			message += fieldErr.Translate(trans)
+		}
 	} else {
 		log.Error("%v", err)
 	}
