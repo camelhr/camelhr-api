@@ -2,7 +2,6 @@ package database_test
 
 import (
 	"context"
-	"database/sql"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -227,7 +226,7 @@ func TestList(t *testing.T) {
 	})
 }
 
-func TestTransact(t *testing.T) {
+func TestWithTx(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should execute transaction", func(t *testing.T) {
@@ -247,8 +246,8 @@ func TestTransact(t *testing.T) {
 			WillReturnResult(sqlmock.NewResult(1, 1))
 		mock.ExpectCommit()
 
-		err = pgDB.Transact(context.Background(), func(tx *sql.Tx) error {
-			_, err := tx.Exec("INSERT INTO users (name, age) VALUES ($1, $2)", "John Doe", 30)
+		err = pgDB.WithTx(context.Background(), func(ctx context.Context) error {
+			err := pgDB.Exec(ctx, nil, "INSERT INTO users (name, age) VALUES ($1, $2)", "John Doe", 30)
 			return err
 		})
 		require.NoError(t, err)
@@ -272,8 +271,8 @@ func TestTransact(t *testing.T) {
 			WillReturnError(assert.AnError)
 		mock.ExpectRollback()
 
-		err = pgDB.Transact(context.Background(), func(tx *sql.Tx) error {
-			_, err := tx.Exec("INSERT INTO users (name, age) VALUES ($1, $2)", "John Doe", 30)
+		err = pgDB.WithTx(context.Background(), func(ctx context.Context) error {
+			err := pgDB.Exec(ctx, nil, "INSERT INTO users (name, age) VALUES ($1, $2)", "John Doe", 30)
 			return err
 		})
 		require.Error(t, err)
@@ -295,7 +294,7 @@ func TestTransact(t *testing.T) {
 		mock.ExpectRollback()
 
 		require.Panics(t, func() {
-			_ = pgDB.Transact(context.Background(), func(tx *sql.Tx) error {
+			_ = pgDB.WithTx(context.Background(), func(ctx context.Context) error {
 				panic("panic")
 			})
 		})

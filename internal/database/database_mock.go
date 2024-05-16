@@ -4,7 +4,6 @@ package database
 
 import (
 	context "context"
-	sql "database/sql"
 
 	mock "github.com/stretchr/testify/mock"
 )
@@ -77,17 +76,17 @@ func (_m *DatabaseMock) List(ctx context.Context, dest interface{}, query string
 	return r0
 }
 
-// Transact provides a mock function with given fields: ctx, fn
-func (_m *DatabaseMock) Transact(ctx context.Context, fn func(*sql.Tx) error) error {
-	ret := _m.Called(ctx, fn)
+// WithTx provides a mock function with given fields: ctx, txFn
+func (_m *DatabaseMock) WithTx(ctx context.Context, txFn func(context.Context) error) error {
+	ret := _m.Called(ctx, txFn)
 
 	if len(ret) == 0 {
-		panic("no return value specified for Transact")
+		panic("no return value specified for WithTx")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, func(*sql.Tx) error) error); ok {
-		r0 = rf(ctx, fn)
+	if rf, ok := ret.Get(0).(func(context.Context, func(context.Context) error) error); ok {
+		r0 = rf(ctx, txFn)
 	} else {
 		r0 = ret.Error(0)
 	}

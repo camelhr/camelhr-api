@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"database/sql"
 	"reflect"
 
 	"github.com/jmoiron/sqlx"
@@ -41,9 +40,9 @@ func (p *postgresDatabase) List(ctx context.Context, dest any, query string, arg
 	return p.db.SelectContext(ctx, dest, query, args...)
 }
 
-func (p *postgresDatabase) Transact(
+func (p *postgresDatabase) WithTx(
 	ctx context.Context,
-	fn func(*sql.Tx) error,
+	txFn func(ctx context.Context) error,
 ) (err error) {
 	tx, err := p.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -65,7 +64,7 @@ func (p *postgresDatabase) Transact(
 		}
 	}()
 
-	err = fn(tx)
+	err = txFn(ctx)
 
 	return err
 }

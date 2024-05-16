@@ -16,8 +16,8 @@ type Database interface {
 	Get(ctx context.Context, dest any, query string, args ...any) error
 	// List executes a query that is expected to return multiple rows. Should be used for read operations.
 	List(ctx context.Context, dest any, query string, args ...any) error
-	// Transact executes the given function inside a transaction.
-	Transact(ctx context.Context, fn func(*sql.Tx) error) error
+
+	Transactor
 }
 
 // SuppressNoRowsError suppresses the sql.ErrNoRows error.
