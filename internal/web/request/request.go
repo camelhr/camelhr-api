@@ -13,6 +13,14 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+type requestContextKey int
+
+const (
+	CtxUserIDKey requestContextKey = iota
+	CtxOrgIDKey
+	CtxOrgSubdomainKey
+)
+
 // decodeJSON decodes a JSON payload from the given reader into the given value.
 // It also validates the fields using the validator.
 func decodeJSON(r io.Reader, v any) error {

@@ -1,12 +1,16 @@
 package config
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"log" //nolint:depguard // since functions defined here are called before the structured logger is initialized
 
 	"github.com/spf13/viper"
 )
 
 type Config struct {
+	AppSecret string `mapstructure:"app_secret"`
+
 	LogLevel string `mapstructure:"log_level"`
 
 	HTTPAddress string `mapstructure:"http_address"`
@@ -25,17 +29,24 @@ const (
 
 func init() {
 	// set the default values. make sure to set the default values for all the configs
-	// that are being used in the application. the default values should point to
-	// the production setup unless the value is a secret or sensitive information.
+	// that are being used in the application. the default values should be suitable for production
+	// to avoid any runtime issues.
+
+	// secure configs
+	// app secret is used to sign the jwt tokens.
+	// it is set to a random value by default. it must be set in the environment variable for production.
+	viper.SetDefault("app_secret", generateDefaultRandomAppSecret())
 
 	// logger configs
-	viper.SetDefault("log_level", "error")
+	viper.SetDefault("log_level", "info")
 
 	// http server configs
+	// 0.0.0.0 is a non-routable meta-address used to listen on all available network interfaces
+	// so it can be accessed via any IP address that the machine has.
 	viper.SetDefault("http_address", "0.0.0.0:8080")
 
 	// database configs
-	viper.SetDefault("db_conn", "") // secret value. should be set in the environment.
+	viper.SetDefault("db_conn", "") // secret value. must be set in the environment.
 	viper.SetDefault("db_max_open", defaultDBMaxOpen)
 	viper.SetDefault("db_max_idle", defaultDBMaxIdle)
 	viper.SetDefault("db_max_idle_conn_time", defaultDBMaxIdleConnTime) // in minutes
@@ -54,4 +65,17 @@ func LoadConfig() Config {
 	}
 
 	return config
+}
+
+// generateDefaultRandomAppSecret generates a random app secret.
+func generateDefaultRandomAppSecret() string {
+	const length = 32
+	bytes := make([]byte, length)
+
+	_, err := rand.Read(bytes)
+	if err != nil {
+		log.Fatalf("failed to generate default random app secret: %v", err)
+	}
+
+	return base64.URLEncoding.EncodeToString(bytes)
 }
