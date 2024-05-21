@@ -49,6 +49,27 @@ func (s *UserTestSuite) TestServiceIntegration_GetUserByAPIToken() {
 	})
 }
 
+func (s *UserTestSuite) TestServiceIntegration_GetUserByOrgSubdomainAPIToken() {
+	s.Run("should return user", func() {
+		s.T().Parallel()
+		repo := user.NewRepository(s.DB)
+		svc := user.NewService(repo)
+		o := fake.NewOrganization(s.DB)
+		u := fake.NewUser(s.DB, o.ID)
+		s.Require().NotNil(u.APIToken)
+
+		result, err := svc.GetUserByOrgSubdomainAPIToken(context.Background(), o.Subdomain, *u.APIToken)
+		s.Require().NoError(err)
+		s.Equal(u.ID, result.ID)
+		s.Equal(u.Email, result.Email)
+		s.Nil(result.DisabledAt)
+		s.NotZero(result.CreatedAt)
+		s.NotZero(result.UpdatedAt)
+		s.Equal(result.CreatedAt, result.UpdatedAt)
+		s.Nil(result.Comment)
+	})
+}
+
 func (s *UserTestSuite) TestServiceIntegration_GetUserByOrgIDEmail() {
 	s.Run("should return user", func() {
 		s.T().Parallel()

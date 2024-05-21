@@ -72,7 +72,7 @@ func (s *UserTestSuite) TestRepositoryIntegration_GetUserByAPIToken() {
 		s.Equal(u.User, result)
 	})
 
-	s.Run("should return error when user does not exist", func() {
+	s.Run("should return error when user does not exist for api token", func() {
 		s.T().Parallel()
 		repo := user.NewRepository(s.DB)
 
@@ -85,8 +85,58 @@ func (s *UserTestSuite) TestRepositoryIntegration_GetUserByAPIToken() {
 		s.T().Parallel()
 		repo := user.NewRepository(s.DB)
 		u := fake.NewUser(s.DB, fake.NewOrganization(s.DB).ID, fake.UserDeleted())
+		s.Require().NotNil(u.APIToken)
 
 		_, err := repo.GetUserByAPIToken(context.Background(), *u.APIToken)
+		s.Require().Error(err)
+		s.ErrorIs(err, sql.ErrNoRows)
+	})
+}
+
+func (s *UserTestSuite) TestRepositoryIntegration_GetUserByOrgSubdomainAPIToken() {
+	s.Run("should return user by org subdomain and api token", func() {
+		s.T().Parallel()
+		repo := user.NewRepository(s.DB)
+		o := fake.NewOrganization(s.DB)
+		u := fake.NewUser(s.DB, o.ID)
+		s.Require().NotNil(u.APIToken)
+
+		result, err := repo.GetUserByOrgSubdomainAPIToken(context.Background(), o.Subdomain, *u.APIToken)
+		s.Require().NoError(err)
+		s.Equal(u.User, result)
+	})
+
+	s.Run("should return error when user does not exist for api token", func() {
+		s.T().Parallel()
+		repo := user.NewRepository(s.DB)
+		o := fake.NewOrganization(s.DB)
+
+		_, err := repo.GetUserByOrgSubdomainAPIToken(context.Background(), o.Subdomain, gofakeit.UUID())
+		s.Require().Error(err)
+		s.ErrorIs(err, sql.ErrNoRows)
+	})
+
+	s.Run("should return error when user does not exist for subdomain", func() {
+		s.T().Parallel()
+		repo := user.NewRepository(s.DB)
+		o1 := fake.NewOrganization(s.DB)
+		o2 := fake.NewOrganization(s.DB)
+		u := fake.NewUser(s.DB, o1.ID)
+		s.Require().NotNil(u.APIToken)
+
+		_, err := repo.GetUserByOrgSubdomainAPIToken(context.Background(), o2.Subdomain, *u.APIToken)
+		s.Require().Error(err)
+		s.ErrorIs(err, sql.ErrNoRows)
+	})
+
+	s.Run("should return error when user is deleted", func() {
+		s.T().Parallel()
+		repo := user.NewRepository(s.DB)
+		o := fake.NewOrganization(s.DB)
+		u := fake.NewUser(s.DB, o.ID, fake.UserDeleted())
+		s.Require().NotNil(u.APIToken)
+
+		_, err := repo.GetUserByOrgSubdomainAPIToken(context.Background(), o.Subdomain, *u.APIToken)
 		s.Require().Error(err)
 		s.ErrorIs(err, sql.ErrNoRows)
 	})

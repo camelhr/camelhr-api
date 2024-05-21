@@ -15,7 +15,10 @@ type Service interface {
 	GetUserByID(ctx context.Context, id int64) (User, error)
 
 	// GetUserByAPIToken returns a user by its API token.
-	GetUserByAPIToken(ctx context.Context, token string) (User, error)
+	GetUserByAPIToken(ctx context.Context, apiToken string) (User, error)
+
+	// GetUserByOrgSubdomainAPIToken returns a user of organization by its org subdomain and api token.
+	GetUserByOrgSubdomainAPIToken(ctx context.Context, orgSubdomain, apiToken string) (User, error)
 
 	// GetUserByOrgIDEmail returns a user of organization by its org id and email.
 	GetUserByOrgIDEmail(ctx context.Context, orgID int64, email string) (User, error)
@@ -60,17 +63,22 @@ func NewService(repo Repository) *service {
 	return &service{repo}
 }
 
-// GetUserByID returns a user by its ID.
 func (s *service) GetUserByID(ctx context.Context, id int64) (User, error) {
 	return s.repo.GetUserByID(ctx, id)
 }
 
-// GetUserByAPIToken returns a user by its API token.
-func (s *service) GetUserByAPIToken(ctx context.Context, token string) (User, error) {
-	return s.repo.GetUserByAPIToken(ctx, token)
+func (s *service) GetUserByAPIToken(ctx context.Context, apiToken string) (User, error) {
+	return s.repo.GetUserByAPIToken(ctx, apiToken)
 }
 
-// GetUserByOrgIDEmail returns a user of organization by its org id and email.
+func (s *service) GetUserByOrgSubdomainAPIToken(ctx context.Context, orgSubdomain, apiToken string) (User, error) {
+	if err := organization.ValidateSubdomain(orgSubdomain); err != nil {
+		return User{}, err
+	}
+
+	return s.repo.GetUserByOrgSubdomainAPIToken(ctx, orgSubdomain, apiToken)
+}
+
 func (s *service) GetUserByOrgIDEmail(ctx context.Context, orgID int64, email string) (User, error) {
 	if err := ValidateEmail(email); err != nil {
 		return User{}, err
@@ -79,7 +87,6 @@ func (s *service) GetUserByOrgIDEmail(ctx context.Context, orgID int64, email st
 	return s.repo.GetUserByOrgIDEmail(ctx, orgID, email)
 }
 
-// GetUserByOrgSubdomainEmail returns a user of organization by its org subdomain and email.
 func (s *service) GetUserByOrgSubdomainEmail(ctx context.Context, orgSubdomain, email string) (User, error) {
 	if err := organization.ValidateSubdomain(orgSubdomain); err != nil {
 		return User{}, err
@@ -92,7 +99,6 @@ func (s *service) GetUserByOrgSubdomainEmail(ctx context.Context, orgSubdomain, 
 	return s.repo.GetUserByOrgSubdomainEmail(ctx, orgSubdomain, email)
 }
 
-// CreateUser creates a new user.
 func (s *service) CreateUser(ctx context.Context, orgID int64, email, password string) (User, error) {
 	if err := ValidateEmail(email); err != nil {
 		return User{}, err
@@ -110,7 +116,6 @@ func (s *service) CreateUser(ctx context.Context, orgID int64, email, password s
 	return s.repo.CreateUser(ctx, orgID, email, passwordHash, false)
 }
 
-// CreateOwner creates a new owner user.
 func (s *service) CreateOwner(ctx context.Context, orgID int64, email, password string) (User, error) {
 	if err := ValidateEmail(email); err != nil {
 		return User{}, err
@@ -128,7 +133,6 @@ func (s *service) CreateOwner(ctx context.Context, orgID int64, email, password 
 	return s.repo.CreateUser(ctx, orgID, email, passwordHash, true)
 }
 
-// ResetPassword resets the password of a user.
 func (s *service) ResetPassword(ctx context.Context, id int64, newPassword string) error {
 	if err := ValidatePassword(newPassword); err != nil {
 		return err
@@ -142,12 +146,10 @@ func (s *service) ResetPassword(ctx context.Context, id int64, newPassword strin
 	return s.repo.ResetPassword(ctx, id, passwordHash)
 }
 
-// DeleteUser deletes a user by its ID.
 func (s *service) DeleteUser(ctx context.Context, id int64) error {
 	return s.repo.DeleteUser(ctx, id)
 }
 
-// DisableUser disables a user by its ID.
 func (s *service) DisableUser(ctx context.Context, id int64, comment string) error {
 	if comment == "" {
 		return errors.New("comment is required")
@@ -156,7 +158,6 @@ func (s *service) DisableUser(ctx context.Context, id int64, comment string) err
 	return s.repo.DisableUser(ctx, id, comment)
 }
 
-// EnableUser enables a user by its ID.
 func (s *service) EnableUser(ctx context.Context, id int64, comment string) error {
 	if comment == "" {
 		return errors.New("comment is required")
@@ -165,14 +166,16 @@ func (s *service) EnableUser(ctx context.Context, id int64, comment string) erro
 	return s.repo.EnableUser(ctx, id, comment)
 }
 
-// GenerateAPIToken generates a new API token for a user.
 func (s *service) GenerateAPIToken(ctx context.Context, id int64) error {
 	return s.repo.GenerateAPIToken(ctx, id)
 }
 
-// ResetAPIToken resets the API token of a user.
 func (s *service) ResetAPIToken(ctx context.Context, id int64) error {
 	return s.repo.ResetAPIToken(ctx, id)
+}
+
+func (s *service) SetEmailVerified(ctx context.Context, id int64) error {
+	return s.repo.SetEmailVerified(ctx, id)
 }
 
 // bcryptPassword hashes a password using bcrypt.
@@ -194,9 +197,4 @@ func (s *service) bcryptPassword(password string) (string, error) {
 
 	// return the hashed password as a string
 	return string(passwordHashBytes), nil
-}
-
-// SetEmailVerified sets the email_verified flag of a user.
-func (s *service) SetEmailVerified(ctx context.Context, id int64) error {
-	return s.repo.SetEmailVerified(ctx, id)
 }

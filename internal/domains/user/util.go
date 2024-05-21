@@ -11,6 +11,7 @@ const (
 	passMaxLength    = 32
 )
 
+// ValidateEmail validates the email string.
 func ValidateEmail(email string) error {
 	if email == "" {
 		return errors.New("email is required")
@@ -24,6 +25,7 @@ func ValidateEmail(email string) error {
 	return nil
 }
 
+// ValidatePassword validates the password string.
 func ValidatePassword(password string) error {
 	if password == "" {
 		return errors.New("password is required")

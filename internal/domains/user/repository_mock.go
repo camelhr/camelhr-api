@@ -113,9 +113,9 @@ func (_m *RepositoryMock) GenerateAPIToken(ctx context.Context, id int64) error 
 	return r0
 }
 
-// GetUserByAPIToken provides a mock function with given fields: ctx, token
-func (_m *RepositoryMock) GetUserByAPIToken(ctx context.Context, token string) (User, error) {
-	ret := _m.Called(ctx, token)
+// GetUserByAPIToken provides a mock function with given fields: ctx, apiToken
+func (_m *RepositoryMock) GetUserByAPIToken(ctx context.Context, apiToken string) (User, error) {
+	ret := _m.Called(ctx, apiToken)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetUserByAPIToken")
@@ -124,16 +124,16 @@ func (_m *RepositoryMock) GetUserByAPIToken(ctx context.Context, token string) (
 	var r0 User
 	var r1 error
 	if rf, ok := ret.Get(0).(func(context.Context, string) (User, error)); ok {
-		return rf(ctx, token)
+		return rf(ctx, apiToken)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, string) User); ok {
-		r0 = rf(ctx, token)
+		r0 = rf(ctx, apiToken)
 	} else {
 		r0 = ret.Get(0).(User)
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, token)
+		r1 = rf(ctx, apiToken)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -190,6 +190,34 @@ func (_m *RepositoryMock) GetUserByOrgIDEmail(ctx context.Context, orgID int64, 
 
 	if rf, ok := ret.Get(1).(func(context.Context, int64, string) error); ok {
 		r1 = rf(ctx, orgID, email)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetUserByOrgSubdomainAPIToken provides a mock function with given fields: ctx, orgSubdomain, apiToken
+func (_m *RepositoryMock) GetUserByOrgSubdomainAPIToken(ctx context.Context, orgSubdomain string, apiToken string) (User, error) {
+	ret := _m.Called(ctx, orgSubdomain, apiToken)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetUserByOrgSubdomainAPIToken")
+	}
+
+	var r0 User
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) (User, error)); ok {
+		return rf(ctx, orgSubdomain, apiToken)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) User); ok {
+		r0 = rf(ctx, orgSubdomain, apiToken)
+	} else {
+		r0 = ret.Get(0).(User)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, orgSubdomain, apiToken)
 	} else {
 		r1 = ret.Error(1)
 	}

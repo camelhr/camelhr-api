@@ -13,7 +13,10 @@ type Repository interface {
 	GetUserByID(ctx context.Context, id int64) (User, error)
 
 	// GetUserByAPIToken returns a user by its API token.
-	GetUserByAPIToken(ctx context.Context, token string) (User, error)
+	GetUserByAPIToken(ctx context.Context, apiToken string) (User, error)
+
+	// GetUserByOrgSubdomainAPIToken returns a user of organization by its org subdomain and api token.
+	GetUserByOrgSubdomainAPIToken(ctx context.Context, orgSubdomain, apiToken string) (User, error)
 
 	// GetUserByOrgIDEmail returns a user of organization by its org id and email.
 	GetUserByOrgIDEmail(ctx context.Context, orgID int64, email string) (User, error)
@@ -61,9 +64,16 @@ func (r *repository) GetUserByID(ctx context.Context, id int64) (User, error) {
 	return user, err
 }
 
-func (r *repository) GetUserByAPIToken(ctx context.Context, token string) (User, error) {
+func (r *repository) GetUserByAPIToken(ctx context.Context, apiToken string) (User, error) {
 	var user User
-	err := r.db.Get(ctx, &user, getUserByAPITokenQuery, token)
+	err := r.db.Get(ctx, &user, getUserByAPITokenQuery, apiToken)
+
+	return user, err
+}
+
+func (r *repository) GetUserByOrgSubdomainAPIToken(ctx context.Context, orgSubdomain, apiToken string) (User, error) {
+	var user User
+	err := r.db.Get(ctx, &user, getUserByOrgSubdomainAPITokenQuery, orgSubdomain, apiToken)
 
 	return user, err
 }

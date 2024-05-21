@@ -95,6 +95,47 @@ func TestRepository_GetUserByAPIToken(t *testing.T) {
 	})
 }
 
+func TestRepository_GetUserByOrgSubdomainAPIToken(t *testing.T) {
+	t.Parallel()
+
+	t.Run("should return an error when the database call fails", func(t *testing.T) {
+		t.Parallel()
+
+		mockDB := &database.DatabaseMock{}
+		repo := user.NewRepository(mockDB)
+
+		mockDB.On("Get", context.Background(), mock.Anything, tests.QueryMatcher("getUserByOrgSubdomainAPITokenQuery"),
+			"subdomain", "token").Return(assert.AnError)
+
+		_, err := repo.GetUserByOrgSubdomainAPIToken(context.Background(), "subdomain", "token")
+		require.Error(t, err)
+		assert.ErrorIs(t, assert.AnError, err)
+	})
+
+	t.Run("should return a user", func(t *testing.T) {
+		t.Parallel()
+
+		var emptyUser user.User
+
+		mockDB := &database.DatabaseMock{}
+		repo := user.NewRepository(mockDB)
+
+		u := user.User{ID: 1}
+
+		mockDB.On("Get", context.Background(), &emptyUser, tests.QueryMatcher("getUserByOrgSubdomainAPITokenQuery"),
+			"subdomain", "token").Run(func(args mock.Arguments) {
+			// populate the passed argument with the user
+			arg, ok := args.Get(1).(*user.User)
+			require.True(t, ok)
+			*arg = u
+		}).Return(nil)
+
+		result, err := repo.GetUserByOrgSubdomainAPIToken(context.Background(), "subdomain", "token")
+		require.NoError(t, err)
+		assert.Equal(t, u, result)
+	})
+}
+
 func TestRepository_GetUserByOrgIDEmail(t *testing.T) {
 	t.Parallel()
 

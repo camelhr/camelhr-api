@@ -8,6 +8,9 @@ var getUserByIDQuery string
 //go:embed sql/get_user_by_api_token.sql
 var getUserByAPITokenQuery string
 
+//go:embed sql/get_user_by_org_subdomain_api_token.sql
+var getUserByOrgSubdomainAPITokenQuery string
+
 //go:embed sql/get_user_by_org_id_email.sql
 var getUserByOrgIDEmailQuery string
 

@@ -89,6 +89,55 @@ func TestService_GetUserByAPIToken(t *testing.T) {
 	})
 }
 
+func TestService_GetUserByOrgSubdomainAPIToken(t *testing.T) {
+	t.Parallel()
+
+	t.Run("should return error when repository return error", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := user.NewRepositoryMock(t)
+		service := user.NewService(mockRepo)
+
+		mockRepo.On("GetUserByOrgSubdomainAPIToken", context.Background(), "subdomain", "token").
+			Return(user.User{}, assert.AnError)
+
+		_, err := service.GetUserByOrgSubdomainAPIToken(context.Background(), "subdomain", "token")
+		require.Error(t, err)
+		assert.ErrorIs(t, assert.AnError, err)
+	})
+
+	t.Run("should return error when subdomain is invalid", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := user.NewRepositoryMock(t)
+		service := user.NewService(mockRepo)
+
+		_, err := service.GetUserByOrgSubdomainAPIToken(context.Background(), "invalid_sub", "token")
+		require.Error(t, err)
+		assert.ErrorContains(t, err, "subdomain can only contain alphanumeric characters")
+	})
+
+	t.Run("should return user by organization subdomain and api token", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := user.NewRepositoryMock(t)
+		service := user.NewService(mockRepo)
+
+		u := user.User{
+			ID:             gofakeit.Int64(),
+			OrganizationID: gofakeit.Int64(),
+			Email:          gofakeit.Email(),
+		}
+
+		mockRepo.On("GetUserByOrgSubdomainAPIToken", context.Background(), "subdomain", "token").
+			Return(u, nil)
+
+		result, err := service.GetUserByOrgSubdomainAPIToken(context.Background(), "subdomain", "token")
+		require.NoError(t, err)
+		assert.Equal(t, u, result)
+	})
+}
+
 func TestService_GetUserByOrgIDEmail(t *testing.T) {
 	t.Parallel()
 
