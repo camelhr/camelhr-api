@@ -96,7 +96,7 @@ func (s *UserTestSuite) TestServiceIntegration_CreateUser() {
 		svc := user.NewService(repo)
 		o := fake.NewOrganization(s.DB)
 		email := gofakeit.Email()
-		password := gofakeit.Password(true, true, true, true, false, 12)
+		password := generatePassword()
 
 		result, err := svc.CreateUser(context.Background(), o.ID, email, password)
 		s.Require().NoError(err)
@@ -119,7 +119,7 @@ func (s *UserTestSuite) TestServiceIntegration_CreateOwner() {
 		svc := user.NewService(repo)
 		o := fake.NewOrganization(s.DB)
 		email := gofakeit.Email()
-		password := gofakeit.Password(true, true, true, true, false, 12)
+		password := generatePassword()
 
 		result, err := svc.CreateOwner(context.Background(), o.ID, email, password)
 		s.Require().NoError(err)
@@ -142,7 +142,7 @@ func (s *UserTestSuite) TestServiceIntegration_ResetPassword() {
 		svc := user.NewService(repo)
 		o := fake.NewOrganization(s.DB)
 		u := fake.NewUser(s.DB, o.ID)
-		newPassword := gofakeit.Password(true, true, true, true, false, 12)
+		newPassword := generatePassword()
 
 		err := svc.ResetPassword(context.Background(), u.ID, newPassword)
 		s.Require().NoError(err)

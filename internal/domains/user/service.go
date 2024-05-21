@@ -2,7 +2,9 @@ package user
 
 import (
 	"context"
+	"errors"
 
+	"github.com/camelhr/camelhr-api/internal/domains/organization"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -70,16 +72,36 @@ func (s *service) GetUserByAPIToken(ctx context.Context, token string) (User, er
 
 // GetUserByOrgIDEmail returns a user of organization by its org id and email.
 func (s *service) GetUserByOrgIDEmail(ctx context.Context, orgID int64, email string) (User, error) {
+	if err := ValidateEmail(email); err != nil {
+		return User{}, err
+	}
+
 	return s.repo.GetUserByOrgIDEmail(ctx, orgID, email)
 }
 
 // GetUserByOrgSubdomainEmail returns a user of organization by its org subdomain and email.
 func (s *service) GetUserByOrgSubdomainEmail(ctx context.Context, orgSubdomain, email string) (User, error) {
+	if err := organization.ValidateSubdomain(orgSubdomain); err != nil {
+		return User{}, err
+	}
+
+	if err := ValidateEmail(email); err != nil {
+		return User{}, err
+	}
+
 	return s.repo.GetUserByOrgSubdomainEmail(ctx, orgSubdomain, email)
 }
 
 // CreateUser creates a new user.
 func (s *service) CreateUser(ctx context.Context, orgID int64, email, password string) (User, error) {
+	if err := ValidateEmail(email); err != nil {
+		return User{}, err
+	}
+
+	if err := ValidatePassword(password); err != nil {
+		return User{}, err
+	}
+
 	passwordHash, err := s.bcryptPassword(password)
 	if err != nil {
 		return User{}, err
@@ -90,6 +112,14 @@ func (s *service) CreateUser(ctx context.Context, orgID int64, email, password s
 
 // CreateOwner creates a new owner user.
 func (s *service) CreateOwner(ctx context.Context, orgID int64, email, password string) (User, error) {
+	if err := ValidateEmail(email); err != nil {
+		return User{}, err
+	}
+
+	if err := ValidatePassword(password); err != nil {
+		return User{}, err
+	}
+
 	passwordHash, err := s.bcryptPassword(password)
 	if err != nil {
 		return User{}, err
@@ -100,6 +130,10 @@ func (s *service) CreateOwner(ctx context.Context, orgID int64, email, password 
 
 // ResetPassword resets the password of a user.
 func (s *service) ResetPassword(ctx context.Context, id int64, newPassword string) error {
+	if err := ValidatePassword(newPassword); err != nil {
+		return err
+	}
+
 	passwordHash, err := s.bcryptPassword(newPassword)
 	if err != nil {
 		return err
@@ -115,11 +149,19 @@ func (s *service) DeleteUser(ctx context.Context, id int64) error {
 
 // DisableUser disables a user by its ID.
 func (s *service) DisableUser(ctx context.Context, id int64, comment string) error {
+	if comment == "" {
+		return errors.New("comment is required")
+	}
+
 	return s.repo.DisableUser(ctx, id, comment)
 }
 
 // EnableUser enables a user by its ID.
 func (s *service) EnableUser(ctx context.Context, id int64, comment string) error {
+	if comment == "" {
+		return errors.New("comment is required")
+	}
+
 	return s.repo.EnableUser(ctx, id, comment)
 }
 
