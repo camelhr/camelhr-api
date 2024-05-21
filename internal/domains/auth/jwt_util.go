@@ -34,15 +34,14 @@ func (c *AppClaims) Validate() error {
 }
 
 // GenerateJWT generates a new jwt token.
-func GenerateJWT(secretKey string, userID, orgID int64, orgSubdomain string) (string, error) {
-	const hoursValid = 24
+func GenerateJWT(appSecret string, userID, orgID int64, orgSubdomain string) (string, error) {
 	claims := AppClaims{
 		UserID:       userID,
 		OrgID:        orgID,
 		OrgSubdomain: orgSubdomain,
 		RegisteredClaims: jwt.RegisteredClaims{
 			IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
-			ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(hoursValid * time.Hour)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(JWTMaxAgeSeconds * time.Second)),
 		},
 	}
 
@@ -50,7 +49,7 @@ func GenerateJWT(secretKey string, userID, orgID int64, orgSubdomain string) (st
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	// generate signed token using the secret signing key
-	t, err := token.SignedString([]byte(secretKey))
+	t, err := token.SignedString([]byte(appSecret))
 	if err != nil {
 		return "", err
 	}
@@ -59,7 +58,7 @@ func GenerateJWT(secretKey string, userID, orgID int64, orgSubdomain string) (st
 }
 
 // ParseAndValidateJWT parses and validates the given jwt token string using the secret key.
-func ParseAndValidateJWT(tokenString string, secretKey string) (*jwt.Token, *AppClaims, error) {
+func ParseAndValidateJWT(tokenString string, appSecret string) (*jwt.Token, *AppClaims, error) {
 	claims := &AppClaims{}
 
 	t, err := jwt.ParseWithClaims(
@@ -67,7 +66,7 @@ func ParseAndValidateJWT(tokenString string, secretKey string) (*jwt.Token, *App
 		claims,
 		func(*jwt.Token) (any, error) {
 			// return the secret signing key
-			return []byte(secretKey), nil
+			return []byte(appSecret), nil
 		},
 		jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Name}),
 		jwt.WithExpirationRequired(), // make sure the exp claim is passed

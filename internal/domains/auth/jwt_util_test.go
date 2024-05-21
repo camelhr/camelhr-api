@@ -18,7 +18,7 @@ func TestGenerateJWT(t *testing.T) {
 		t.Parallel()
 
 		// create a random secret key
-		secretKey := gofakeit.UUID()
+		appSecret := gofakeit.UUID()
 
 		// create random user id, org id and org subdomain
 		userID := gofakeit.Int64()
@@ -26,13 +26,13 @@ func TestGenerateJWT(t *testing.T) {
 		orgSubdomain := gofakeit.Username()
 
 		// generate jwt token
-		token, err := auth.GenerateJWT(secretKey, userID, orgID, orgSubdomain)
+		token, err := auth.GenerateJWT(appSecret, userID, orgID, orgSubdomain)
 		require.NoError(t, err)
 		require.NotEmpty(t, token)
 
 		// verify the claims in the token
 		parsedToken, err := jwt.ParseWithClaims(token, &auth.AppClaims{}, func(*jwt.Token) (any, error) {
-			return []byte(secretKey), nil
+			return []byte(appSecret), nil
 		})
 		require.NoError(t, err)
 		require.True(t, parsedToken.Valid)
@@ -64,7 +64,7 @@ func TestParseAndValidateJWT(t *testing.T) { //nolint:maintidx // test function
 		t.Parallel()
 
 		// create a random secret key
-		secretKey := gofakeit.UUID()
+		appSecret := gofakeit.UUID()
 
 		// create random user id, org id and org subdomain
 		userID := gofakeit.Int64()
@@ -82,12 +82,12 @@ func TestParseAndValidateJWT(t *testing.T) { //nolint:maintidx // test function
 				ExpiresAt: jwt.NewNumericDate(time.Now().Add(hoursValid * time.Hour)),
 			},
 		}
-		token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(secretKey))
+		token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(appSecret))
 		require.NoError(t, err)
 		require.NotEmpty(t, token)
 
 		// parse and validate the token
-		parsedToken, parsedClaims, err := auth.ParseAndValidateJWT(token, secretKey)
+		parsedToken, parsedClaims, err := auth.ParseAndValidateJWT(token, appSecret)
 		require.NoError(t, err)
 		require.True(t, parsedToken.Valid)
 		require.Equal(t, parsedToken.Claims, parsedClaims) // claims from token and parsed claims should be same
@@ -103,7 +103,7 @@ func TestParseAndValidateJWT(t *testing.T) { //nolint:maintidx // test function
 		t.Parallel()
 
 		// create a random secret key
-		secretKey := gofakeit.UUID()
+		appSecret := gofakeit.UUID()
 
 		// create random user id, org id and org subdomain
 		userID := gofakeit.Int64()
@@ -111,22 +111,22 @@ func TestParseAndValidateJWT(t *testing.T) { //nolint:maintidx // test function
 		orgSubdomain := gofakeit.Username()
 
 		// generate expired jwt token
-		const expiry = -25
+		const expiry = -auth.JWTMaxAgeSeconds + 120
 		claims := auth.AppClaims{
 			UserID:       userID,
 			OrgID:        orgID,
 			OrgSubdomain: orgSubdomain,
 			RegisteredClaims: jwt.RegisteredClaims{
 				IssuedAt:  jwt.NewNumericDate(time.Now()),
-				ExpiresAt: jwt.NewNumericDate(time.Now().Add(expiry * time.Hour)),
+				ExpiresAt: jwt.NewNumericDate(time.Now().Add(expiry * time.Second)),
 			},
 		}
-		token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(secretKey))
+		token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(appSecret))
 		require.NoError(t, err)
 		require.NotEmpty(t, token)
 
 		// parse and validate the token
-		parsedToken, parsedClaims, err := auth.ParseAndValidateJWT(token, secretKey)
+		parsedToken, parsedClaims, err := auth.ParseAndValidateJWT(token, appSecret)
 		require.Error(t, err)
 		require.ErrorIs(t, err, jwt.ErrTokenExpired)
 		require.ErrorContains(t, err, "token is expired")
@@ -138,7 +138,7 @@ func TestParseAndValidateJWT(t *testing.T) { //nolint:maintidx // test function
 		t.Parallel()
 
 		// create a random secret key
-		secretKey := gofakeit.UUID()
+		appSecret := gofakeit.UUID()
 
 		// generate token without app claims, include only standard claims
 		const hoursValid = 24
@@ -146,12 +146,12 @@ func TestParseAndValidateJWT(t *testing.T) { //nolint:maintidx // test function
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(hoursValid * time.Hour)),
 		}
-		token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(secretKey))
+		token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(appSecret))
 		require.NoError(t, err)
 		require.NotEmpty(t, token)
 
 		// parse and validate the token
-		parsedToken, parsedClaims, err := auth.ParseAndValidateJWT(token, secretKey)
+		parsedToken, parsedClaims, err := auth.ParseAndValidateJWT(token, appSecret)
 		require.Error(t, err)
 		require.ErrorIs(t, err, jwt.ErrTokenInvalidClaims)
 		require.ErrorContains(t, err, "missing user id in claims")
@@ -204,7 +204,7 @@ func TestParseAndValidateJWT(t *testing.T) { //nolint:maintidx // test function
 				t.Parallel()
 
 				// create a random secret key
-				secretKey := gofakeit.UUID()
+				appSecret := gofakeit.UUID()
 
 				// generate jwt token
 				const hoursValid = 24
@@ -217,12 +217,12 @@ func TestParseAndValidateJWT(t *testing.T) { //nolint:maintidx // test function
 						ExpiresAt: jwt.NewNumericDate(time.Now().Add(hoursValid * time.Hour)),
 					},
 				}
-				token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(secretKey))
+				token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(appSecret))
 				require.NoError(t, err)
 				require.NotEmpty(t, token)
 
 				// parse and validate the token
-				parsedToken, parsedClaims, err := auth.ParseAndValidateJWT(token, secretKey)
+				parsedToken, parsedClaims, err := auth.ParseAndValidateJWT(token, appSecret)
 				require.Error(t, err)
 				require.ErrorIs(t, err, jwt.ErrTokenInvalidClaims)
 				require.ErrorContains(t, err, errString)
@@ -236,7 +236,7 @@ func TestParseAndValidateJWT(t *testing.T) { //nolint:maintidx // test function
 		t.Parallel()
 
 		// create a random secret key
-		secretKey := gofakeit.UUID()
+		appSecret := gofakeit.UUID()
 
 		// generate token without exp claims
 		claims := auth.AppClaims{
@@ -247,12 +247,12 @@ func TestParseAndValidateJWT(t *testing.T) { //nolint:maintidx // test function
 				IssuedAt: jwt.NewNumericDate(time.Now()),
 			},
 		}
-		token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(secretKey))
+		token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(appSecret))
 		require.NoError(t, err)
 		require.NotEmpty(t, token)
 
 		// parse and validate the token
-		parsedToken, parsedClaims, err := auth.ParseAndValidateJWT(token, secretKey)
+		parsedToken, parsedClaims, err := auth.ParseAndValidateJWT(token, appSecret)
 		require.Error(t, err)
 		require.ErrorIs(t, err, jwt.ErrTokenInvalidClaims)
 		require.ErrorContains(t, err, "exp claim is required")
@@ -264,7 +264,7 @@ func TestParseAndValidateJWT(t *testing.T) { //nolint:maintidx // test function
 		t.Parallel()
 
 		// create a random secret key
-		secretKey := gofakeit.UUID()
+		appSecret := gofakeit.UUID()
 
 		// generate token without eat claims
 		const hoursValid = 24
@@ -277,12 +277,12 @@ func TestParseAndValidateJWT(t *testing.T) { //nolint:maintidx // test function
 				ExpiresAt: jwt.NewNumericDate(time.Now().Add(hoursValid * time.Hour)),
 			},
 		}
-		token, err := jwt.NewWithClaims(jwt.SigningMethodHS384, claims).SignedString([]byte(secretKey))
+		token, err := jwt.NewWithClaims(jwt.SigningMethodHS384, claims).SignedString([]byte(appSecret))
 		require.NoError(t, err)
 		require.NotEmpty(t, token)
 
 		// parse and validate the token
-		parsedToken, parsedClaims, err := auth.ParseAndValidateJWT(token, secretKey)
+		parsedToken, parsedClaims, err := auth.ParseAndValidateJWT(token, appSecret)
 		require.Error(t, err)
 		require.ErrorIs(t, err, jwt.ErrTokenSignatureInvalid)
 		require.ErrorContains(t, err, "signing method HS384 is invalid")
@@ -321,7 +321,7 @@ func TestParseAndValidateJWT(t *testing.T) { //nolint:maintidx // test function
 		t.Parallel()
 
 		// create a random secret key
-		secretKey := gofakeit.UUID()
+		appSecret := gofakeit.UUID()
 
 		// create random user id, org id and org subdomain
 		userID := gofakeit.Int64()
@@ -329,7 +329,7 @@ func TestParseAndValidateJWT(t *testing.T) { //nolint:maintidx // test function
 		orgSubdomain := gofakeit.Username()
 
 		// generate jwt token
-		token, err := auth.GenerateJWT(secretKey, userID, orgID, orgSubdomain)
+		token, err := auth.GenerateJWT(appSecret, userID, orgID, orgSubdomain)
 		require.NoError(t, err)
 		require.NotEmpty(t, token)
 
@@ -337,7 +337,7 @@ func TestParseAndValidateJWT(t *testing.T) { //nolint:maintidx // test function
 		token += "invalid"
 
 		// parse and validate the token
-		_, _, err = auth.ParseAndValidateJWT(token, secretKey)
+		_, _, err = auth.ParseAndValidateJWT(token, appSecret)
 		require.Error(t, err)
 	})
 }
