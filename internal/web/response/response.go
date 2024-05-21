@@ -16,8 +16,9 @@ type errorResponse struct {
 }
 
 // ErrorResponse writes an error response with the given status code.
-// If the error is an APIError, the error message will be used in the response.
-// Otherwise, the error message will be empty.
+// Appropriate error message will be sent in the response body.
+// If the error is of type base.APIError with not-nil cause, the cause will be logged.
+// General errors will not be logged.
 func ErrorResponse(w http.ResponseWriter, statusCode int, err error) {
 	var message string
 
@@ -25,24 +26,20 @@ func ErrorResponse(w http.ResponseWriter, statusCode int, err error) {
 
 	var notFoundErr *base.NotFoundError
 
-	var validationErr validator.ValidationErrors
+	var validationErrors validator.ValidationErrors
 
 	// send the error message for known errors
 	if ok := errors.As(err, &apiErr); ok {
 		message = apiErr.Error()
+
+		cause := apiErr.Unwrap()
+		if cause != nil {
+			log.Error("%v", cause)
+		}
 	} else if ok := errors.As(err, &notFoundErr); ok {
 		message = notFoundErr.Error()
-	} else if ok := errors.As(err, &validationErr); ok {
-		trans := base.ValidationTranslator()
-		message = ""
-
-		for _, fieldErr := range validationErr {
-			if message != "" {
-				message += ". "
-			}
-
-			message += fieldErr.Translate(trans)
-		}
+	} else if ok := errors.As(err, &validationErrors); ok {
+		message = buildValidationErrorMessage(validationErrors)
 	} else {
 		log.Error("%v", err)
 	}
@@ -89,4 +86,20 @@ func Text(w http.ResponseWriter, status int, v string) {
 	if _, err := w.Write([]byte(v)); err != nil {
 		log.Error("failed to write response: %v", err)
 	}
+}
+
+// buildValidationErrorMessage extracts the validation error message from the given validation errors.
+func buildValidationErrorMessage(errs validator.ValidationErrors) string {
+	trans := base.ValidationTranslator()
+	message := ""
+
+	for _, fieldErr := range errs {
+		if message != "" {
+			message += ". "
+		}
+
+		message += fieldErr.Translate(trans)
+	}
+
+	return message
 }

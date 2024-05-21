@@ -49,7 +49,7 @@ func (m *authMiddleware) ValidateAuth(next http.Handler) http.Handler {
 func processJWT(next http.Handler, w http.ResponseWriter, r *http.Request, jwtString, secretKey string) {
 	token, claims, err := auth.ParseAndValidateJWT(jwtString, secretKey)
 	if err != nil {
-		response.ErrorResponse(w, http.StatusUnauthorized, err)
+		response.ErrorResponse(w, http.StatusUnauthorized, base.NewAPIError("invalid token", base.ErrorCause(err)))
 		return
 	}
 

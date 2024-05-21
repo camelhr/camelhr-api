@@ -13,47 +13,101 @@ import (
 func TestErrorResponse(t *testing.T) {
 	t.Parallel()
 
-	t.Run("should write an error response with the given status code", func(t *testing.T) {
-		t.Parallel()
+	t.Run("should write an error response with status code and empty error message for nil error",
+		func(t *testing.T) {
+			t.Parallel()
 
-		// create a new recorder
-		rr := httptest.NewRecorder()
+			// create a new recorder
+			rr := httptest.NewRecorder()
 
-		// call the ErrorResponse function
-		response.ErrorResponse(rr, http.StatusBadRequest, nil)
+			// call the ErrorResponse function
+			response.ErrorResponse(rr, http.StatusBadRequest, nil)
 
-		// assert that the response is correct
-		assert.Equal(t, http.StatusBadRequest, rr.Code)
-		assert.JSONEq(t, `{"error":""}`, rr.Body.String())
-	})
+			// assert that the response is correct
+			assert.Equal(t, http.StatusBadRequest, rr.Code)
+			assert.JSONEq(t, `{"error":""}`, rr.Body.String())
+			assert.Equal(t, "application/json", rr.Header().Get("Content-Type"))
+		})
 
-	t.Run("should write an error response with given status code and empty error message", func(t *testing.T) {
-		t.Parallel()
+	t.Run("should write empty error message to response for general error and log the error message",
+		func(t *testing.T) {
+			t.Parallel()
 
-		// create a new recorder
-		rr := httptest.NewRecorder()
+			// create a new recorder
+			rr := httptest.NewRecorder()
 
-		// call the ErrorResponse function with an error
-		response.ErrorResponse(rr, http.StatusInternalServerError, assert.AnError)
+			// call the ErrorResponse function with an error
+			response.ErrorResponse(rr, http.StatusInternalServerError, assert.AnError)
 
-		// assert that the response is correct
-		assert.Equal(t, http.StatusInternalServerError, rr.Code)
-		assert.JSONEq(t, `{"error":""}`, rr.Body.String())
-	})
+			// assert that the response is correct
+			assert.Equal(t, http.StatusInternalServerError, rr.Code)
+			assert.JSONEq(t, `{"error":""}`, rr.Body.String())
+			assert.Equal(t, "application/json", rr.Header().Get("Content-Type"))
+		})
 
-	t.Run("should write an error response with the given status code and error message", func(t *testing.T) {
-		t.Parallel()
+	t.Run("should write error message to response but not log the error for api error without cause",
+		func(t *testing.T) {
+			t.Parallel()
 
-		// create a new recorder
-		rr := httptest.NewRecorder()
+			// create a new recorder
+			rr := httptest.NewRecorder()
 
-		// call the ErrorResponse function with an APIError
-		response.ErrorResponse(rr, http.StatusBadRequest, base.NewAPIError("test error"))
+			// call the ErrorResponse function with an APIError
+			response.ErrorResponse(rr, http.StatusBadRequest, base.NewAPIError("test error"))
 
-		// assert that the response is correct
-		assert.Equal(t, http.StatusBadRequest, rr.Code)
-		assert.JSONEq(t, `{"error":"test error"}`, rr.Body.String())
-	})
+			// assert that the response is correct
+			assert.Equal(t, http.StatusBadRequest, rr.Code)
+			assert.JSONEq(t, `{"error":"test error"}`, rr.Body.String())
+			assert.Equal(t, "application/json", rr.Header().Get("Content-Type"))
+		})
+
+	t.Run("should write error message to response but not log the error for not-found error",
+		func(t *testing.T) {
+			t.Parallel()
+
+			// create a new recorder
+			rr := httptest.NewRecorder()
+
+			// call the ErrorResponse function with a NotFoundError
+			response.ErrorResponse(rr, http.StatusNotFound, base.NewNotFoundError("test not found error"))
+
+			// assert that the response is correct
+			assert.Equal(t, http.StatusNotFound, rr.Code)
+			assert.JSONEq(t, `{"error":"test not found error"}`, rr.Body.String())
+			assert.Equal(t, "application/json", rr.Header().Get("Content-Type"))
+		})
+
+	t.Run("should write error message to response and log the cause when error has a cause",
+		func(t *testing.T) {
+			t.Parallel()
+
+			// create a new recorder
+			rr := httptest.NewRecorder()
+
+			// call the ErrorResponse function
+			response.ErrorResponse(rr, http.StatusBadRequest, base.NewAPIError("test error", base.ErrorCause(assert.AnError)))
+
+			// assert that the response is correct
+			assert.Equal(t, http.StatusBadRequest, rr.Code)
+			assert.JSONEq(t, `{"error":"test error"}`, rr.Body.String())
+			assert.Equal(t, "application/json", rr.Header().Get("Content-Type"))
+		})
+
+	t.Run("should write error message to response and log the error when error is wrapped",
+		func(t *testing.T) {
+			t.Parallel()
+
+			// create a new recorder
+			rr := httptest.NewRecorder()
+
+			// call the ErrorResponse function with an error wrapped with WrapError
+			response.ErrorResponse(rr, http.StatusInternalServerError, base.WrapError(assert.AnError))
+
+			// assert that the response is correct
+			assert.Equal(t, http.StatusInternalServerError, rr.Code)
+			assert.JSONEq(t, `{"error":"assert.AnError general error for testing"}`, rr.Body.String())
+			assert.Equal(t, "application/json", rr.Header().Get("Content-Type"))
+		})
 }
 
 func TestJSON(t *testing.T) {
