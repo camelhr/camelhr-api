@@ -69,6 +69,18 @@ func TestService_GetOrganizationByID(t *testing.T) {
 func TestService_GetOrganizationBySubdomain(t *testing.T) {
 	t.Parallel()
 
+	t.Run("should return an error when the subdomain is invalid", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := organization.NewRepositoryMock(t)
+		service := organization.NewService(mockRepo)
+		subdomain := "#invalid-subdomain"
+
+		_, err := service.GetOrganizationBySubdomain(context.Background(), subdomain)
+		require.Error(t, err)
+		assert.ErrorContains(t, err, "subdomain can only contain alphanumeric characters")
+	})
+
 	t.Run("should return an error when the repository call fails", func(t *testing.T) {
 		t.Parallel()
 
@@ -125,6 +137,18 @@ func TestService_GetOrganizationBySubdomain(t *testing.T) {
 func TestService_GetOrganizationByName(t *testing.T) {
 	t.Parallel()
 
+	t.Run("should return an error when the organization name is invalid", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := organization.NewRepositoryMock(t)
+		service := organization.NewService(mockRepo)
+		orgName := "ørg1-non-ascii"
+
+		_, err := service.GetOrganizationByName(context.Background(), orgName)
+		require.Error(t, err)
+		assert.ErrorContains(t, err, "organization name can only contain ascii characters")
+	})
+
 	t.Run("should return an error when the repository call fails", func(t *testing.T) {
 		t.Parallel()
 
@@ -180,6 +204,30 @@ func TestService_GetOrganizationByName(t *testing.T) {
 func TestService_CreateOrganization(t *testing.T) {
 	t.Parallel()
 
+	t.Run("should return an error when the subdomain is invalid", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := organization.NewRepositoryMock(t)
+		service := organization.NewService(mockRepo)
+		subdomain := "#invalid-subdomain"
+
+		_, err := service.CreateOrganization(context.Background(), subdomain, randomOrganizationName())
+		require.Error(t, err)
+		assert.ErrorContains(t, err, "subdomain can only contain alphanumeric characters")
+	})
+
+	t.Run("should return an error when the organization name is invalid", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := organization.NewRepositoryMock(t)
+		service := organization.NewService(mockRepo)
+		orgName := "ørg1"
+
+		_, err := service.CreateOrganization(context.Background(), randomOrganizationSubdomain(), orgName)
+		require.Error(t, err)
+		assert.ErrorContains(t, err, "organization name can only contain ascii characters")
+	})
+
 	t.Run("should return an error when the repository call fails", func(t *testing.T) {
 		t.Parallel()
 
@@ -216,6 +264,19 @@ func TestService_CreateOrganization(t *testing.T) {
 
 func TestService_UpdateOrganization(t *testing.T) {
 	t.Parallel()
+
+	t.Run("should return an error when the organization name is invalid", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := organization.NewRepositoryMock(t)
+		service := organization.NewService(mockRepo)
+		orgID := gofakeit.Int64()
+		newOrgName := "ørg1"
+
+		err := service.UpdateOrganization(context.Background(), orgID, newOrgName)
+		require.Error(t, err)
+		assert.ErrorContains(t, err, "organization name can only contain ascii characters")
+	})
 
 	t.Run("should return an error when the repository call fails", func(t *testing.T) {
 		t.Parallel()

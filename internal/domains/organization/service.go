@@ -62,6 +62,10 @@ func (s *service) GetOrganizationByID(ctx context.Context, id int64) (Organizati
 }
 
 func (s *service) GetOrganizationBySubdomain(ctx context.Context, subdomain string) (Organization, error) {
+	if err := ValidateSubdomain(subdomain); err != nil {
+		return Organization{}, err
+	}
+
 	o, err := s.repo.GetOrganizationBySubdomain(ctx, subdomain)
 	if errors.Is(err, sql.ErrNoRows) {
 		return Organization{}, base.NewNotFoundError("organization not found for the given subdomain")
@@ -71,6 +75,10 @@ func (s *service) GetOrganizationBySubdomain(ctx context.Context, subdomain stri
 }
 
 func (s *service) GetOrganizationByName(ctx context.Context, name string) (Organization, error) {
+	if err := ValidateOrgName(name); err != nil {
+		return Organization{}, err
+	}
+
 	o, err := s.repo.GetOrganizationByName(ctx, name)
 	if errors.Is(err, sql.ErrNoRows) {
 		return Organization{}, base.NewNotFoundError("organization not found for the given name")
@@ -80,10 +88,22 @@ func (s *service) GetOrganizationByName(ctx context.Context, name string) (Organ
 }
 
 func (s *service) CreateOrganization(ctx context.Context, subdomain string, name string) (Organization, error) {
+	if err := ValidateSubdomain(subdomain); err != nil {
+		return Organization{}, err
+	}
+
+	if err := ValidateOrgName(name); err != nil {
+		return Organization{}, err
+	}
+
 	return s.repo.CreateOrganization(ctx, subdomain, name)
 }
 
 func (s *service) UpdateOrganization(ctx context.Context, id int64, name string) error {
+	if err := ValidateOrgName(name); err != nil {
+		return err
+	}
+
 	return s.repo.UpdateOrganization(ctx, id, name)
 }
 
