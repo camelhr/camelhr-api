@@ -2,7 +2,6 @@ package middleware_test
 
 import (
 	"context"
-	"encoding/base64"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -102,7 +101,7 @@ func TestAuthMiddleware_ValidateAuth(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/api/some-endpoint", nil)
 		req.AddCookie(&http.Cookie{
 			Name:  auth.JWTCookieName,
-			Value: base64.StdEncoding.EncodeToString([]byte(token)),
+			Value: token,
 		})
 
 		// simulate chi's URL parameters

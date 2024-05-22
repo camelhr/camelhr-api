@@ -51,9 +51,8 @@ func (m *authMiddleware) ValidateAuth(next http.Handler) http.Handler {
 
 		// try to get jwt from cookie
 		if cookie, err := r.Cookie(auth.JWTCookieName); err == nil {
-			decoded, err := base64.StdEncoding.DecodeString(cookie.Value)
-			if err == nil && len(decoded) > 0 {
-				m.processJWT(next, w, r, string(decoded))
+			if cookie.Value != "" {
+				m.processJWT(next, w, r, cookie.Value)
 				return
 			}
 		}
