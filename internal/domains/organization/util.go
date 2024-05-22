@@ -5,6 +5,7 @@ import (
 	"regexp"
 )
 
+// ValidateSubdomain validates the subdomain string.
 func ValidateSubdomain(subdomain string) error {
 	const allowedMaxLength = 30
 
