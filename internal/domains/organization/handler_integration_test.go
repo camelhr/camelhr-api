@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"strings"
 
+	"github.com/camelhr/camelhr-api/internal/domains/auth"
 	"github.com/camelhr/camelhr-api/internal/domains/organization"
 	"github.com/camelhr/camelhr-api/internal/tests/fake"
 	"github.com/camelhr/camelhr-api/internal/web"
@@ -33,7 +34,7 @@ func (s *OrganizationTestSuite) TestHandlerIntegration_GetOrganizationBySubdomai
 		s.Require().NoError(err)
 
 		rr := httptest.NewRecorder()
-		h := web.SetupRoutes(s.DB)
+		h := web.SetupRoutes(s.DB, s.Config)
 		h.ServeHTTP(rr, req)
 
 		// assert the response
@@ -59,6 +60,7 @@ func (s *OrganizationTestSuite) TestHandlerIntegration_UpdateOrganization() {
 		s.T().Parallel()
 
 		fakeOrg := fake.NewOrganization(s.DB)
+		u := fake.NewUser(s.DB, fakeOrg.Organization.ID)
 		updatePayload := organization.Request{
 			Name: randomOrganizationName(),
 		}
@@ -72,10 +74,10 @@ func (s *OrganizationTestSuite) TestHandlerIntegration_UpdateOrganization() {
 			strings.NewReader(string(orgJSON)),
 		)
 		s.Require().NoError(err)
-		req.Header.Set("Content-Type", "application/json")
+		req.SetBasicAuth(*u.APIToken, auth.APITokenPassword)
 
 		rr := httptest.NewRecorder()
-		h := web.SetupRoutes(s.DB)
+		h := web.SetupRoutes(s.DB, s.Config)
 		h.ServeHTTP(rr, req)
 
 		// assert the response status code
@@ -94,6 +96,7 @@ func (s *OrganizationTestSuite) TestHandlerIntegration_DeleteOrganization() {
 		s.T().Parallel()
 
 		fakeOrg := fake.NewOrganization(s.DB)
+		u := fake.NewUser(s.DB, fakeOrg.Organization.ID)
 
 		// create a new request
 		req, err := http.NewRequest(
@@ -102,9 +105,10 @@ func (s *OrganizationTestSuite) TestHandlerIntegration_DeleteOrganization() {
 			nil,
 		)
 		s.Require().NoError(err)
+		req.SetBasicAuth(*u.APIToken, auth.APITokenPassword)
 
 		rr := httptest.NewRecorder()
-		h := web.SetupRoutes(s.DB)
+		h := web.SetupRoutes(s.DB, s.Config)
 		h.ServeHTTP(rr, req)
 
 		// assert the response status code

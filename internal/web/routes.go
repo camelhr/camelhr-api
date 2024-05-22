@@ -3,8 +3,10 @@ package web
 import (
 	"net/http"
 
+	"github.com/camelhr/camelhr-api/internal/config"
 	"github.com/camelhr/camelhr-api/internal/database"
 	"github.com/camelhr/camelhr-api/internal/domains/organization"
+	"github.com/camelhr/camelhr-api/internal/domains/user"
 	"github.com/camelhr/camelhr-api/internal/web/middleware"
 	"github.com/camelhr/camelhr-api/internal/web/response"
 	"github.com/go-chi/chi/v5"
@@ -12,11 +14,14 @@ import (
 )
 
 // SetupRoutes initializes the routes for the web server.
-func SetupRoutes(db database.Database) http.Handler {
+func SetupRoutes(db database.Database, conf config.Config) http.Handler {
 	// initialize dependencies
 	orgRepo := organization.NewRepository(db)
 	orgService := organization.NewService(orgRepo)
 	orgHandler := organization.NewHandler(orgService)
+	userRepo := user.NewRepository(db)
+	userService := user.NewService(userRepo)
+	authMiddleware := middleware.NewAuthMiddleware(conf.AppSecret, userService)
 
 	// create a default router
 	r := chi.NewRouter()
@@ -47,7 +52,8 @@ func SetupRoutes(db database.Database) http.Handler {
 
 		// protected routes. auth required
 		r.Group(func(r chi.Router) {
-			// TODO: add auth middleware
+			r.Use(authMiddleware.ValidateAuth)
+
 			r.Put("/", orgHandler.UpdateOrganization)
 			r.Delete("/", orgHandler.DeleteOrganization)
 		})

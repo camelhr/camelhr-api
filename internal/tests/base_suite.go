@@ -3,12 +3,14 @@ package tests
 import (
 	"testing"
 
+	"github.com/camelhr/camelhr-api/internal/config"
 	"github.com/camelhr/camelhr-api/internal/database"
 	"github.com/stretchr/testify/suite"
 )
 
 type IntegrationBaseSuite struct {
 	suite.Suite
+	Config      config.Config
 	DB          database.Database
 	PGContainer *PostgreSQLContainer
 }
@@ -24,6 +26,10 @@ func (s *IntegrationBaseSuite) SetupSuite() {
 			s.TearDownSuite()
 		}
 	}()
+
+	s.Config = config.Config{
+		AppSecret: "test_secret",
+	}
 
 	c, err := NewPostgresContainer()
 	s.Require().NoError(err)

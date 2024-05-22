@@ -42,7 +42,7 @@ func main() {
 	pgDB := database.NewPostgresDatabase(db)
 
 	// setup routes and start the server
-	handler := web.SetupRoutes(pgDB)
+	handler := web.SetupRoutes(pgDB, configs)
 	server := &http.Server{
 		Addr:              configs.HTTPAddress,
 		Handler:           handler,
