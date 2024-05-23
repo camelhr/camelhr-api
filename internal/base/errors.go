@@ -1,5 +1,7 @@
 package base
 
+import "errors"
+
 type APIError struct {
 	cause error
 	msg   string
@@ -73,4 +75,10 @@ func (e *NotFoundError) Error() string {
 // NewNotFoundError creates a new not found error with the given message.
 func NewNotFoundError(msg string) error {
 	return &NotFoundError{msg: msg}
+}
+
+// IsNotFoundError checks if the given error is a not found error.
+func IsNotFoundError(err error) bool {
+	var notFoundErr *NotFoundError
+	return errors.As(err, &notFoundErr)
 }
