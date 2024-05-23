@@ -88,6 +88,35 @@ func Text(w http.ResponseWriter, status int, v string) {
 	}
 }
 
+// SetCookie sets a cookie in the response.
+func SetCookie(w http.ResponseWriter, name, value string, maxAge int) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     name,
+		Value:    value,
+		MaxAge:   maxAge,
+		HttpOnly: true,                    // prevent javascript access
+		Secure:   true,                    // only send over https
+		SameSite: http.SameSiteStrictMode, // do not send on cross-site requests. prevent csrf
+	})
+}
+
+// RemoveCookie removes a cookie from the response.
+func RemoveCookie(w http.ResponseWriter, name string) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     name,
+		Value:    "",
+		MaxAge:   -1, // delete the cookie
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
+	})
+}
+
+// Redirect redirects the request to the given url with status code 302.
+func Redirect(w http.ResponseWriter, r *http.Request, url string) {
+	http.Redirect(w, r, url, http.StatusFound)
+}
+
 // buildValidationErrorMessage extracts the validation error message from the given validation errors.
 func buildValidationErrorMessage(errs validator.ValidationErrors) string {
 	trans := base.ValidationTranslator()
