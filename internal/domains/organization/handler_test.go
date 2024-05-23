@@ -267,7 +267,7 @@ func TestHandler_UpdateOrganization(t *testing.T) {
 				testName:  "subdomain is missing",
 				payload:   `{"name": "test org pvt ltd."}`,
 				subdomain: "",
-				err:       `{"error": "subdomain is a required"}`,
+				err:       `{"error": "subdomain is required"}`,
 			},
 			{
 				testName:  "name is missing",

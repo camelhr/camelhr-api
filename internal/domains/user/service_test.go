@@ -165,7 +165,7 @@ func TestService_GetUserByOrgIDEmail(t *testing.T) {
 
 		_, err := service.GetUserByOrgIDEmail(context.Background(), int64(1), email)
 		require.Error(t, err)
-		assert.ErrorContains(t, err, "invalid email format")
+		assert.ErrorContains(t, err, "email must be a valid email address")
 	})
 
 	t.Run("should return user by organization id and email", func(t *testing.T) {
@@ -285,7 +285,7 @@ func TestService_CreateUser(t *testing.T) {
 
 		_, err := service.CreateUser(context.Background(), int64(1), "invalid", password)
 		require.Error(t, err)
-		assert.ErrorContains(t, err, "invalid email format")
+		assert.ErrorContains(t, err, "email must be a valid email address")
 	})
 
 	t.Run("should return error when password is invalid", func(t *testing.T) {
@@ -296,7 +296,7 @@ func TestService_CreateUser(t *testing.T) {
 
 		_, err := service.CreateUser(context.Background(), int64(1), gofakeit.Email(), "invalid")
 		require.Error(t, err)
-		assert.ErrorContains(t, err, "password must be at least 8 characters")
+		assert.ErrorContains(t, err, "password must be at least 8 characters in length")
 	})
 
 	t.Run("should create user", func(t *testing.T) {
@@ -354,7 +354,7 @@ func TestService_CreateOwner(t *testing.T) {
 
 		_, err := service.CreateOwner(context.Background(), int64(1), "invalid", password)
 		require.Error(t, err)
-		assert.ErrorContains(t, err, "invalid email format")
+		assert.ErrorContains(t, err, "email must be a valid email address")
 	})
 
 	t.Run("should return error when password is invalid", func(t *testing.T) {

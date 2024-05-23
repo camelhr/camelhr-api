@@ -3,8 +3,9 @@ package base
 import "errors"
 
 type APIError struct {
-	cause error
-	msg   string
+	httpStatusCode *int
+	cause          error
+	msg            string
 }
 
 // APIErrorOption is a function that modifies an property of an API error.
@@ -17,7 +18,7 @@ func (e *APIError) Error() string {
 
 // NewAPIError creates a new API error with the given message and options.
 // Use it to send the error message in the response.
-// Use the options to add more information to the error.
+// Pass the options to customize the error.
 // If cause is added using base.ErrorCause option, the cause will be logged.
 //
 // Example: Create a new API error with a just a message.
@@ -43,10 +44,16 @@ func NewAPIError(msg string, options ...APIErrorOption) error {
 }
 
 // WrapError wraps the given error.
-// It sets message and cause to the given error.
+// It defaults the message and cause to the given error.
 // Use it to log and send the error message in the response.
-func WrapError(err error) error {
-	return &APIError{cause: err, msg: err.Error()}
+// Pass the options to customize the error.
+func WrapError(err error, options ...APIErrorOption) error {
+	apiErr := &APIError{cause: err, msg: err.Error()}
+	for _, option := range options {
+		apiErr = option(apiErr)
+	}
+
+	return apiErr
 }
 
 // Unwrap unwraps the cause of the API error.
@@ -54,12 +61,31 @@ func (e *APIError) Unwrap() error {
 	return e.cause
 }
 
-// ErrorCause adds a cause to the API error.
+// HTTPStatusCode returns the http status code of the API error.
+func (e *APIError) HTTPStatusCode() *int {
+	return e.httpStatusCode
+}
+
+// ErrorCause sets the cause to the API error.
 func ErrorCause(cause error) APIErrorOption {
 	return func(apiErr *APIError) *APIError {
 		apiErr.cause = cause
 		return apiErr
 	}
+}
+
+// ErrorHTTPStatus sets the http status code to the API error.
+func ErrorHTTPStatus(httpStatusCode int) APIErrorOption {
+	return func(apiErr *APIError) *APIError {
+		apiErr.httpStatusCode = &httpStatusCode
+		return apiErr
+	}
+}
+
+// IsAPIError checks if the given error is an API error.
+func IsAPIError(err error) bool {
+	var apiErr *APIError
+	return errors.As(err, &apiErr)
 }
 
 // NotFoundError is an error type that represents a not found error.
@@ -81,4 +107,25 @@ func NewNotFoundError(msg string) error {
 func IsNotFoundError(err error) bool {
 	var notFoundErr *NotFoundError
 	return errors.As(err, &notFoundErr)
+}
+
+// InputValidationError is an error type that represents a validation error.
+type InputValidationError struct {
+	msg string
+}
+
+// Error returns the error message.
+func (e *InputValidationError) Error() string {
+	return e.msg
+}
+
+// NewInputValidationError creates a new validation error with the given message.
+func NewInputValidationError(msg string) error {
+	return &InputValidationError{msg: msg}
+}
+
+// IsInputValidationError checks if the given error is a validation error.
+func IsInputValidationError(err error) bool {
+	var validationErr *InputValidationError
+	return errors.As(err, &validationErr)
 }

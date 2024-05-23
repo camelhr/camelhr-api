@@ -15,36 +15,99 @@ type errorResponse struct {
 	ErrorText string `json:"error"`
 }
 
-// ErrorResponse writes an error response with the given status code.
-// Appropriate error message will be sent in the response body.
+// ErrorResponse writes an error response for the given error.
+// Appropriate http status code will be used based on the error type.
+// Error message will be sent in the http response for applicable errors.
 // If the error is of type base.APIError with not-nil cause, the cause will be logged.
-// General errors will not be logged.
-func ErrorResponse(w http.ResponseWriter, statusCode int, err error) {
-	var message string
-
+// If the error is of type base.APIError with not-nil http status code, it will be used. Otherwise, default is 500.
+// Appropriate errors will be logged.
+func ErrorResponse(w http.ResponseWriter, err error) {
 	var apiErr *base.APIError
 
 	var notFoundErr *base.NotFoundError
 
+	var inputValidationErr *base.InputValidationError
+
 	var validationErrors validator.ValidationErrors
 
-	// send the error message for known errors
+	// handle api error
 	if ok := errors.As(err, &apiErr); ok {
-		message = apiErr.Error()
+		statusCode, message := processAPIError(apiErr)
+		JSON(w, statusCode, &errorResponse{ErrorText: message})
 
-		cause := apiErr.Unwrap()
-		if cause != nil {
-			log.Error("%v", cause)
-		}
-	} else if ok := errors.As(err, &notFoundErr); ok {
-		message = notFoundErr.Error()
-	} else if ok := errors.As(err, &validationErrors); ok {
-		message = buildValidationErrorMessage(validationErrors)
-	} else {
-		log.Error("%v", err)
+		return
 	}
 
-	JSON(w, statusCode, &errorResponse{ErrorText: message})
+	// handle not found error
+	if ok := errors.As(err, &notFoundErr); ok {
+		statusCode, message := processNotFoundError(notFoundErr)
+		JSON(w, statusCode, &errorResponse{ErrorText: message})
+
+		return
+	}
+
+	// handle input validation error
+	if ok := errors.As(err, &inputValidationErr); ok {
+		statusCode, message := processInputValidationError(inputValidationErr)
+		JSON(w, statusCode, &errorResponse{ErrorText: message})
+
+		return
+	}
+
+	// handle validation errors
+	if ok := errors.As(err, &validationErrors); ok {
+		statusCode, message := processValidationErrors(validationErrors)
+		JSON(w, statusCode, &errorResponse{ErrorText: message})
+
+		return
+	}
+
+	// log and send generic error
+	log.Error("%v", err)
+	JSON(w, http.StatusInternalServerError, &errorResponse{ErrorText: ""})
+}
+
+// processAPIError processes the API error and returns the status code and message.
+func processAPIError(apiErr *base.APIError) (int, string) {
+	statusCode := http.StatusInternalServerError
+	message := apiErr.Error()
+
+	cause := apiErr.Unwrap()
+	if cause != nil {
+		log.Error("%v", cause)
+	}
+
+	if httpStatusCode := apiErr.HTTPStatusCode(); httpStatusCode != nil {
+		statusCode = *httpStatusCode
+	}
+
+	return statusCode, message
+}
+
+// processNotFoundError processes the not found error and returns the status code and message.
+func processNotFoundError(notFoundErr *base.NotFoundError) (int, string) {
+	return http.StatusNotFound, notFoundErr.Error()
+}
+
+// processInputValidationError processes the input validation error and returns the status code and message.
+func processInputValidationError(inputValidationErr *base.InputValidationError) (int, string) {
+	return http.StatusBadRequest, inputValidationErr.Error()
+}
+
+// processValidationErrors processes the validation errors and returns the status code and message.
+func processValidationErrors(validationErrors validator.ValidationErrors) (int, string) {
+	trans := base.ValidationTranslator()
+	message := ""
+
+	for _, fieldErr := range validationErrors {
+		if message != "" {
+			message += ". "
+		}
+
+		message += fieldErr.Translate(trans)
+	}
+
+	return http.StatusBadRequest, message
 }
 
 // JSON writes a JSON response with the given status code and value.
@@ -115,20 +178,4 @@ func RemoveCookie(w http.ResponseWriter, name string) {
 // Redirect redirects the request to the given url with status code 302.
 func Redirect(w http.ResponseWriter, r *http.Request, url string) {
 	http.Redirect(w, r, url, http.StatusFound)
-}
-
-// buildValidationErrorMessage extracts the validation error message from the given validation errors.
-func buildValidationErrorMessage(errs validator.ValidationErrors) string {
-	trans := base.ValidationTranslator()
-	message := ""
-
-	for _, fieldErr := range errs {
-		if message != "" {
-			message += ". "
-		}
-
-		message += fieldErr.Translate(trans)
-	}
-
-	return message
 }

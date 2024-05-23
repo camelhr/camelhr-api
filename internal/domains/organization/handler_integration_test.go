@@ -38,7 +38,7 @@ func (s *OrganizationTestSuite) TestHandlerIntegration_GetOrganizationBySubdomai
 		h.ServeHTTP(rr, req)
 
 		// assert the response
-		s.Equal(http.StatusOK, rr.Code)
+		s.Require().Equal(http.StatusOK, rr.Code)
 		s.JSONEq(string(orgJSON), rr.Body.String())
 
 		// parse the response body

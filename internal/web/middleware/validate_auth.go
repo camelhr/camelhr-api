@@ -30,8 +30,8 @@ func (m *authMiddleware) ValidateAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// subdomain is required for user authentication
 		if request.URLParam(r, "subdomain") == "" {
-			response.ErrorResponse(w, http.StatusUnauthorized,
-				base.NewAPIError("subdomain is required for user authentication"))
+			response.ErrorResponse(w, base.NewAPIError("subdomain is required for user authentication",
+				base.ErrorHTTPStatus(http.StatusUnauthorized)))
 
 			return
 		}
@@ -66,12 +66,14 @@ func (m *authMiddleware) ValidateAuth(next http.Handler) http.Handler {
 func (m *authMiddleware) processJWT(next http.Handler, w http.ResponseWriter, r *http.Request, jwtString string) {
 	token, claims, err := auth.ParseAndValidateJWT(jwtString, m.appSecret)
 	if err != nil {
-		response.ErrorResponse(w, http.StatusUnauthorized, base.NewAPIError("invalid token", base.ErrorCause(err)))
+		response.ErrorResponse(w, base.NewAPIError("invalid token", base.ErrorCause(err),
+			base.ErrorHTTPStatus(http.StatusUnauthorized)))
+
 		return
 	}
 
 	if token == nil || !token.Valid || claims == nil {
-		response.ErrorResponse(w, http.StatusUnauthorized, base.NewAPIError("invalid token"))
+		response.ErrorResponse(w, base.NewAPIError("invalid token", base.ErrorHTTPStatus(http.StatusUnauthorized)))
 		return
 	}
 
@@ -82,7 +84,9 @@ func (m *authMiddleware) processJWT(next http.Handler, w http.ResponseWriter, r 
 
 	// validate the subdomain from the request path against the subdomain in the jwt claims
 	if request.URLParam(r, "subdomain") != claims.OrgSubdomain {
-		response.ErrorResponse(w, http.StatusUnauthorized, base.NewAPIError("user doesn't belong to the organization"))
+		response.ErrorResponse(w, base.NewAPIError("user doesn't belong to the organization",
+			base.ErrorHTTPStatus(http.StatusUnauthorized)))
+
 		return
 	}
 
@@ -100,8 +104,8 @@ func (m *authMiddleware) processAPIToken(
 	// decode the basic auth header
 	decoded, err := base64.StdEncoding.DecodeString(basicAuthCred)
 	if err != nil {
-		response.ErrorResponse(w, http.StatusUnauthorized,
-			base.NewAPIError("invalid basic auth header", base.ErrorCause(err)))
+		response.ErrorResponse(w, base.NewAPIError("invalid basic auth header", base.ErrorCause(err),
+			base.ErrorHTTPStatus(http.StatusUnauthorized)))
 
 		return
 	}
@@ -109,8 +113,8 @@ func (m *authMiddleware) processAPIToken(
 	// extract the api token
 	apiToken, found := strings.CutSuffix(string(decoded), ":"+auth.APITokenPassword)
 	if !found {
-		response.ErrorResponse(w, http.StatusUnauthorized,
-			base.NewAPIError(fmt.Sprintf("invalid basic auth header. expected %s as password", auth.APITokenPassword)))
+		response.ErrorResponse(w, base.NewAPIError(fmt.Sprintf("invalid basic auth header. expected %s as password",
+			auth.APITokenPassword), base.ErrorHTTPStatus(http.StatusUnauthorized)))
 
 		return
 	}
@@ -120,15 +124,14 @@ func (m *authMiddleware) processAPIToken(
 	// get user for the given subdomain and api token
 	u, err := m.userService.GetUserByOrgSubdomainAPIToken(r.Context(), subdomain, apiToken)
 	if err != nil {
-		response.ErrorResponse(w, http.StatusUnauthorized,
-			base.NewAPIError("invalid api token", base.ErrorCause(err)))
+		response.ErrorResponse(w, base.NewAPIError("invalid api token", base.ErrorCause(err),
+			base.ErrorHTTPStatus(http.StatusUnauthorized)))
 
 		return
 	}
 
 	if u.DisabledAt != nil {
-		response.ErrorResponse(w, http.StatusUnauthorized,
-			base.NewAPIError("user is disabled"))
+		response.ErrorResponse(w, base.NewAPIError("user is disabled", base.ErrorHTTPStatus(http.StatusUnauthorized)))
 
 		return
 	}
