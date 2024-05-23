@@ -11,6 +11,10 @@ type postgresDatabase struct {
 	db *sqlx.DB
 }
 
+type txContextKey int
+
+const ctxTxKey txContextKey = iota // should not be exported
+
 // NewPostgresDatabase creates a new instance of the postgresDatabase.
 // Currently we are executing the queries directly.
 // The idea to use different connections for read and write operations.
@@ -20,6 +24,22 @@ func NewPostgresDatabase(db *sqlx.DB) Database {
 }
 
 func (p *postgresDatabase) Exec(ctx context.Context, dest any, query string, args ...any) error {
+	// if the transaction is present in the context, use it
+	tx, ok := ctx.Value(ctxTxKey).(*sqlx.Tx)
+	if ok {
+		if dest == nil {
+			_, err := tx.ExecContext(ctx, query, args...)
+			return err
+		}
+
+		if isSliceOrArray(dest) {
+			return tx.SelectContext(ctx, dest, query, args...)
+		}
+
+		return tx.GetContext(ctx, dest, query, args...)
+	}
+
+	// if the transaction is not present in the context, use the db connection
 	if dest == nil {
 		_, err := p.db.ExecContext(ctx, query, args...)
 		return err
@@ -33,10 +53,20 @@ func (p *postgresDatabase) Exec(ctx context.Context, dest any, query string, arg
 }
 
 func (p *postgresDatabase) Get(ctx context.Context, dest any, query string, args ...any) error {
+	tx, ok := ctx.Value(ctxTxKey).(*sqlx.Tx)
+	if ok {
+		return tx.GetContext(ctx, dest, query, args...)
+	}
+
 	return p.db.GetContext(ctx, dest, query, args...)
 }
 
 func (p *postgresDatabase) List(ctx context.Context, dest any, query string, args ...any) error {
+	tx, ok := ctx.Value(ctxTxKey).(*sqlx.Tx)
+	if ok {
+		return tx.SelectContext(ctx, dest, query, args...)
+	}
+
 	return p.db.SelectContext(ctx, dest, query, args...)
 }
 
@@ -44,10 +74,13 @@ func (p *postgresDatabase) WithTx(
 	ctx context.Context,
 	txFn func(ctx context.Context) error,
 ) (err error) {
-	tx, err := p.db.BeginTx(ctx, nil)
+	tx, err := p.db.BeginTxx(ctx, nil)
 	if err != nil {
 		return err
 	}
+
+	// inject transaction into context
+	ctx = context.WithValue(ctx, ctxTxKey, tx)
 
 	defer func() {
 		if p := recover(); p != nil {
