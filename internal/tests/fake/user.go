@@ -29,6 +29,20 @@ func UserEmail(email string) UserOption {
 	}
 }
 
+// UserPassword sets/overrides the default password of a user.
+func UserPassword(password string) UserOption {
+	return func(u *FakeUser) (*FakeUser, error) {
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+		if err != nil {
+			return nil, err
+		}
+
+		u.PasswordHash = string(hashedPassword)
+
+		return u, nil
+	}
+}
+
 // UserIsOwner sets the user as the owner of the organization.
 func UserIsOwner() UserOption {
 	return func(u *FakeUser) (*FakeUser, error) {
