@@ -160,7 +160,7 @@ func TestAuthMiddleware_ValidateAuth(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/api/some-endpoint", nil)
 		req.SetBasicAuth(
 			apiToken,
-			auth.APITokenPassword,
+			auth.APITokenBasicAuthPassword,
 		)
 
 		// simulate chi's URL parameters
@@ -284,7 +284,7 @@ func TestAuthMiddleware_ValidateAuth(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/api/some-endpoint", nil)
 		req.SetBasicAuth(
 			apiToken,
-			auth.APITokenPassword,
+			auth.APITokenBasicAuthPassword,
 		)
 
 		// simulate chi's URL parameters
@@ -327,7 +327,7 @@ func TestAuthMiddleware_ValidateAuth(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/api/some-endpoint", nil)
 		req.SetBasicAuth(
 			apiToken,
-			auth.APITokenPassword,
+			auth.APITokenBasicAuthPassword,
 		)
 
 		// simulate chi's URL parameters

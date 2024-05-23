@@ -74,7 +74,7 @@ func (s *OrganizationTestSuite) TestHandlerIntegration_UpdateOrganization() {
 			strings.NewReader(string(orgJSON)),
 		)
 		s.Require().NoError(err)
-		req.SetBasicAuth(*u.APIToken, auth.APITokenPassword)
+		req.SetBasicAuth(*u.APIToken, auth.APITokenBasicAuthPassword)
 
 		rr := httptest.NewRecorder()
 		h := web.SetupRoutes(s.DB, s.Config)
@@ -105,7 +105,7 @@ func (s *OrganizationTestSuite) TestHandlerIntegration_DeleteOrganization() {
 			nil,
 		)
 		s.Require().NoError(err)
-		req.SetBasicAuth(*u.APIToken, auth.APITokenPassword)
+		req.SetBasicAuth(*u.APIToken, auth.APITokenBasicAuthPassword)
 
 		rr := httptest.NewRecorder()
 		h := web.SetupRoutes(s.DB, s.Config)

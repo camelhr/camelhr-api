@@ -111,10 +111,10 @@ func (m *authMiddleware) processAPIToken(
 	}
 
 	// extract the api token
-	apiToken, found := strings.CutSuffix(string(decoded), ":"+auth.APITokenPassword)
+	apiToken, found := strings.CutSuffix(string(decoded), ":"+auth.APITokenBasicAuthPassword)
 	if !found {
 		response.ErrorResponse(w, base.NewAPIError(fmt.Sprintf("invalid basic auth header. expected %s as password",
-			auth.APITokenPassword), base.ErrorHTTPStatus(http.StatusUnauthorized)))
+			auth.APITokenBasicAuthPassword), base.ErrorHTTPStatus(http.StatusUnauthorized)))
 
 		return
 	}
