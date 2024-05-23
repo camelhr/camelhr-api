@@ -48,11 +48,15 @@ func NewPostgresContainer() (*PostgreSQLContainer, error) {
 	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
 		Repository: "postgres",
 		Tag:        "16.2-alpine",
+		Cmd: []string{
+			"postgres",
+			"-c", "log_statement=all",
+			"-c", "log_error_verbosity=verbose",
+		},
 		Env: []string{
 			"POSTGRES_USER=" + pgUser,
 			"POSTGRES_PASSWORD=" + pgPassword,
 			"POSTGRES_DB=" + pgDBName,
-			"listen_addresses = '*'",
 		},
 		ExposedPorts: []string{"5432/tcp"},
 	}, func(config *docker.HostConfig) {
