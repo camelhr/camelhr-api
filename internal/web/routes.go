@@ -5,6 +5,7 @@ import (
 
 	"github.com/camelhr/camelhr-api/internal/config"
 	"github.com/camelhr/camelhr-api/internal/database"
+	"github.com/camelhr/camelhr-api/internal/domains/auth"
 	"github.com/camelhr/camelhr-api/internal/domains/organization"
 	"github.com/camelhr/camelhr-api/internal/domains/user"
 	"github.com/camelhr/camelhr-api/internal/web/middleware"
@@ -21,6 +22,8 @@ func SetupRoutes(db database.Database, conf config.Config) http.Handler {
 	orgHandler := organization.NewHandler(orgService)
 	userRepo := user.NewRepository(db)
 	userService := user.NewService(userRepo)
+	authService := auth.NewService(db, orgService, userService, conf.AppSecret)
+	authHandler := auth.NewHandler(authService)
 	authMiddleware := middleware.NewAuthMiddleware(conf.AppSecret, userService)
 
 	// create a default router
@@ -40,11 +43,19 @@ func SetupRoutes(db database.Database, conf config.Config) http.Handler {
 		r.Get("/status", func(w http.ResponseWriter, r *http.Request) {
 			response.Text(w, http.StatusOK, "OK")
 		})
+
+		r.Post("/auth/register", authHandler.Register)
+		r.Post("/auth/logout", authHandler.Logout)
 	})
 
 	// create a sub-router for v1 subdomain endpoints
 	v1Subdomain := chi.NewRouter()
 	v1.Mount("/subdomains/{subdomain}", v1Subdomain)
+
+	v1Subdomain.Route("/auth", func(r chi.Router) {
+		// open routes. no auth required
+		r.Post("/login", authHandler.Login)
+	})
 
 	v1Subdomain.Route("/organizations", func(r chi.Router) {
 		// open routes. no auth required
