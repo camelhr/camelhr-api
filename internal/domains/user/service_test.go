@@ -19,7 +19,7 @@ func TestService_GetUserByID(t *testing.T) {
 	t.Run("should return error when repository return error", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 
 		mockRepo.On("GetUserByID", context.Background(), int64(1)).
@@ -33,7 +33,7 @@ func TestService_GetUserByID(t *testing.T) {
 	t.Run("should return user by id", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 
 		u := user.User{
@@ -57,7 +57,7 @@ func TestService_GetUserByAPIToken(t *testing.T) {
 	t.Run("should return error when repository return error", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 
 		mockRepo.On("GetUserByAPIToken", context.Background(), "token").
@@ -71,7 +71,7 @@ func TestService_GetUserByAPIToken(t *testing.T) {
 	t.Run("should return user by api token", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 
 		u := user.User{
@@ -95,7 +95,7 @@ func TestService_GetUserByOrgSubdomainAPIToken(t *testing.T) {
 	t.Run("should return error when repository return error", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 
 		mockRepo.On("GetUserByOrgSubdomainAPIToken", context.Background(), "subdomain", "token").
@@ -109,7 +109,7 @@ func TestService_GetUserByOrgSubdomainAPIToken(t *testing.T) {
 	t.Run("should return error when subdomain is invalid", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 
 		_, err := service.GetUserByOrgSubdomainAPIToken(context.Background(), "invalid_sub", "token")
@@ -120,7 +120,7 @@ func TestService_GetUserByOrgSubdomainAPIToken(t *testing.T) {
 	t.Run("should return user by organization subdomain and api token", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 
 		u := user.User{
@@ -144,7 +144,7 @@ func TestService_GetUserByOrgIDEmail(t *testing.T) {
 	t.Run("should return error when repository return error", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 		email := gofakeit.Email()
 
@@ -159,7 +159,7 @@ func TestService_GetUserByOrgIDEmail(t *testing.T) {
 	t.Run("should return error when email is invalid", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 		email := "invalid@invalid"
 
@@ -171,7 +171,7 @@ func TestService_GetUserByOrgIDEmail(t *testing.T) {
 	t.Run("should return user by organization id and email", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 
 		u := user.User{
@@ -195,7 +195,7 @@ func TestService_GetUserByOrgSubdomainEmail(t *testing.T) {
 	t.Run("should return error when repository return error", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 		email := gofakeit.Email()
 
@@ -210,7 +210,7 @@ func TestService_GetUserByOrgSubdomainEmail(t *testing.T) {
 	t.Run("should return error when subdomain is invalid", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 
 		_, err := service.GetUserByOrgSubdomainEmail(context.Background(), "@#invalid", gofakeit.Email())
@@ -221,7 +221,7 @@ func TestService_GetUserByOrgSubdomainEmail(t *testing.T) {
 	t.Run("should return error when email is invalid", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 		email := ""
 
@@ -233,7 +233,7 @@ func TestService_GetUserByOrgSubdomainEmail(t *testing.T) {
 	t.Run("should return user by organization subdomain and email", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 		email := gofakeit.Email()
 
@@ -258,7 +258,7 @@ func TestService_CreateUser(t *testing.T) {
 	t.Run("should return error when repository return error", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 		password := generatePassword()
 
@@ -279,7 +279,7 @@ func TestService_CreateUser(t *testing.T) {
 	t.Run("should return error when email is invalid", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 		password := generatePassword()
 
@@ -291,7 +291,7 @@ func TestService_CreateUser(t *testing.T) {
 	t.Run("should return error when password is invalid", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 
 		_, err := service.CreateUser(context.Background(), int64(1), gofakeit.Email(), "invalid")
@@ -302,7 +302,7 @@ func TestService_CreateUser(t *testing.T) {
 	t.Run("should create user", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 		password := generatePassword()
 
@@ -327,7 +327,7 @@ func TestService_CreateOwner(t *testing.T) {
 	t.Run("should return error when repository return error", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 		password := generatePassword()
 
@@ -348,7 +348,7 @@ func TestService_CreateOwner(t *testing.T) {
 	t.Run("should return error when email is invalid", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 		password := generatePassword()
 
@@ -360,7 +360,7 @@ func TestService_CreateOwner(t *testing.T) {
 	t.Run("should return error when password is invalid", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 
 		_, err := service.CreateOwner(context.Background(), int64(1), gofakeit.Email(), "invalid123")
@@ -371,7 +371,7 @@ func TestService_CreateOwner(t *testing.T) {
 	t.Run("should create owner", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 		password := generatePassword()
 
@@ -396,7 +396,7 @@ func TestService_ResetPassword(t *testing.T) {
 	t.Run("should return error when repository return error", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 		password := generatePassword()
 
@@ -411,7 +411,7 @@ func TestService_ResetPassword(t *testing.T) {
 	t.Run("should return error when password is invalid", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 
 		err := service.ResetPassword(context.Background(), int64(1), "Invalid123")
@@ -422,7 +422,7 @@ func TestService_ResetPassword(t *testing.T) {
 	t.Run("should reset password", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 		password := generatePassword()
 
@@ -440,7 +440,7 @@ func TestService_DeleteUser(t *testing.T) {
 	t.Run("should return error when repository return error", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 
 		mockRepo.On("DeleteUser", context.Background(), int64(1)).
@@ -454,7 +454,7 @@ func TestService_DeleteUser(t *testing.T) {
 	t.Run("should delete user", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 
 		mockRepo.On("DeleteUser", context.Background(), int64(1)).
@@ -471,7 +471,7 @@ func TestService_DisableUser(t *testing.T) {
 	t.Run("should return error when repository return error", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 		comment := gofakeit.SentenceSimple()
 
@@ -486,7 +486,7 @@ func TestService_DisableUser(t *testing.T) {
 	t.Run("should return error when comment is empty", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 
 		err := service.DisableUser(context.Background(), int64(1), "")
@@ -497,7 +497,7 @@ func TestService_DisableUser(t *testing.T) {
 	t.Run("should disable user", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 		comment := gofakeit.SentenceSimple()
 
@@ -515,7 +515,7 @@ func TestService_EnableUser(t *testing.T) {
 	t.Run("should return error when repository return error", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 		comment := gofakeit.SentenceSimple()
 
@@ -530,7 +530,7 @@ func TestService_EnableUser(t *testing.T) {
 	t.Run("should return error when comment is empty", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 
 		err := service.DisableUser(context.Background(), int64(1), "")
@@ -541,7 +541,7 @@ func TestService_EnableUser(t *testing.T) {
 	t.Run("should enable user", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 		comment := gofakeit.SentenceSimple()
 
@@ -559,7 +559,7 @@ func TestService_GenerateAPIToken(t *testing.T) {
 	t.Run("should return error when repository return error", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 
 		mockRepo.On("GenerateAPIToken", context.Background(), int64(1)).
@@ -573,7 +573,7 @@ func TestService_GenerateAPIToken(t *testing.T) {
 	t.Run("should generate api token", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 
 		mockRepo.On("GenerateAPIToken", context.Background(), int64(1)).
@@ -590,7 +590,7 @@ func TestService_ResetAPIToken(t *testing.T) {
 	t.Run("should return error when repository return error", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 
 		mockRepo.On("ResetAPIToken", context.Background(), int64(1)).
@@ -604,7 +604,7 @@ func TestService_ResetAPIToken(t *testing.T) {
 	t.Run("should reset api token", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 
 		mockRepo.On("ResetAPIToken", context.Background(), int64(1)).
@@ -621,7 +621,7 @@ func TestService_SetEmailVerified(t *testing.T) {
 	t.Run("should return error when repository return error", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 
 		mockRepo.On("SetEmailVerified", context.Background(), int64(1)).
@@ -635,7 +635,7 @@ func TestService_SetEmailVerified(t *testing.T) {
 	t.Run("should set email verified", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := user.NewRepositoryMock(t)
+		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 
 		mockRepo.On("SetEmailVerified", context.Background(), int64(1)).

@@ -141,7 +141,7 @@ func TestAuthMiddleware_ValidateAuth(t *testing.T) {
 	t.Run("should validate the request with a api token", func(t *testing.T) {
 		t.Parallel()
 
-		userService := user.NewServiceMock(t)
+		userService := user.NewMockService(t)
 		subdomain := gofakeit.Word()
 		apiToken := gofakeit.UUID()
 		u := user.User{
@@ -269,7 +269,7 @@ func TestAuthMiddleware_ValidateAuth(t *testing.T) {
 	t.Run("should return unauthorized response if user not found for api token & subdomain", func(t *testing.T) {
 		t.Parallel()
 
-		userService := user.NewServiceMock(t)
+		userService := user.NewMockService(t)
 		subdomain := gofakeit.Word()
 		apiToken := gofakeit.UUID()
 
@@ -307,7 +307,7 @@ func TestAuthMiddleware_ValidateAuth(t *testing.T) {
 	t.Run("should return unauthorized response for a api token of disabled user", func(t *testing.T) {
 		t.Parallel()
 
-		userService := user.NewServiceMock(t)
+		userService := user.NewMockService(t)
 		subdomain := gofakeit.Word()
 		apiToken := gofakeit.UUID()
 		now := time.Now()

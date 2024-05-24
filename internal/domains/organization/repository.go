@@ -6,8 +6,6 @@ import (
 	"github.com/camelhr/camelhr-api/internal/database"
 )
 
-//go:generate mockery --name=Repository --structname=RepositoryMock --inpackage --filename=repository_mock.go
-
 type Repository interface {
 	// GetOrganizationByID returns an organization by its ID.
 	GetOrganizationByID(ctx context.Context, id int64) (Organization, error)

@@ -1,4 +1,5 @@
-.PHONY: up down nuke run build test lint lint-fix clean goose-up migrate-up
+.PHONY: up down nuke run build test unit-test lint lint-fix install-golangci-lint mock clean 
+.PHONY: migrate-up migrate-down migrate-create-schema migrate-create-datafix migrate-version migrate-status
 
 export PGHOST ?= localhost
 export PGPORT ?= 5432
@@ -28,11 +29,18 @@ test:
 unit-test:
 	go test -v -cover -race ./... -short
 
-lint:
+lint: install-golangci-lint
 	golangci-lint run
 
-lint-fix:
+lint-fix: install-golangci-lint
 	golangci-lint run --fix
+
+install-golangci-lint:
+	@which golangci-lint > /dev/null || go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.56.2
+
+mock:
+	@which mockery > /dev/null || go install github.com/vektra/mockery/v2@v2.43.1
+	mockery
 
 clean:
 	rm -rf bin

@@ -39,7 +39,7 @@ func TestHandler_Register(t *testing.T) {
 		req, err := http.NewRequest(http.MethodPost, registerPath, strings.NewReader(payload))
 		require.NoError(t, err)
 
-		mockService := auth.NewServiceMock(t)
+		mockService := auth.NewMockService(t)
 		rr := httptest.NewRecorder()
 		handler := auth.NewHandler(mockService)
 
@@ -64,7 +64,7 @@ func TestHandler_Register(t *testing.T) {
 		req, err := http.NewRequest(http.MethodPost, registerPath, strings.NewReader(payload))
 		require.NoError(t, err)
 
-		mockService := auth.NewServiceMock(t)
+		mockService := auth.NewMockService(t)
 		rr := httptest.NewRecorder()
 		handler := auth.NewHandler(mockService)
 
@@ -89,7 +89,7 @@ func TestHandler_Register(t *testing.T) {
 		req, err := http.NewRequest(http.MethodPost, registerPath, strings.NewReader(payload))
 		require.NoError(t, err)
 
-		mockService := auth.NewServiceMock(t)
+		mockService := auth.NewMockService(t)
 		rr := httptest.NewRecorder()
 		handler := auth.NewHandler(mockService)
 
@@ -114,7 +114,7 @@ func TestHandler_Register(t *testing.T) {
 		req, err := http.NewRequest(http.MethodPost, registerPath, strings.NewReader(payload))
 		require.NoError(t, err)
 
-		mockService := auth.NewServiceMock(t)
+		mockService := auth.NewMockService(t)
 		rr := httptest.NewRecorder()
 		handler := auth.NewHandler(mockService)
 
@@ -139,7 +139,7 @@ func TestHandler_Register(t *testing.T) {
 		req, err := http.NewRequest(http.MethodPost, registerPath, strings.NewReader(payload))
 		require.NoError(t, err)
 
-		mockService := auth.NewServiceMock(t)
+		mockService := auth.NewMockService(t)
 		rr := httptest.NewRecorder()
 		handler := auth.NewHandler(mockService)
 
@@ -167,7 +167,7 @@ func TestHandler_Register(t *testing.T) {
 		req, err := http.NewRequest(http.MethodPost, registerPath, strings.NewReader(payload))
 		require.NoError(t, err)
 
-		mockService := auth.NewServiceMock(t)
+		mockService := auth.NewMockService(t)
 		rr := httptest.NewRecorder()
 		handler := auth.NewHandler(mockService)
 
@@ -198,7 +198,7 @@ func TestHandler_Login(t *testing.T) {
 		reqContext.URLParams.Add("subdomain", subdomain)
 		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
 
-		mockService := auth.NewServiceMock(t)
+		mockService := auth.NewMockService(t)
 		rr := httptest.NewRecorder()
 		handler := auth.NewHandler(mockService)
 
@@ -230,7 +230,7 @@ func TestHandler_Login(t *testing.T) {
 		reqContext.URLParams.Add("subdomain", subdomain)
 		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
 
-		mockService := auth.NewServiceMock(t)
+		mockService := auth.NewMockService(t)
 		rr := httptest.NewRecorder()
 		handler := auth.NewHandler(mockService)
 
@@ -262,7 +262,7 @@ func TestHandler_Login(t *testing.T) {
 		reqContext.URLParams.Add("subdomain", subdomain)
 		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
 
-		mockService := auth.NewServiceMock(t)
+		mockService := auth.NewMockService(t)
 		rr := httptest.NewRecorder()
 		handler := auth.NewHandler(mockService)
 
@@ -294,7 +294,7 @@ func TestHandler_Login(t *testing.T) {
 		reqContext.URLParams.Add("subdomain", subdomain)
 		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
 
-		mockService := auth.NewServiceMock(t)
+		mockService := auth.NewMockService(t)
 		rr := httptest.NewRecorder()
 		handler := auth.NewHandler(mockService)
 
@@ -329,7 +329,7 @@ func TestHandler_Login(t *testing.T) {
 		reqContext.URLParams.Add("subdomain", subdomain)
 		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
 
-		mockService := auth.NewServiceMock(t)
+		mockService := auth.NewMockService(t)
 		rr := httptest.NewRecorder()
 		handler := auth.NewHandler(mockService)
 
@@ -365,7 +365,7 @@ func TestHandler_Login(t *testing.T) {
 		reqContext.URLParams.Add("subdomain", subdomain)
 		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
 
-		mockService := auth.NewServiceMock(t)
+		mockService := auth.NewMockService(t)
 		rr := httptest.NewRecorder()
 		handler := auth.NewHandler(mockService)
 
@@ -395,7 +395,7 @@ func TestHandler_Logout(t *testing.T) {
 		req, err := http.NewRequest(http.MethodPost, loginPath, nil)
 		require.NoError(t, err)
 
-		mockService := auth.NewServiceMock(t)
+		mockService := auth.NewMockService(t)
 		rr := httptest.NewRecorder()
 		handler := auth.NewHandler(mockService)
 

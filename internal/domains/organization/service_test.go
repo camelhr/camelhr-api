@@ -18,7 +18,7 @@ func TestService_GetOrganizationByID(t *testing.T) {
 	t.Run("should return an error when the repository call fails", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := organization.NewRepositoryMock(t)
+		mockRepo := organization.NewMockRepository(t)
 		service := organization.NewService(mockRepo)
 
 		mockRepo.On("GetOrganizationByID", context.Background(), int64(1)).
@@ -34,7 +34,7 @@ func TestService_GetOrganizationByID(t *testing.T) {
 
 		var notFoundErr *base.NotFoundError
 
-		mockRepo := organization.NewRepositoryMock(t)
+		mockRepo := organization.NewMockRepository(t)
 		service := organization.NewService(mockRepo)
 
 		mockRepo.On("GetOrganizationByID", context.Background(), int64(1)).
@@ -48,7 +48,7 @@ func TestService_GetOrganizationByID(t *testing.T) {
 	t.Run("should return the organization by ID", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := organization.NewRepositoryMock(t)
+		mockRepo := organization.NewMockRepository(t)
 		service := organization.NewService(mockRepo)
 
 		org := organization.Organization{
@@ -72,7 +72,7 @@ func TestService_GetOrganizationBySubdomain(t *testing.T) {
 	t.Run("should return an error when the subdomain is invalid", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := organization.NewRepositoryMock(t)
+		mockRepo := organization.NewMockRepository(t)
 		service := organization.NewService(mockRepo)
 		subdomain := "#invalid-subdomain"
 
@@ -84,7 +84,7 @@ func TestService_GetOrganizationBySubdomain(t *testing.T) {
 	t.Run("should return an error when the repository call fails", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := organization.NewRepositoryMock(t)
+		mockRepo := organization.NewMockRepository(t)
 		service := organization.NewService(mockRepo)
 		orgSubdomain := randomOrganizationSubdomain()
 
@@ -101,7 +101,7 @@ func TestService_GetOrganizationBySubdomain(t *testing.T) {
 
 		var notFoundErr *base.NotFoundError
 
-		mockRepo := organization.NewRepositoryMock(t)
+		mockRepo := organization.NewMockRepository(t)
 		service := organization.NewService(mockRepo)
 		orgSubdomain := randomOrganizationSubdomain()
 
@@ -116,7 +116,7 @@ func TestService_GetOrganizationBySubdomain(t *testing.T) {
 	t.Run("should return the organization by subdomain", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := organization.NewRepositoryMock(t)
+		mockRepo := organization.NewMockRepository(t)
 		service := organization.NewService(mockRepo)
 		orgSubdomain := randomOrganizationSubdomain()
 
@@ -140,7 +140,7 @@ func TestService_GetOrganizationByName(t *testing.T) {
 	t.Run("should return an error when the organization name is invalid", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := organization.NewRepositoryMock(t)
+		mockRepo := organization.NewMockRepository(t)
 		service := organization.NewService(mockRepo)
 		orgName := "ørg1-non-ascii"
 
@@ -152,7 +152,7 @@ func TestService_GetOrganizationByName(t *testing.T) {
 	t.Run("should return an error when the repository call fails", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := organization.NewRepositoryMock(t)
+		mockRepo := organization.NewMockRepository(t)
 		service := organization.NewService(mockRepo)
 		orgName := randomOrganizationName()
 
@@ -169,7 +169,7 @@ func TestService_GetOrganizationByName(t *testing.T) {
 
 		var notFoundErr *base.NotFoundError
 
-		mockRepo := organization.NewRepositoryMock(t)
+		mockRepo := organization.NewMockRepository(t)
 		service := organization.NewService(mockRepo)
 		orgName := randomOrganizationName()
 
@@ -184,7 +184,7 @@ func TestService_GetOrganizationByName(t *testing.T) {
 	t.Run("should return the organization by name", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := organization.NewRepositoryMock(t)
+		mockRepo := organization.NewMockRepository(t)
 		service := organization.NewService(mockRepo)
 
 		org := organization.Organization{
@@ -207,7 +207,7 @@ func TestService_CreateOrganization(t *testing.T) {
 	t.Run("should return an error when the subdomain is invalid", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := organization.NewRepositoryMock(t)
+		mockRepo := organization.NewMockRepository(t)
 		service := organization.NewService(mockRepo)
 		subdomain := "#invalid-subdomain"
 
@@ -219,7 +219,7 @@ func TestService_CreateOrganization(t *testing.T) {
 	t.Run("should return an error when the organization name is invalid", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := organization.NewRepositoryMock(t)
+		mockRepo := organization.NewMockRepository(t)
 		service := organization.NewService(mockRepo)
 		orgName := "ørg1"
 
@@ -231,7 +231,7 @@ func TestService_CreateOrganization(t *testing.T) {
 	t.Run("should return an error when the repository call fails", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := organization.NewRepositoryMock(t)
+		mockRepo := organization.NewMockRepository(t)
 		service := organization.NewService(mockRepo)
 
 		mockRepo.On("CreateOrganization", context.Background(), "sub1", "org1").
@@ -245,7 +245,7 @@ func TestService_CreateOrganization(t *testing.T) {
 	t.Run("should return the created organization", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := organization.NewRepositoryMock(t)
+		mockRepo := organization.NewMockRepository(t)
 		service := organization.NewService(mockRepo)
 
 		org := organization.Organization{
@@ -268,7 +268,7 @@ func TestService_UpdateOrganization(t *testing.T) {
 	t.Run("should return an error when the organization name is invalid", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := organization.NewRepositoryMock(t)
+		mockRepo := organization.NewMockRepository(t)
 		service := organization.NewService(mockRepo)
 		orgID := gofakeit.Int64()
 		newOrgName := "ørg1"
@@ -281,7 +281,7 @@ func TestService_UpdateOrganization(t *testing.T) {
 	t.Run("should return an error when the repository call fails", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := organization.NewRepositoryMock(t)
+		mockRepo := organization.NewMockRepository(t)
 		service := organization.NewService(mockRepo)
 		orgID := gofakeit.Int64()
 		newOrgName := randomOrganizationName()
@@ -297,7 +297,7 @@ func TestService_UpdateOrganization(t *testing.T) {
 	t.Run("should return nil when the organization is updated", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := organization.NewRepositoryMock(t)
+		mockRepo := organization.NewMockRepository(t)
 		service := organization.NewService(mockRepo)
 		orgID := gofakeit.Int64()
 		newOrgName := randomOrganizationName()
@@ -316,7 +316,7 @@ func TestService_DeleteOrganization(t *testing.T) {
 	t.Run("should return an error when the repository call fails", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := organization.NewRepositoryMock(t)
+		mockRepo := organization.NewMockRepository(t)
 		service := organization.NewService(mockRepo)
 		orgID := gofakeit.Int64()
 
@@ -331,7 +331,7 @@ func TestService_DeleteOrganization(t *testing.T) {
 	t.Run("should return nil when the organization is deleted", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := organization.NewRepositoryMock(t)
+		mockRepo := organization.NewMockRepository(t)
 		service := organization.NewService(mockRepo)
 		orgID := gofakeit.Int64()
 
@@ -349,7 +349,7 @@ func TestService_SuspendOrganization(t *testing.T) {
 	t.Run("should return an error when the repository call fails", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := organization.NewRepositoryMock(t)
+		mockRepo := organization.NewMockRepository(t)
 		service := organization.NewService(mockRepo)
 		orgID := gofakeit.Int64()
 		comment := "test suspend"
@@ -365,7 +365,7 @@ func TestService_SuspendOrganization(t *testing.T) {
 	t.Run("should return nil when the organization is suspended", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := organization.NewRepositoryMock(t)
+		mockRepo := organization.NewMockRepository(t)
 		service := organization.NewService(mockRepo)
 		orgID := gofakeit.Int64()
 		comment := "test suspend"
@@ -384,7 +384,7 @@ func TestService_UnsuspendOrganization(t *testing.T) {
 	t.Run("should return an error when the repository call fails", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := organization.NewRepositoryMock(t)
+		mockRepo := organization.NewMockRepository(t)
 		service := organization.NewService(mockRepo)
 		orgID := gofakeit.Int64()
 		comment := "test unsuspend"
@@ -400,7 +400,7 @@ func TestService_UnsuspendOrganization(t *testing.T) {
 	t.Run("should return nil when the organization is unsuspended", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := organization.NewRepositoryMock(t)
+		mockRepo := organization.NewMockRepository(t)
 		service := organization.NewService(mockRepo)
 		orgID := gofakeit.Int64()
 		comment := "test unsuspend"
@@ -419,7 +419,7 @@ func TestService_BlacklistOrganization(t *testing.T) {
 	t.Run("should return an error when the repository call fails", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := organization.NewRepositoryMock(t)
+		mockRepo := organization.NewMockRepository(t)
 		service := organization.NewService(mockRepo)
 		orgID := gofakeit.Int64()
 		comment := "test blacklist"
@@ -435,7 +435,7 @@ func TestService_BlacklistOrganization(t *testing.T) {
 	t.Run("should return nil when the organization is blacklisted", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := organization.NewRepositoryMock(t)
+		mockRepo := organization.NewMockRepository(t)
 		service := organization.NewService(mockRepo)
 		orgID := gofakeit.Int64()
 		comment := "test blacklist"
@@ -454,7 +454,7 @@ func TestService_UnblacklistOrganization(t *testing.T) {
 	t.Run("should return an error when the repository call fails", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := organization.NewRepositoryMock(t)
+		mockRepo := organization.NewMockRepository(t)
 		service := organization.NewService(mockRepo)
 		orgID := gofakeit.Int64()
 		comment := "test unblacklist"
@@ -470,7 +470,7 @@ func TestService_UnblacklistOrganization(t *testing.T) {
 	t.Run("should return nil when the organization is unblacklisted", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := organization.NewRepositoryMock(t)
+		mockRepo := organization.NewMockRepository(t)
 		service := organization.NewService(mockRepo)
 		orgID := gofakeit.Int64()
 		comment := "test unblacklist"

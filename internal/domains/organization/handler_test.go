@@ -49,7 +49,7 @@ func TestHandler_GetOrganizationBySubdomain(t *testing.T) {
 		expectedBody := fmt.Sprintf(`{"id": %d, "subdomain": "%s", "name": "%s",
 		"suspended_at": null, "blacklisted_at": null, "created_at": "%s", "updated_at": "%s"}`,
 			org.ID, org.Subdomain, org.Name, org.CreatedAt.Format(time.RFC3339Nano), org.UpdatedAt.Format(time.RFC3339Nano))
-		mockService := organization.NewServiceMock(t)
+		mockService := organization.NewMockService(t)
 		rr := httptest.NewRecorder()
 		handler := organization.NewHandler(mockService)
 
@@ -77,7 +77,7 @@ func TestHandler_GetOrganizationBySubdomain(t *testing.T) {
 		reqContext.URLParams.Add("subdomain", "sub1")
 		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
 
-		mockService := organization.NewServiceMock(t)
+		mockService := organization.NewMockService(t)
 		rr := httptest.NewRecorder()
 		handler := organization.NewHandler(mockService)
 
@@ -104,7 +104,7 @@ func TestHandler_GetOrganizationBySubdomain(t *testing.T) {
 		reqContext.URLParams.Add("subdomain", "sub1")
 		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
 
-		mockService := organization.NewServiceMock(t)
+		mockService := organization.NewMockService(t)
 		rr := httptest.NewRecorder()
 		handler := organization.NewHandler(mockService)
 
@@ -143,7 +143,7 @@ func TestHandler_UpdateOrganization(t *testing.T) {
 		reqContext.URLParams.Add("subdomain", subdomain)
 		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
 
-		mockService := organization.NewServiceMock(t)
+		mockService := organization.NewMockService(t)
 		rr := httptest.NewRecorder()
 		handler := organization.NewHandler(mockService)
 
@@ -173,7 +173,7 @@ func TestHandler_UpdateOrganization(t *testing.T) {
 		reqContext.URLParams.Add("subdomain", subdomain)
 		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
 
-		mockService := organization.NewServiceMock(t)
+		mockService := organization.NewMockService(t)
 		rr := httptest.NewRecorder()
 		handler := organization.NewHandler(mockService)
 
@@ -203,7 +203,7 @@ func TestHandler_UpdateOrganization(t *testing.T) {
 		reqContext.URLParams.Add("subdomain", subdomain)
 		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
 
-		mockService := organization.NewServiceMock(t)
+		mockService := organization.NewMockService(t)
 		rr := httptest.NewRecorder()
 		handler := organization.NewHandler(mockService)
 
@@ -238,7 +238,7 @@ func TestHandler_UpdateOrganization(t *testing.T) {
 		reqContext.URLParams.Add("subdomain", subdomain)
 		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
 
-		mockService := organization.NewServiceMock(t)
+		mockService := organization.NewMockService(t)
 		rr := httptest.NewRecorder()
 		handler := organization.NewHandler(mockService)
 
@@ -318,7 +318,7 @@ func TestHandler_UpdateOrganization(t *testing.T) {
 				reqContext.URLParams.Add("subdomain", subdomain)
 				req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
 
-				mockService := organization.NewServiceMock(t)
+				mockService := organization.NewMockService(t)
 				rr := httptest.NewRecorder()
 				handler := organization.NewHandler(mockService)
 
@@ -349,7 +349,7 @@ func TestHandler_DeleteOrganization(t *testing.T) {
 		reqContext.URLParams.Add("subdomain", org.Subdomain)
 		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
 
-		mockService := organization.NewServiceMock(t)
+		mockService := organization.NewMockService(t)
 		rr := httptest.NewRecorder()
 		handler := organization.NewHandler(mockService)
 
@@ -380,7 +380,7 @@ func TestHandler_DeleteOrganization(t *testing.T) {
 		reqContext.URLParams.Add("subdomain", org.Subdomain)
 		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
 
-		mockService := organization.NewServiceMock(t)
+		mockService := organization.NewMockService(t)
 		rr := httptest.NewRecorder()
 		handler := organization.NewHandler(mockService)
 
@@ -411,7 +411,7 @@ func TestHandler_DeleteOrganization(t *testing.T) {
 		reqContext.URLParams.Add("subdomain", org.Subdomain)
 		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
 
-		mockService := organization.NewServiceMock(t)
+		mockService := organization.NewMockService(t)
 		rr := httptest.NewRecorder()
 		handler := organization.NewHandler(mockService)
 
@@ -442,7 +442,7 @@ func TestHandler_DeleteOrganization(t *testing.T) {
 		reqContext.URLParams.Add("subdomain", org.Subdomain)
 		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
 
-		mockService := organization.NewServiceMock(t)
+		mockService := organization.NewMockService(t)
 		rr := httptest.NewRecorder()
 		handler := organization.NewHandler(mockService)
 

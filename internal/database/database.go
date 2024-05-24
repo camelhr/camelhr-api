@@ -1,7 +1,5 @@
 package database
 
-//go:generate mockery --name=Database --structname=DatabaseMock --inpackage --filename=database_mock.go
-
 import (
 	"context"
 	"database/sql"

@@ -32,7 +32,7 @@ func TestService_Register(t *testing.T) {
 		orgName := gofakeit.Company()
 		subdomain := gofakeit.Word()
 
-		orgService := organization.NewServiceMock(t)
+		orgService := organization.NewMockService(t)
 		orgService.On("GetOrganizationBySubdomain", ctx, subdomain).
 			Return(organization.Organization{ID: gofakeit.Int64(), Subdomain: subdomain}, nil)
 
@@ -53,7 +53,7 @@ func TestService_Register(t *testing.T) {
 			orgName := gofakeit.Company()
 			subdomain := gofakeit.Word()
 
-			orgService := organization.NewServiceMock(t)
+			orgService := organization.NewMockService(t)
 			orgService.On("GetOrganizationBySubdomain", ctx, subdomain).
 				Return(organization.Organization{}, assert.AnError)
 
@@ -73,11 +73,11 @@ func TestService_Register(t *testing.T) {
 		subdomain := gofakeit.Word()
 		notFoundErr := base.NewNotFoundError("not found")
 
-		orgService := organization.NewServiceMock(t)
+		orgService := organization.NewMockService(t)
 		orgService.On("GetOrganizationBySubdomain", ctx, subdomain).
 			Return(organization.Organization{}, notFoundErr)
 
-		transactor := database.NewTransactorMock(t)
+		transactor := database.NewMockTransactor(t)
 		transactor.On("WithTx", ctx, mock.Anything).Return(assert.AnError)
 
 		authService := auth.NewService(transactor, orgService, nil, "")
@@ -96,11 +96,11 @@ func TestService_Register(t *testing.T) {
 		subdomain := gofakeit.Word()
 		notFoundErr := base.NewNotFoundError("not found")
 
-		orgService := organization.NewServiceMock(t)
+		orgService := organization.NewMockService(t)
 		orgService.On("GetOrganizationBySubdomain", ctx, subdomain).
 			Return(organization.Organization{}, notFoundErr)
 
-		transactor := database.NewTransactorMock(t)
+		transactor := database.NewMockTransactor(t)
 		transactor.On("WithTx", ctx, mock.Anything).Return(nil)
 
 		authService := auth.NewService(transactor, orgService, nil, "")
@@ -120,7 +120,7 @@ func TestService_Login(t *testing.T) {
 			ctx := context.Background()
 			subdomain := gofakeit.Word()
 
-			orgService := organization.NewServiceMock(t)
+			orgService := organization.NewMockService(t)
 			orgService.On("GetOrganizationBySubdomain", ctx, subdomain).
 				Return(organization.Organization{}, assert.AnError)
 
@@ -140,11 +140,11 @@ func TestService_Login(t *testing.T) {
 			o := organization.Organization{ID: gofakeit.Int64()}
 			email := gofakeit.Email()
 
-			orgService := organization.NewServiceMock(t)
+			orgService := organization.NewMockService(t)
 			orgService.On("GetOrganizationBySubdomain", ctx, subdomain).
 				Return(o, nil)
 
-			userService := user.NewServiceMock(t)
+			userService := user.NewMockService(t)
 			userService.On("GetUserByOrgIDEmail", ctx, o.ID, email).
 				Return(user.User{}, assert.AnError)
 
@@ -164,11 +164,11 @@ func TestService_Login(t *testing.T) {
 			o := organization.Organization{ID: gofakeit.Int64()}
 			email := gofakeit.Email()
 
-			orgService := organization.NewServiceMock(t)
+			orgService := organization.NewMockService(t)
 			orgService.On("GetOrganizationBySubdomain", ctx, subdomain).
 				Return(o, nil)
 
-			userService := user.NewServiceMock(t)
+			userService := user.NewMockService(t)
 			userService.On("GetUserByOrgIDEmail", ctx, o.ID, email).
 				Return(user.User{}, base.NewNotFoundError("not found"))
 
@@ -196,11 +196,11 @@ func TestService_Login(t *testing.T) {
 		}
 		o := organization.Organization{ID: gofakeit.Int64()}
 
-		orgService := organization.NewServiceMock(t)
+		orgService := organization.NewMockService(t)
 		orgService.On("GetOrganizationBySubdomain", ctx, subdomain).
 			Return(o, nil)
 
-		userService := user.NewServiceMock(t)
+		userService := user.NewMockService(t)
 		userService.On("GetUserByOrgIDEmail", ctx, o.ID, email).
 			Return(u, nil)
 
@@ -226,11 +226,11 @@ func TestService_Login(t *testing.T) {
 		}
 		o := organization.Organization{ID: gofakeit.Int64()}
 
-		orgService := organization.NewServiceMock(t)
+		orgService := organization.NewMockService(t)
 		orgService.On("GetOrganizationBySubdomain", ctx, subdomain).
 			Return(o, nil)
 
-		userService := user.NewServiceMock(t)
+		userService := user.NewMockService(t)
 		userService.On("GetUserByOrgIDEmail", ctx, o.ID, email).
 			Return(u, nil)
 
@@ -256,11 +256,11 @@ func TestService_Login(t *testing.T) {
 		}
 		o := organization.Organization{ID: gofakeit.Int64()}
 
-		orgService := organization.NewServiceMock(t)
+		orgService := organization.NewMockService(t)
 		orgService.On("GetOrganizationBySubdomain", ctx, subdomain).
 			Return(o, nil)
 
-		userService := user.NewServiceMock(t)
+		userService := user.NewMockService(t)
 		userService.On("GetUserByOrgIDEmail", ctx, o.ID, email).
 			Return(u, nil)
 

@@ -19,7 +19,7 @@ func TestRepository_GetUserByID(t *testing.T) {
 	t.Run("should return an error when the database call fails", func(t *testing.T) {
 		t.Parallel()
 
-		mockDB := &database.DatabaseMock{}
+		mockDB := database.NewMockDatabase(t)
 		repo := user.NewRepository(mockDB)
 
 		mockDB.On("Get", context.Background(), mock.Anything, tests.QueryMatcher("getUserByIDQuery"), int64(1)).
@@ -35,7 +35,7 @@ func TestRepository_GetUserByID(t *testing.T) {
 
 		var emptyUser user.User
 
-		mockDB := &database.DatabaseMock{}
+		mockDB := database.NewMockDatabase(t)
 		repo := user.NewRepository(mockDB)
 
 		u := user.User{ID: 1}
@@ -60,7 +60,7 @@ func TestRepository_GetUserByAPIToken(t *testing.T) {
 	t.Run("should return an error when the database call fails", func(t *testing.T) {
 		t.Parallel()
 
-		mockDB := &database.DatabaseMock{}
+		mockDB := database.NewMockDatabase(t)
 		repo := user.NewRepository(mockDB)
 
 		mockDB.On("Get", context.Background(), mock.Anything, tests.QueryMatcher("getUserByAPITokenQuery"), "token").
@@ -76,7 +76,7 @@ func TestRepository_GetUserByAPIToken(t *testing.T) {
 
 		var emptyUser user.User
 
-		mockDB := &database.DatabaseMock{}
+		mockDB := database.NewMockDatabase(t)
 		repo := user.NewRepository(mockDB)
 
 		u := user.User{ID: 1}
@@ -101,7 +101,7 @@ func TestRepository_GetUserByOrgSubdomainAPIToken(t *testing.T) {
 	t.Run("should return an error when the database call fails", func(t *testing.T) {
 		t.Parallel()
 
-		mockDB := &database.DatabaseMock{}
+		mockDB := database.NewMockDatabase(t)
 		repo := user.NewRepository(mockDB)
 
 		mockDB.On("Get", context.Background(), mock.Anything, tests.QueryMatcher("getUserByOrgSubdomainAPITokenQuery"),
@@ -117,7 +117,7 @@ func TestRepository_GetUserByOrgSubdomainAPIToken(t *testing.T) {
 
 		var emptyUser user.User
 
-		mockDB := &database.DatabaseMock{}
+		mockDB := database.NewMockDatabase(t)
 		repo := user.NewRepository(mockDB)
 
 		u := user.User{ID: 1}
@@ -142,7 +142,7 @@ func TestRepository_GetUserByOrgIDEmail(t *testing.T) {
 	t.Run("should return an error when the database call fails", func(t *testing.T) {
 		t.Parallel()
 
-		mockDB := &database.DatabaseMock{}
+		mockDB := database.NewMockDatabase(t)
 		repo := user.NewRepository(mockDB)
 
 		mockDB.On("Get", context.Background(), mock.Anything,
@@ -159,7 +159,7 @@ func TestRepository_GetUserByOrgIDEmail(t *testing.T) {
 
 		var emptyUser user.User
 
-		mockDB := &database.DatabaseMock{}
+		mockDB := database.NewMockDatabase(t)
 		repo := user.NewRepository(mockDB)
 
 		u := user.User{ID: 1}
@@ -184,7 +184,7 @@ func TestRepository_GetUserByOrgSubdomainEmail(t *testing.T) {
 	t.Run("should return an error when the database call fails", func(t *testing.T) {
 		t.Parallel()
 
-		mockDB := &database.DatabaseMock{}
+		mockDB := database.NewMockDatabase(t)
 		repo := user.NewRepository(mockDB)
 
 		mockDB.On("Get", context.Background(), mock.Anything, tests.QueryMatcher("getUserByOrgSubdomainEmailQuery"),
@@ -200,7 +200,7 @@ func TestRepository_GetUserByOrgSubdomainEmail(t *testing.T) {
 
 		var emptyUser user.User
 
-		mockDB := &database.DatabaseMock{}
+		mockDB := database.NewMockDatabase(t)
 		repo := user.NewRepository(mockDB)
 
 		u := user.User{ID: 1}
@@ -226,7 +226,7 @@ func TestRepository_CreateUser(t *testing.T) {
 	t.Run("should return an error when the database call fails", func(t *testing.T) {
 		t.Parallel()
 
-		mockDB := &database.DatabaseMock{}
+		mockDB := database.NewMockDatabase(t)
 		repo := user.NewRepository(mockDB)
 
 		mockDB.On("Exec", context.Background(), mock.Anything,
@@ -242,7 +242,7 @@ func TestRepository_CreateUser(t *testing.T) {
 
 		var emptyUser user.User
 
-		mockDB := &database.DatabaseMock{}
+		mockDB := database.NewMockDatabase(t)
 		repo := user.NewRepository(mockDB)
 
 		u := user.User{ID: 1}
@@ -268,7 +268,7 @@ func TestRepository_ResetPassword(t *testing.T) {
 	t.Run("should return an error when the database call fails", func(t *testing.T) {
 		t.Parallel()
 
-		mockDB := &database.DatabaseMock{}
+		mockDB := database.NewMockDatabase(t)
 		repo := user.NewRepository(mockDB)
 
 		mockDB.On("Exec", context.Background(), nil, tests.QueryMatcher("resetPasswordQuery"), int64(1), "password").
@@ -282,7 +282,7 @@ func TestRepository_ResetPassword(t *testing.T) {
 	t.Run("should return nil when the password is reset", func(t *testing.T) {
 		t.Parallel()
 
-		mockDB := &database.DatabaseMock{}
+		mockDB := database.NewMockDatabase(t)
 		repo := user.NewRepository(mockDB)
 
 		mockDB.On("Exec", context.Background(), nil, tests.QueryMatcher("resetPasswordQuery"), int64(1), "password").
@@ -299,7 +299,7 @@ func TestRepository_DeleteUser(t *testing.T) {
 	t.Run("should return an error when the database call fails", func(t *testing.T) {
 		t.Parallel()
 
-		mockDB := &database.DatabaseMock{}
+		mockDB := database.NewMockDatabase(t)
 		repo := user.NewRepository(mockDB)
 
 		mockDB.On("Exec", context.Background(), nil, tests.QueryMatcher("deleteUserQuery"), int64(1)).
@@ -313,7 +313,7 @@ func TestRepository_DeleteUser(t *testing.T) {
 	t.Run("should return nil when user is deleted", func(t *testing.T) {
 		t.Parallel()
 
-		mockDB := &database.DatabaseMock{}
+		mockDB := database.NewMockDatabase(t)
 		repo := user.NewRepository(mockDB)
 
 		mockDB.On("Exec", context.Background(), nil, tests.QueryMatcher("deleteUserQuery"), int64(1)).
@@ -330,7 +330,7 @@ func TestRepository_DisableUser(t *testing.T) {
 	t.Run("should return an error when the database call fails", func(t *testing.T) {
 		t.Parallel()
 
-		mockDB := &database.DatabaseMock{}
+		mockDB := database.NewMockDatabase(t)
 		repo := user.NewRepository(mockDB)
 		comment := gofakeit.SentenceSimple()
 
@@ -345,7 +345,7 @@ func TestRepository_DisableUser(t *testing.T) {
 	t.Run("should return nil when user is disabled", func(t *testing.T) {
 		t.Parallel()
 
-		mockDB := &database.DatabaseMock{}
+		mockDB := database.NewMockDatabase(t)
 		repo := user.NewRepository(mockDB)
 		comment := gofakeit.SentenceSimple()
 
@@ -363,7 +363,7 @@ func TestRepository_EnableUser(t *testing.T) {
 	t.Run("should return an error when the database call fails", func(t *testing.T) {
 		t.Parallel()
 
-		mockDB := &database.DatabaseMock{}
+		mockDB := database.NewMockDatabase(t)
 		repo := user.NewRepository(mockDB)
 		comment := gofakeit.SentenceSimple()
 
@@ -378,7 +378,7 @@ func TestRepository_EnableUser(t *testing.T) {
 	t.Run("should return nil when user is enabled", func(t *testing.T) {
 		t.Parallel()
 
-		mockDB := &database.DatabaseMock{}
+		mockDB := database.NewMockDatabase(t)
 		repo := user.NewRepository(mockDB)
 		comment := gofakeit.SentenceSimple()
 
@@ -396,7 +396,7 @@ func TestRepository_GenerateAPIToken(t *testing.T) {
 	t.Run("should return an error when the database call fails", func(t *testing.T) {
 		t.Parallel()
 
-		mockDB := &database.DatabaseMock{}
+		mockDB := database.NewMockDatabase(t)
 		repo := user.NewRepository(mockDB)
 
 		mockDB.On("Exec", context.Background(), nil, tests.QueryMatcher("generateAPITokenQuery"), int64(1)).
@@ -410,7 +410,7 @@ func TestRepository_GenerateAPIToken(t *testing.T) {
 	t.Run("should return nil when api token is generated", func(t *testing.T) {
 		t.Parallel()
 
-		mockDB := &database.DatabaseMock{}
+		mockDB := database.NewMockDatabase(t)
 		repo := user.NewRepository(mockDB)
 
 		mockDB.On("Exec", context.Background(), nil, tests.QueryMatcher("generateAPITokenQuery"), int64(1)).
@@ -427,7 +427,7 @@ func TestRepository_ResetAPIToken(t *testing.T) {
 	t.Run("should return an error when the database call fails", func(t *testing.T) {
 		t.Parallel()
 
-		mockDB := &database.DatabaseMock{}
+		mockDB := database.NewMockDatabase(t)
 		repo := user.NewRepository(mockDB)
 
 		mockDB.On("Exec", context.Background(), nil, tests.QueryMatcher("resetAPITokenQuery"), int64(1)).
@@ -441,7 +441,7 @@ func TestRepository_ResetAPIToken(t *testing.T) {
 	t.Run("should return nil when api token is reset", func(t *testing.T) {
 		t.Parallel()
 
-		mockDB := &database.DatabaseMock{}
+		mockDB := database.NewMockDatabase(t)
 		repo := user.NewRepository(mockDB)
 
 		mockDB.On("Exec", context.Background(), nil, tests.QueryMatcher("resetAPITokenQuery"), int64(1)).
@@ -458,7 +458,7 @@ func TestRepository_SetEmailVerified(t *testing.T) {
 	t.Run("should return an error when the database call fails", func(t *testing.T) {
 		t.Parallel()
 
-		mockDB := &database.DatabaseMock{}
+		mockDB := database.NewMockDatabase(t)
 		repo := user.NewRepository(mockDB)
 
 		mockDB.On("Exec", context.Background(), nil, tests.QueryMatcher("setEmailVerifiedQuery"), int64(1)).
@@ -472,7 +472,7 @@ func TestRepository_SetEmailVerified(t *testing.T) {
 	t.Run("should return nil when email is verified", func(t *testing.T) {
 		t.Parallel()
 
-		mockDB := &database.DatabaseMock{}
+		mockDB := database.NewMockDatabase(t)
 		repo := user.NewRepository(mockDB)
 
 		mockDB.On("Exec", context.Background(), nil, tests.QueryMatcher("setEmailVerifiedQuery"), int64(1)).

@@ -8,8 +8,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-//go:generate mockery --name=Service --structname=ServiceMock --inpackage --filename=service_mock.go
-
 type Service interface {
 	// GetUserByID returns a user by its ID.
 	GetUserByID(ctx context.Context, id int64) (User, error)

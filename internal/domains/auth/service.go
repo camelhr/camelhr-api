@@ -11,8 +11,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-//go:generate mockery --name=Service --structname=ServiceMock --inpackage --filename=service_mock.go
-
 type Service interface {
 	// Register registers a new user and organization.
 	Register(ctx context.Context, email, password, subdomain, orgName string) error

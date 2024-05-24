@@ -6,8 +6,6 @@ import (
 	"github.com/camelhr/camelhr-api/internal/database"
 )
 
-//go:generate mockery --name=Repository --structname=RepositoryMock --inpackage --filename=repository_mock.go
-
 type Repository interface {
 	// GetUserByID returns a user by its ID.
 	GetUserByID(ctx context.Context, id int64) (User, error)
