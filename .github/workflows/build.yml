@@ -33,4 +33,4 @@ jobs:
             -t $GITHUB_REPO_REGISTRY/$IMAGE_NAME:${GITHUB_REF##*/} \
             -t $GITHUB_REPO_REGISTRY/$IMAGE_NAME:$COMMIT_SHA \
             -t $GITHUB_REPO_REGISTRY/$IMAGE_NAME:latest .
-            docker push -a $GITHUB_REPO_REGISTRY/$IMAGE_NAME
+          docker push -a $GITHUB_REPO_REGISTRY/$IMAGE_NAME

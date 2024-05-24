@@ -2,11 +2,13 @@ name: Lint
 
 on:
   push:
-  pull_request:
-    types: [opened, synchronize, reopened]
-    # Note: GitHub does not pass secrets(for security reasons) to PR workflows created with forked repos
-    # So do not use any actions that require secrets
-    # Tee GITHUB_TOKEN secret is allowed with readonly access for PR workflows created with forked repos
+    branches:
+      - main
+  pull_request: # By default, it will run on opened and synchronize PR events
+
+# Note: GitHub does not pass secrets(for security reasons) to PR workflows created with forked repos
+# So do not use any actions that require secrets
+# The GITHUB_TOKEN secret is allowed with readonly access for PR workflows created with forked repos
 
 jobs:
   lint:
