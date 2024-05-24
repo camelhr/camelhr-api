@@ -1,0 +1,30 @@
+name: Lint
+
+on:
+  push:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    # Note: GitHub does not pass secrets(for security reasons) to PR workflows created with forked repos
+    # So do not use any actions that require secrets
+    # Tee GITHUB_TOKEN secret is allowed with readonly access for PR workflows created with forked repos
+
+jobs:
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: run lint
+      run: |
+        make lint
+
+    - name: verify mockery mocks
+      run: |
+        make mock
+        git diff --exit-code
+
+    - name: verify go mod tidy
+      run: |
+        go mod tidy
+        git diff --exit-code
