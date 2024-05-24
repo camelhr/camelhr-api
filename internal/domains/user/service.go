@@ -52,6 +52,8 @@ type Service interface {
 	SetEmailVerified(ctx context.Context, id int64) error
 }
 
+var ErrUserCommentMissing = errors.New("comment is missing")
+
 type service struct {
 	repo Repository
 }
@@ -150,7 +152,7 @@ func (s *service) DeleteUser(ctx context.Context, id int64) error {
 
 func (s *service) DisableUser(ctx context.Context, id int64, comment string) error {
 	if comment == "" {
-		return errors.New("comment is required")
+		return ErrUserCommentMissing
 	}
 
 	return s.repo.DisableUser(ctx, id, comment)
@@ -158,7 +160,7 @@ func (s *service) DisableUser(ctx context.Context, id int64, comment string) err
 
 func (s *service) EnableUser(ctx context.Context, id int64, comment string) error {
 	if comment == "" {
-		return errors.New("comment is required")
+		return ErrUserCommentMissing
 	}
 
 	return s.repo.EnableUser(ctx, id, comment)

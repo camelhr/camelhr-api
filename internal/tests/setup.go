@@ -16,6 +16,8 @@ import (
 
 const resourceExpirationTime = 900
 
+var ErrContainerNotInitialized = errors.New("container is not initialized")
+
 type PostgreSQLContainer struct {
 	resource *dockertest.Resource
 	pool     *dockertest.Pool
@@ -84,7 +86,7 @@ func (c *PostgreSQLContainer) Connect() (*sqlx.DB, error) {
 	var db *sqlx.DB
 
 	if c.pool == nil || c.resource == nil {
-		return nil, errors.New("container is not initialized")
+		return nil, ErrContainerNotInitialized
 	}
 
 	databaseURI := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable",

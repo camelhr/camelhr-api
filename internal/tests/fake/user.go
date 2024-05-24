@@ -121,19 +121,18 @@ func (u *FakeUser) IsDeleted(db database.Database) bool {
 }
 
 // setDefaults sets the default values of a fake user.
-//
-//nolint:gomnd // generate random values
 func (u *FakeUser) setDefaults() {
-	u.Email = gofakeit.Email()
+	const passLength = 12
 
 	hashedPassword, err := bcrypt.GenerateFromPassword(
-		[]byte(gofakeit.Password(true, true, true, true, false, 12)),
+		[]byte(gofakeit.Password(true, true, true, true, false, passLength)),
 		bcrypt.DefaultCost,
 	)
 	if err != nil {
 		panic(err)
 	}
 
+	u.Email = gofakeit.Email()
 	u.PasswordHash = string(hashedPassword)
 	u.IsOwner = false
 	u.IsEmailVerified = true

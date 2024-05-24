@@ -2,6 +2,7 @@ package request
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -20,6 +21,8 @@ const (
 	CtxOrgIDKey
 	CtxOrgSubdomainKey
 )
+
+var ErrInvalidPathParam = errors.New("invalid path parameter")
 
 // decodeJSON decodes a JSON payload from the given reader into the given value.
 // It also validates the fields using the validator.
@@ -82,7 +85,7 @@ func URLParamID(r *http.Request, param string) (int64, error) {
 	}
 
 	if id <= 0 {
-		return 0, fmt.Errorf("invalid value %d for url param '%s'", id, param)
+		return 0, fmt.Errorf("invalid value %d for url param '%s': %w", id, param, ErrInvalidPathParam)
 	}
 
 	return id, nil

@@ -88,7 +88,7 @@ func NewOrganization(db database.Database, options ...OrganizationOption) *FakeO
 
 // setDefaults sets the default values of a fake organization.
 //
-//nolint:gomnd // generate random values
+//nolint:mnd // generates random values
 func (o *FakeOrganization) setDefaults() {
 	o.Subdomain = gofakeit.LetterN(uint(gofakeit.Number(1, 30)))
 	o.Name = fmt.Sprint(gofakeit.LetterN(8), " ", gofakeit.Company())

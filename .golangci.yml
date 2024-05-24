@@ -2,12 +2,12 @@
 
 run:
   deadline: 2m
-  skip-files:
-    - ".*_mock.go$" # skipping generated mock files
 
 issues:
   max-issues-per-linter: 0
   max-same-issues: 0
+  exclude-files:
+    - ".*_mock.go$" # skipping generated mock files
   exclude-rules:
     - path: _test\.go$
       linters:
@@ -20,7 +20,6 @@ linters:
   enable-all: true
   disable:
     - varnamelen
-    - goerr113
     - wrapcheck
     - godox
     - exhaustruct
@@ -40,6 +39,8 @@ linters:
     - scopelint # disabling as it is deprecated
     - structcheck # disabling as it is deprecated
     - varcheck # disabling as it is deprecated
+    - gomnd # disabling as it is deprecated
+    - execinquery # disabling as it is deprecated
 
 linters-settings:
   nlreturn:
@@ -52,6 +53,7 @@ linters-settings:
     max-func-lines: 0
   errcheck:
     check-type-assertions: true
+    ignore : "" # https://github.com/golangci/golangci-lint/issues/4733
   gocognit:
     min-function-lines: 15
   gocyclo:
@@ -87,54 +89,20 @@ linters-settings:
         disabled: false
   gocritic:
     enabled-checks:
-      - appendAssign
-      - argOrder
-      - assignOp
-      - badCall
-      - badCond
       - boolExprSimplify
       - builtinShadow
-      - captLocal
-      - caseOrder
-      - codegenComment
       - commentedOutCode
       - commentedOutImport
-      - commentFormatting
-      - defaultCaseOrder
-      - deprecatedComment
       - docStub
-      - dupArg
-      - dupBranchBody
-      - dupCase
       - dupImport
-      - dupSubExpr
-      - elseif
       - emptyFallthrough
       - emptyStringTest
-      - exitAfterDefer
-      - flagDeref
-      - flagName
-      - ifElseChain
       - importShadow
-      - mapKey
       - nestingReduce
-      - newDeref
-      - offBy1
       - ptrToRefParam
-      - regexpMust
-      - singleCaseSwitch
-      - sloppyLen
-      - sloppyTypeAssert
       - stringXbytes
-      - switchTrue
       - truncateCmp
       - typeAssertChain
-      - typeSwitchVar
-      - underef
-      - unlambda
       - unnecessaryBlock
-      - unslice
-      - valSwap
       - whyNoLint
-      - wrapperFunc
       - yodaStyleExpr

@@ -9,22 +9,28 @@ on:
     # Tee GITHUB_TOKEN secret is allowed with readonly access for PR workflows created with forked repos
 
 jobs:
-
-  test:
+  lint:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    - uses: actions/setup-go@v5
 
     - name: run lint
       run: |
         make lint
 
-    - name: verify mockery mocks
+    - name: verify mocks
       run: |
         make mock
-        git diff --exit-code
+        echo " "
+        echo "listing uncommitted stale mocks(if any)"
+        git diff --exit-code --name-only
+        echo "successfully verified that all mocks are committed"
 
     - name: verify go mod tidy
       run: |
         go mod tidy
+        echo " "
+        echo "listing uncommitted go mod tidy changes(if any)"
         git diff --exit-code
+        echo "successfully verified that go mod tidy is clean"

@@ -491,7 +491,7 @@ func TestService_DisableUser(t *testing.T) {
 
 		err := service.DisableUser(context.Background(), int64(1), "")
 		require.Error(t, err)
-		assert.ErrorContains(t, err, "comment is required")
+		assert.ErrorIs(t, user.ErrUserCommentMissing, err)
 	})
 
 	t.Run("should disable user", func(t *testing.T) {
@@ -535,7 +535,7 @@ func TestService_EnableUser(t *testing.T) {
 
 		err := service.DisableUser(context.Background(), int64(1), "")
 		require.Error(t, err)
-		assert.ErrorContains(t, err, "comment is required")
+		assert.ErrorIs(t, user.ErrUserCommentMissing, err)
 	})
 
 	t.Run("should enable user", func(t *testing.T) {
@@ -658,7 +658,7 @@ func generatePassword() string {
 		specialChars  = "!@#$%^&*()-_=+,.?/:;{}[]`~"
 		numberChars   = "0123456789"
 		allChars      = lowerChars + upperChars + specialChars + numberChars
-		password      []byte
+		password      = make([]byte, 0, 13)
 		requiredChars = []byte{
 			lowerChars[r.Intn(len(lowerChars))],
 			upperChars[r.Intn(len(upperChars))],
@@ -667,8 +667,9 @@ func generatePassword() string {
 		}
 	)
 
-	for i := 0; i < 9; i++ {
-		password = append(password, allChars[r.Intn(len(allChars))])
+	for range [9]int{} {
+		password = append(
+			password, allChars[r.Intn(len(allChars))])
 	}
 
 	password = append(password, requiredChars...)

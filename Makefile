@@ -36,10 +36,10 @@ lint-fix: install-golangci-lint
 	golangci-lint run --fix
 
 install-golangci-lint:
-	@which golangci-lint > /dev/null || go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.56.2
+	@which golangci-lint > /dev/null || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b "$(shell go env GOPATH)/bin" v1.58.2
 
 mock:
-	@which mockery > /dev/null || go install github.com/vektra/mockery/v2@v2.43.1
+	@which mockery > /dev/null || curl -sSfL "https://github.com/vektra/mockery/releases/download/v2.43.1/mockery_2.43.1_$(shell uname -s)_$(shell uname -m).tar.gz" | tar xz -C "$(shell go env GOPATH)/bin" mockery
 	mockery
 
 clean:

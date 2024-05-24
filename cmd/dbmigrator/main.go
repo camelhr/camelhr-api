@@ -49,6 +49,23 @@ Commands:
 `
 )
 
+var (
+	// ErrNoDBConn is returned when the db connection string is missing.
+	ErrNoDBConn = errors.New("db connection string is missing")
+
+	// ErrUnknownCommand is returned when the command is unknown.
+	ErrUnknownCommand = errors.New("unknown command")
+
+	// ErrCommandArgMissing is returned when the command argument is missing.
+	ErrCommandArgMissing = errors.New("command argument is missing")
+
+	// ErrDBConnStringMissing is returned when the db connection string is missing.
+	ErrDBConnStringMissing = errors.New("db connection string is missing")
+
+	// ErrCreateCommandArgsMissing is returned when the create command arguments are missing.
+	ErrCreateCommandArgsMissing = errors.New("create command arguments are missing")
+)
+
 func main() {
 	flagSet := prepareFlags()
 
@@ -123,8 +140,9 @@ func shouldMigrateDatafix(migrationType string) bool {
 // runMigration runs the migration command with the provided arguments.
 func runMigration(ctx context.Context, command string, db *sql.DB, dir string, args []string) error {
 	if command == "create" {
-		if len(args) < 2 { //nolint:gomnd // 2 is the minimum number of arguments required
-			return errors.New("create must be of form: goose [OPTIONS] DRIVER DBSTRING create NAME [go|sql]")
+		const minArgs = 2
+		if len(args) < minArgs {
+			return ErrCreateCommandArgsMissing
 		}
 
 		migrationType := args[1] // go or sql
@@ -167,12 +185,12 @@ func prepareFlags() *flag.FlagSet {
 // It returns an error if the command is invalid.
 func extractCommand(args []string, allowedCommands []string) (string, error) {
 	if len(args) < 1 {
-		return "", errors.New("command argument is required")
+		return "", ErrCommandArgMissing
 	}
 
 	command := args[0]
 	if !contains(allowedCommands, strings.ToLower(command)) {
-		return "", fmt.Errorf("invalid command: %s", command)
+		return "", fmt.Errorf("command: %s not found: %w", command, ErrUnknownCommand)
 	}
 
 	return command, nil
@@ -187,7 +205,8 @@ func validateDBConnectionString(dbConn string, command string, dbIndependentComm
 			return nil
 		}
 
-		return fmt.Errorf("db_conn flag or DB_CONN environment variable is required for '%s' command", command)
+		return fmt.Errorf("db_conn flag or DB_CONN env variable is required for '%s' command: %w",
+			command, ErrDBConnStringMissing)
 	}
 
 	return nil
