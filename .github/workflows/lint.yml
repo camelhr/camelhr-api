@@ -12,25 +12,25 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-go@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
 
-    - name: run lint
-      run: |
-        make lint
+      - name: run lint
+        run: |
+          make lint
 
-    - name: verify mocks
-      run: |
-        make mock
-        echo " "
-        echo "listing uncommitted stale mocks(if any)"
-        git diff --exit-code --name-only
-        echo "successfully verified that all mocks are committed"
+      - name: verify mocks
+        run: |
+          make mock
+          echo " "
+          echo "listing uncommitted stale mocks(if any)"
+          git diff --exit-code --name-only
+          echo "successfully verified that all mocks are committed"
 
-    - name: verify go mod tidy
-      run: |
-        go mod tidy
-        echo " "
-        echo "listing uncommitted go mod tidy changes(if any)"
-        git diff --exit-code
-        echo "successfully verified that go mod tidy is clean"
+      - name: verify go mod tidy
+        run: |
+          go mod tidy
+          echo " "
+          echo "listing uncommitted go mod tidy changes(if any)"
+          git diff --exit-code
+          echo "successfully verified that go mod tidy is clean"
