@@ -1,4 +1,4 @@
-name: Deploy on Render
+name: Deploy on Free Plan
 
 on:
   workflow_run:
@@ -12,6 +12,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  run-migrations:
+    runs-on: ubuntu-latest
+    container: ghcr.io/camelhr/camelhr/camelhr-api:latest
+    steps:
+      - name: run database migrations
+        env:
+          DB_CONN: ${{ secrets.DB_CONN_STRING }}
+        run: |
+          cd /app
+          ./dbmigrator up
+
   deoploy-render:
     runs-on: ubuntu-latest
     steps:
