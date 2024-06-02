@@ -1,0 +1,22 @@
+name: Deploy on Render
+
+on:
+  workflow_run:
+    workflows: ["Build"]
+    branches: [main]
+    types: 
+      - completed
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deoploy-render:
+    runs-on: ubuntu-latest
+    steps:
+      - name: trigger deploy on render
+        env:
+          deploy_url: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          curl "$deploy_url"
