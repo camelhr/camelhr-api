@@ -23,7 +23,7 @@ func (s *OrganizationTestSuite) TestServiceIntegration_GetOrganizationByID() {
 		s.NotZero(result.UpdatedAt)
 		s.Equal(result.CreatedAt, result.UpdatedAt)
 		s.Nil(result.SuspendedAt)
-		s.Nil(result.BlacklistedAt)
+		s.Nil(result.DisabledAt)
 		s.Nil(result.Comment)
 	})
 }
@@ -43,7 +43,7 @@ func (s *OrganizationTestSuite) TestServiceIntegration_GetOrganizationBySubdomai
 		s.NotZero(result.UpdatedAt)
 		s.Equal(result.CreatedAt, result.UpdatedAt)
 		s.Nil(result.SuspendedAt)
-		s.Nil(result.BlacklistedAt)
+		s.Nil(result.DisabledAt)
 		s.Nil(result.Comment)
 	})
 }
@@ -63,7 +63,7 @@ func (s *OrganizationTestSuite) TestServiceIntegration_GetOrganizationByName() {
 		s.NotZero(result.UpdatedAt)
 		s.Equal(result.CreatedAt, result.UpdatedAt)
 		s.Nil(result.SuspendedAt)
-		s.Nil(result.BlacklistedAt)
+		s.Nil(result.DisabledAt)
 		s.Nil(result.Comment)
 	})
 }
@@ -87,7 +87,7 @@ func (s *OrganizationTestSuite) TestServiceIntegration_CreateOrganization() {
 		s.NotZero(result.UpdatedAt)
 		s.Equal(result.CreatedAt, result.UpdatedAt)
 		s.Nil(result.SuspendedAt)
-		s.Nil(result.BlacklistedAt)
+		s.Nil(result.DisabledAt)
 		s.Nil(result.Comment)
 	})
 }
@@ -110,7 +110,7 @@ func (s *OrganizationTestSuite) TestServiceIntegration_UpdateOrganization() {
 		s.NotZero(result.UpdatedAt)
 		s.GreaterOrEqual(result.UpdatedAt, result.CreatedAt) // could be equal if the update is fast
 		s.Nil(result.SuspendedAt)
-		s.Nil(result.BlacklistedAt)
+		s.Nil(result.DisabledAt)
 		s.Nil(result.Comment)
 	})
 }
@@ -147,7 +147,7 @@ func (s *OrganizationTestSuite) TestServiceIntegration_SuspendOrganization() {
 		s.NotZero(result.CreatedAt)
 		s.NotZero(result.UpdatedAt)
 		s.Nil(result.DeletedAt)
-		s.Nil(result.BlacklistedAt)
+		s.Nil(result.DisabledAt)
 	})
 }
 
@@ -168,24 +168,24 @@ func (s *OrganizationTestSuite) TestServiceIntegration_UnsuspendOrganization() {
 		s.NotZero(result.CreatedAt)
 		s.NotZero(result.UpdatedAt)
 		s.Nil(result.DeletedAt)
-		s.Nil(result.BlacklistedAt)
+		s.Nil(result.DisabledAt)
 	})
 }
 
-func (s *OrganizationTestSuite) TestServiceIntegration_BlacklistOrganization() {
-	s.Run("should blacklist organization", func() {
+func (s *OrganizationTestSuite) TestServiceIntegration_DisableOrganization() {
+	s.Run("should disable organization", func() {
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
 		svc := organization.NewService(repo)
 		org := fake.NewOrganization(s.DB)
 
-		err := svc.BlacklistOrganization(context.Background(), org.ID, "test blacklist")
+		err := svc.DisableOrganization(context.Background(), org.ID, "test disable")
 		s.Require().NoError(err)
 
 		result := org.FetchLatest(s.DB)
 		s.Require().NotNil(result.Comment)
-		s.Equal("test blacklist", *result.Comment)
-		s.NotNil(result.BlacklistedAt)
+		s.Equal("test disable", *result.Comment)
+		s.NotNil(result.DisabledAt)
 		s.NotZero(result.CreatedAt)
 		s.NotZero(result.UpdatedAt)
 		s.Nil(result.DeletedAt)
@@ -193,20 +193,20 @@ func (s *OrganizationTestSuite) TestServiceIntegration_BlacklistOrganization() {
 	})
 }
 
-func (s *OrganizationTestSuite) TestServiceIntegration_UnblacklistOrganization() {
-	s.Run("should unblacklist organization", func() {
+func (s *OrganizationTestSuite) TestServiceIntegration_EnableOrganization() {
+	s.Run("should enable organization", func() {
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
 		svc := organization.NewService(repo)
-		org := fake.NewOrganization(s.DB, fake.OrganizationBlacklisted())
+		org := fake.NewOrganization(s.DB, fake.OrganizationDisabled())
 
-		err := svc.UnblacklistOrganization(context.Background(), org.ID, "test unblacklist")
+		err := svc.EnableOrganization(context.Background(), org.ID, "test enable")
 		s.Require().NoError(err)
 
 		result := org.FetchLatest(s.DB)
 		s.Require().NotNil(result.Comment)
-		s.Equal("test unblacklist", *result.Comment)
-		s.Nil(result.BlacklistedAt)
+		s.Equal("test enable", *result.Comment)
+		s.Nil(result.DisabledAt)
 		s.NotZero(result.CreatedAt)
 		s.NotZero(result.UpdatedAt)
 		s.Nil(result.DeletedAt)

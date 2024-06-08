@@ -334,7 +334,7 @@ func TestRepository_UnsuspendOrganization(t *testing.T) {
 	})
 }
 
-func TestRepository_BlacklistOrganization(t *testing.T) {
+func TestRepository_DisableOrganization(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should return an error when the database call fails", func(t *testing.T) {
@@ -344,30 +344,30 @@ func TestRepository_BlacklistOrganization(t *testing.T) {
 		repo := organization.NewRepository(mockDB)
 
 		mockDB.On("Exec", context.Background(), nil,
-			tests.QueryMatcher("blacklistOrganizationQuery"), int64(1), "test blacklisted").
+			tests.QueryMatcher("disableOrganizationQuery"), int64(1), "test disabled").
 			Return(assert.AnError)
 
-		err := repo.BlacklistOrganization(context.Background(), 1, "test blacklisted")
+		err := repo.DisableOrganization(context.Background(), 1, "test disabled")
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
 
-	t.Run("should return nil when the organization is blacklisted", func(t *testing.T) {
+	t.Run("should return nil when the organization is disabled", func(t *testing.T) {
 		t.Parallel()
 
 		mockDB := database.NewMockDatabase(t)
 		repo := organization.NewRepository(mockDB)
 
 		mockDB.On("Exec", context.Background(), nil,
-			tests.QueryMatcher("blacklistOrganizationQuery"), int64(1), "test blacklisted").
+			tests.QueryMatcher("disableOrganizationQuery"), int64(1), "test disabled").
 			Return(nil)
 
-		err := repo.BlacklistOrganization(context.Background(), 1, "test blacklisted")
+		err := repo.DisableOrganization(context.Background(), 1, "test disabled")
 		require.NoError(t, err)
 	})
 }
 
-func TestRepository_UnblacklistOrganization(t *testing.T) {
+func TestRepository_EnableOrganization(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should return an error when the database call fails", func(t *testing.T) {
@@ -377,25 +377,25 @@ func TestRepository_UnblacklistOrganization(t *testing.T) {
 		repo := organization.NewRepository(mockDB)
 
 		mockDB.On("Exec", context.Background(), nil,
-			tests.QueryMatcher("unblacklistOrganizationQuery"), int64(1), "test unblacklisted").
+			tests.QueryMatcher("enableOrganizationQuery"), int64(1), "test enabled").
 			Return(assert.AnError)
 
-		err := repo.UnblacklistOrganization(context.Background(), 1, "test unblacklisted")
+		err := repo.EnableOrganization(context.Background(), 1, "test enabled")
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
 
-	t.Run("should return nil when the organization is unblacklisted", func(t *testing.T) {
+	t.Run("should return nil when the organization is enabled", func(t *testing.T) {
 		t.Parallel()
 
 		mockDB := database.NewMockDatabase(t)
 		repo := organization.NewRepository(mockDB)
 
 		mockDB.On("Exec", context.Background(), nil,
-			tests.QueryMatcher("unblacklistOrganizationQuery"), int64(1), "test unblacklisted").
+			tests.QueryMatcher("enableOrganizationQuery"), int64(1), "test enabled").
 			Return(nil)
 
-		err := repo.UnblacklistOrganization(context.Background(), 1, "test unblacklisted")
+		err := repo.EnableOrganization(context.Background(), 1, "test enabled")
 		require.NoError(t, err)
 	})
 }

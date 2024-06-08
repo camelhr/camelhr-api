@@ -21,7 +21,7 @@ func (s *FakeTestSuite) TestFakeOrganization() {
 		s.NotEmpty(o.ID)
 		s.NotEmpty(o.Name)
 		s.Nil(o.SuspendedAt)
-		s.Nil(o.BlacklistedAt)
+		s.Nil(o.DisabledAt)
 		s.Nil(o.Comment)
 		s.NotZero(o.CreatedAt)
 		s.NotZero(o.UpdatedAt)
@@ -69,20 +69,20 @@ func (s *FakeTestSuite) TestFakeOrganization() {
 		s.Equal(time.UTC, o.SuspendedAt.Location())
 		s.WithinDuration(time.Now().UTC(), *o.SuspendedAt, 1*time.Minute)
 		s.Nil(o.DeletedAt)
-		s.Nil(o.BlacklistedAt)
+		s.Nil(o.DisabledAt)
 	})
 
-	s.Run("should created a blacklisted organization", func() {
+	s.Run("should created a disabled organization", func() {
 		s.T().Parallel()
 
-		// create a blacklisted organization
-		o := fake.NewOrganization(s.DB, fake.OrganizationBlacklisted())
+		// create a disabled organization
+		o := fake.NewOrganization(s.DB, fake.OrganizationDisabled())
 
-		// assert that the organization is blacklisted
+		// assert that the organization is disabled
 		s.Require().NotNil(o)
-		s.Require().NotNil(o.BlacklistedAt)
-		s.Equal(time.UTC, o.BlacklistedAt.Location())
-		s.WithinDuration(time.Now().UTC(), *o.BlacklistedAt, 1*time.Minute)
+		s.Require().NotNil(o.DisabledAt)
+		s.Equal(time.UTC, o.DisabledAt.Location())
+		s.WithinDuration(time.Now().UTC(), *o.DisabledAt, 1*time.Minute)
 		s.Nil(o.DeletedAt)
 		s.Nil(o.SuspendedAt)
 	})
@@ -112,16 +112,16 @@ func (s *FakeTestSuite) TestFakeOrganization() {
 		s.True(isSuspended)
 	})
 
-	s.Run("should return true if organization is blacklisted", func() {
+	s.Run("should return true if organization is disabled", func() {
 		s.T().Parallel()
 
-		// create a blacklisted organization
-		o := fake.NewOrganization(s.DB, fake.OrganizationBlacklisted())
+		// create a disabled organization
+		o := fake.NewOrganization(s.DB, fake.OrganizationDisabled())
 		s.Require().NotNil(o)
-		isBlacklisted := o.IsBlacklisted(s.DB)
+		isDisabled := o.IsDisabled(s.DB)
 
-		// assert that the organization is blacklisted
-		s.True(isBlacklisted)
+		// assert that the organization is disabled
+		s.True(isDisabled)
 	})
 
 	s.Run("should return true if organization is deleted", func() {

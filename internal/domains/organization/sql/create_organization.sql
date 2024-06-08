@@ -9,7 +9,7 @@ VALUES
     subdomain,
     name,
     suspended_at,
-    blacklisted_at,
+    disabled_at,
     comment,
     created_at,
     updated_at,

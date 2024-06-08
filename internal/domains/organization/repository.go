@@ -31,11 +31,11 @@ type Repository interface {
 	// UnsuspendOrganization unsuspend an organization by its ID.
 	UnsuspendOrganization(ctx context.Context, id int64, comment string) error
 
-	// BlacklistOrganization blacklists an organization by its ID.
-	BlacklistOrganization(ctx context.Context, id int64, comment string) error
+	// DisableOrganization disables an organization by its ID.
+	DisableOrganization(ctx context.Context, id int64, comment string) error
 
-	// UnblacklistOrganization unblacklist an organization by its ID.
-	UnblacklistOrganization(ctx context.Context, id int64, comment string) error
+	// EnableOrganization enable an organization by its ID.
+	EnableOrganization(ctx context.Context, id int64, comment string) error
 }
 
 type repository struct {
@@ -90,10 +90,10 @@ func (r *repository) UnsuspendOrganization(ctx context.Context, id int64, commen
 	return r.db.Exec(ctx, nil, unsuspendOrganizationQuery, id, comment)
 }
 
-func (r *repository) BlacklistOrganization(ctx context.Context, id int64, comment string) error {
-	return r.db.Exec(ctx, nil, blacklistOrganizationQuery, id, comment)
+func (r *repository) DisableOrganization(ctx context.Context, id int64, comment string) error {
+	return r.db.Exec(ctx, nil, disableOrganizationQuery, id, comment)
 }
 
-func (r *repository) UnblacklistOrganization(ctx context.Context, id int64, comment string) error {
-	return r.db.Exec(ctx, nil, unblacklistOrganizationQuery, id, comment)
+func (r *repository) EnableOrganization(ctx context.Context, id int64, comment string) error {
+	return r.db.Exec(ctx, nil, enableOrganizationQuery, id, comment)
 }

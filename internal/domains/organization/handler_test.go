@@ -47,7 +47,7 @@ func TestHandler_GetOrganizationBySubdomain(t *testing.T) {
 		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
 
 		expectedBody := fmt.Sprintf(`{"id": %d, "subdomain": "%s", "name": "%s",
-		"suspended_at": null, "blacklisted_at": null, "created_at": "%s", "updated_at": "%s"}`,
+		"suspended_at": null, "disabled_at": null, "created_at": "%s", "updated_at": "%s"}`,
 			org.ID, org.Subdomain, org.Name, org.CreatedAt.Format(time.RFC3339Nano), org.UpdatedAt.Format(time.RFC3339Nano))
 		mockService := organization.NewMockService(t)
 		rr := httptest.NewRecorder()

@@ -83,11 +83,11 @@ func (h *handler) DeleteOrganization(w http.ResponseWriter, r *http.Request) {
 
 func (h *handler) toResponse(org Organization) *Response {
 	return &Response{
-		ID:            org.ID,
-		Subdomain:     org.Subdomain,
-		Name:          org.Name,
-		SuspendedAt:   org.SuspendedAt,
-		BlacklistedAt: org.BlacklistedAt,
-		Timestamps:    org.Timestamps,
+		ID:          org.ID,
+		Subdomain:   org.Subdomain,
+		Name:        org.Name,
+		SuspendedAt: org.SuspendedAt,
+		DisabledAt:  org.DisabledAt,
+		Timestamps:  org.Timestamps,
 	}
 }

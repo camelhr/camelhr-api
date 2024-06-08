@@ -21,54 +21,6 @@ func (_m *MockRepository) EXPECT() *MockRepository_Expecter {
 	return &MockRepository_Expecter{mock: &_m.Mock}
 }
 
-// BlacklistOrganization provides a mock function with given fields: ctx, id, comment
-func (_m *MockRepository) BlacklistOrganization(ctx context.Context, id int64, comment string) error {
-	ret := _m.Called(ctx, id, comment)
-
-	if len(ret) == 0 {
-		panic("no return value specified for BlacklistOrganization")
-	}
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, int64, string) error); ok {
-		r0 = rf(ctx, id, comment)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// MockRepository_BlacklistOrganization_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'BlacklistOrganization'
-type MockRepository_BlacklistOrganization_Call struct {
-	*mock.Call
-}
-
-// BlacklistOrganization is a helper method to define mock.On call
-//   - ctx context.Context
-//   - id int64
-//   - comment string
-func (_e *MockRepository_Expecter) BlacklistOrganization(ctx interface{}, id interface{}, comment interface{}) *MockRepository_BlacklistOrganization_Call {
-	return &MockRepository_BlacklistOrganization_Call{Call: _e.mock.On("BlacklistOrganization", ctx, id, comment)}
-}
-
-func (_c *MockRepository_BlacklistOrganization_Call) Run(run func(ctx context.Context, id int64, comment string)) *MockRepository_BlacklistOrganization_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(int64), args[2].(string))
-	})
-	return _c
-}
-
-func (_c *MockRepository_BlacklistOrganization_Call) Return(_a0 error) *MockRepository_BlacklistOrganization_Call {
-	_c.Call.Return(_a0)
-	return _c
-}
-
-func (_c *MockRepository_BlacklistOrganization_Call) RunAndReturn(run func(context.Context, int64, string) error) *MockRepository_BlacklistOrganization_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
 // CreateOrganization provides a mock function with given fields: ctx, subdomain, name
 func (_m *MockRepository) CreateOrganization(ctx context.Context, subdomain string, name string) (Organization, error) {
 	ret := _m.Called(ctx, subdomain, name)
@@ -170,6 +122,102 @@ func (_c *MockRepository_DeleteOrganization_Call) Return(_a0 error) *MockReposit
 }
 
 func (_c *MockRepository_DeleteOrganization_Call) RunAndReturn(run func(context.Context, int64) error) *MockRepository_DeleteOrganization_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DisableOrganization provides a mock function with given fields: ctx, id, comment
+func (_m *MockRepository) DisableOrganization(ctx context.Context, id int64, comment string) error {
+	ret := _m.Called(ctx, id, comment)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DisableOrganization")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, int64, string) error); ok {
+		r0 = rf(ctx, id, comment)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockRepository_DisableOrganization_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DisableOrganization'
+type MockRepository_DisableOrganization_Call struct {
+	*mock.Call
+}
+
+// DisableOrganization is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id int64
+//   - comment string
+func (_e *MockRepository_Expecter) DisableOrganization(ctx interface{}, id interface{}, comment interface{}) *MockRepository_DisableOrganization_Call {
+	return &MockRepository_DisableOrganization_Call{Call: _e.mock.On("DisableOrganization", ctx, id, comment)}
+}
+
+func (_c *MockRepository_DisableOrganization_Call) Run(run func(ctx context.Context, id int64, comment string)) *MockRepository_DisableOrganization_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(int64), args[2].(string))
+	})
+	return _c
+}
+
+func (_c *MockRepository_DisableOrganization_Call) Return(_a0 error) *MockRepository_DisableOrganization_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockRepository_DisableOrganization_Call) RunAndReturn(run func(context.Context, int64, string) error) *MockRepository_DisableOrganization_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// EnableOrganization provides a mock function with given fields: ctx, id, comment
+func (_m *MockRepository) EnableOrganization(ctx context.Context, id int64, comment string) error {
+	ret := _m.Called(ctx, id, comment)
+
+	if len(ret) == 0 {
+		panic("no return value specified for EnableOrganization")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, int64, string) error); ok {
+		r0 = rf(ctx, id, comment)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockRepository_EnableOrganization_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'EnableOrganization'
+type MockRepository_EnableOrganization_Call struct {
+	*mock.Call
+}
+
+// EnableOrganization is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id int64
+//   - comment string
+func (_e *MockRepository_Expecter) EnableOrganization(ctx interface{}, id interface{}, comment interface{}) *MockRepository_EnableOrganization_Call {
+	return &MockRepository_EnableOrganization_Call{Call: _e.mock.On("EnableOrganization", ctx, id, comment)}
+}
+
+func (_c *MockRepository_EnableOrganization_Call) Run(run func(ctx context.Context, id int64, comment string)) *MockRepository_EnableOrganization_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(int64), args[2].(string))
+	})
+	return _c
+}
+
+func (_c *MockRepository_EnableOrganization_Call) Return(_a0 error) *MockRepository_EnableOrganization_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockRepository_EnableOrganization_Call) RunAndReturn(run func(context.Context, int64, string) error) *MockRepository_EnableOrganization_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -389,54 +437,6 @@ func (_c *MockRepository_SuspendOrganization_Call) Return(_a0 error) *MockReposi
 }
 
 func (_c *MockRepository_SuspendOrganization_Call) RunAndReturn(run func(context.Context, int64, string) error) *MockRepository_SuspendOrganization_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// UnblacklistOrganization provides a mock function with given fields: ctx, id, comment
-func (_m *MockRepository) UnblacklistOrganization(ctx context.Context, id int64, comment string) error {
-	ret := _m.Called(ctx, id, comment)
-
-	if len(ret) == 0 {
-		panic("no return value specified for UnblacklistOrganization")
-	}
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, int64, string) error); ok {
-		r0 = rf(ctx, id, comment)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// MockRepository_UnblacklistOrganization_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UnblacklistOrganization'
-type MockRepository_UnblacklistOrganization_Call struct {
-	*mock.Call
-}
-
-// UnblacklistOrganization is a helper method to define mock.On call
-//   - ctx context.Context
-//   - id int64
-//   - comment string
-func (_e *MockRepository_Expecter) UnblacklistOrganization(ctx interface{}, id interface{}, comment interface{}) *MockRepository_UnblacklistOrganization_Call {
-	return &MockRepository_UnblacklistOrganization_Call{Call: _e.mock.On("UnblacklistOrganization", ctx, id, comment)}
-}
-
-func (_c *MockRepository_UnblacklistOrganization_Call) Run(run func(ctx context.Context, id int64, comment string)) *MockRepository_UnblacklistOrganization_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(int64), args[2].(string))
-	})
-	return _c
-}
-
-func (_c *MockRepository_UnblacklistOrganization_Call) Return(_a0 error) *MockRepository_UnblacklistOrganization_Call {
-	_c.Call.Return(_a0)
-	return _c
-}
-
-func (_c *MockRepository_UnblacklistOrganization_Call) RunAndReturn(run func(context.Context, int64, string) error) *MockRepository_UnblacklistOrganization_Call {
 	_c.Call.Return(run)
 	return _c
 }

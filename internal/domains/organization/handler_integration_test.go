@@ -123,11 +123,11 @@ func (s *OrganizationTestSuite) TestHandlerIntegration_DeleteOrganization() {
 
 func toOrganizationResponse(org organization.Organization) organization.Response {
 	return organization.Response{
-		ID:            org.ID,
-		Subdomain:     org.Subdomain,
-		Name:          org.Name,
-		SuspendedAt:   org.SuspendedAt,
-		BlacklistedAt: org.BlacklistedAt,
-		Timestamps:    org.Timestamps,
+		ID:          org.ID,
+		Subdomain:   org.Subdomain,
+		Name:        org.Name,
+		SuspendedAt: org.SuspendedAt,
+		DisabledAt:  org.DisabledAt,
+		Timestamps:  org.Timestamps,
 	}
 }

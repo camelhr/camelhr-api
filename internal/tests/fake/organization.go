@@ -56,11 +56,11 @@ func OrganizationSuspended() OrganizationOption {
 	}
 }
 
-// OrganizationBlacklisted sets blacklisted_at to current timestamp.
-func OrganizationBlacklisted() OrganizationOption {
+// OrganizationDisabled sets disabled_at to current timestamp.
+func OrganizationDisabled() OrganizationOption {
 	return func(o *FakeOrganization) (*FakeOrganization, error) {
 		now := time.Now().UTC()
-		o.BlacklistedAt = &now
+		o.DisabledAt = &now
 
 		return o, nil
 	}
@@ -98,11 +98,11 @@ func (o *FakeOrganization) setDefaults() {
 
 func (o *FakeOrganization) persist(db database.Database) error {
 	insertQuery := `INSERT INTO organizations
-			(subdomain, name, suspended_at, blacklisted_at, comment, created_at, updated_at, deleted_at) VALUES
+			(subdomain, name, suspended_at, disabled_at, comment, created_at, updated_at, deleted_at) VALUES
 			($1, $2, $3, $4, $5, $6, $7, $8)
 			RETURNING *`
 
-	return db.Exec(context.Background(), o, insertQuery, o.Subdomain, o.Name, o.SuspendedAt, o.BlacklistedAt,
+	return db.Exec(context.Background(), o, insertQuery, o.Subdomain, o.Name, o.SuspendedAt, o.DisabledAt,
 		o.Comment, o.CreatedAt, o.UpdatedAt, o.DeletedAt)
 }
 
@@ -134,18 +134,18 @@ func (o *FakeOrganization) IsSuspended(db database.Database) bool {
 	return isSuspended
 }
 
-// IsBlacklisted returns blacklisted status of the organization by querying the database.
-func (o *FakeOrganization) IsBlacklisted(db database.Database) bool {
-	var isBlacklisted bool
+// IsDisabled returns disabled status of the organization by querying the database.
+func (o *FakeOrganization) IsDisabled(db database.Database) bool {
+	var isDisabled bool
 
-	query := "SELECT blacklisted_at IS NOT NULL FROM organizations WHERE organization_id = $1"
-	err := db.Get(context.Background(), &isBlacklisted, query, o.ID)
+	query := "SELECT disabled_at IS NOT NULL FROM organizations WHERE organization_id = $1"
+	err := db.Get(context.Background(), &isDisabled, query, o.ID)
 
 	if database.SuppressNoRowsError(err) != nil {
 		panic(err)
 	}
 
-	return isBlacklisted
+	return isDisabled
 }
 
 // AddUser creates a fake user under the organization.
@@ -164,7 +164,7 @@ func (o *FakeOrganization) FetchLatest(db database.Database) *FakeOrganization {
 				subdomain,
 				name,
 				suspended_at,
-				blacklisted_at,
+				disabled_at,
 				comment,
 				created_at,
 				updated_at,

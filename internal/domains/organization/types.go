@@ -20,8 +20,8 @@ type Organization struct {
 	// SuspendedAt is the timestamp when the organization was suspended.
 	SuspendedAt *time.Time `db:"suspended_at"`
 
-	// BlacklistedAt is the timestamp when the organization was blacklisted.
-	BlacklistedAt *time.Time `db:"blacklisted_at"`
+	// DisabledAt is the timestamp when the organization was disabled.
+	DisabledAt *time.Time `db:"disabled_at"`
 
 	// Comment represents any additional information about the organization's current state.
 	Comment *string `db:"comment"`
@@ -36,10 +36,10 @@ type Request struct {
 
 // Response represents a response of an http response organization.
 type Response struct {
-	ID            int64      `json:"id"`
-	Subdomain     string     `json:"subdomain"`
-	Name          string     `json:"name"`
-	SuspendedAt   *time.Time `json:"suspended_at"`
-	BlacklistedAt *time.Time `json:"blacklisted_at"`
+	ID          int64      `json:"id"`
+	Subdomain   string     `json:"subdomain"`
+	Name        string     `json:"name"`
+	SuspendedAt *time.Time `json:"suspended_at"`
+	DisabledAt  *time.Time `json:"disabled_at"`
 	base.Timestamps
 }

@@ -136,7 +136,7 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_CreateOrganization() {
 		s.WithinDuration(time.Now().UTC(), result.UpdatedAt, 1*time.Minute)
 		s.Nil(result.DeletedAt)
 		s.Nil(result.SuspendedAt)
-		s.Nil(result.BlacklistedAt)
+		s.Nil(result.DisabledAt)
 		s.Nil(result.Comment)
 	})
 
@@ -201,7 +201,7 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_UpdateOrganization() {
 		s.WithinDuration(time.Now().UTC(), result.UpdatedAt, 1*time.Minute)
 		s.Nil(result.DeletedAt)
 		s.Nil(result.SuspendedAt)
-		s.Nil(result.BlacklistedAt)
+		s.Nil(result.DisabledAt)
 		s.Nil(result.Comment)
 	})
 
@@ -221,7 +221,7 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_UpdateOrganization() {
 		s.Equal(org.CreatedAt, result.CreatedAt)
 		s.NotNil(result.DeletedAt)
 		s.Nil(result.SuspendedAt)
-		s.Nil(result.BlacklistedAt)
+		s.Nil(result.DisabledAt)
 		s.Nil(result.Comment)
 	})
 }
@@ -277,7 +277,7 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_SuspendOrganization() 
 		s.Require().NotNil(result.Comment)
 		s.Equal("test suspend comment", *result.Comment)
 		s.Nil(result.DeletedAt)
-		s.Nil(result.BlacklistedAt)
+		s.Nil(result.DisabledAt)
 		s.Equal(org.CreatedAt, result.CreatedAt)
 		s.Equal(org.UpdatedAt, result.UpdatedAt)
 	})
@@ -309,7 +309,7 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_UnsuspendOrganization(
 		s.Require().NotNil(result.Comment)
 		s.Equal("test unsuspend comment", *result.Comment)
 		s.Nil(result.DeletedAt)
-		s.Nil(result.BlacklistedAt)
+		s.Nil(result.DisabledAt)
 		s.Equal(org.CreatedAt, result.CreatedAt)
 		s.Equal(org.UpdatedAt, result.UpdatedAt)
 	})
@@ -327,68 +327,68 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_UnsuspendOrganization(
 	})
 }
 
-func (s *OrganizationTestSuite) TestRepositoryIntegration_BlacklistOrganization() {
-	s.Run("should blacklist an organization", func() {
+func (s *OrganizationTestSuite) TestRepositoryIntegration_DisableOrganization() {
+	s.Run("should disable an organization", func() {
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
 		org := fake.NewOrganization(s.DB)
 
-		err := repo.BlacklistOrganization(context.Background(), org.ID, "test blacklist comment")
+		err := repo.DisableOrganization(context.Background(), org.ID, "test disable comment")
 		s.Require().NoError(err)
 
 		result := org.FetchLatest(s.DB)
-		s.Require().NotNil(result.BlacklistedAt)
-		s.Equal(time.UTC, result.BlacklistedAt.Location())
-		s.WithinDuration(time.Now().UTC(), *result.BlacklistedAt, 1*time.Minute)
+		s.Require().NotNil(result.DisabledAt)
+		s.Equal(time.UTC, result.DisabledAt.Location())
+		s.WithinDuration(time.Now().UTC(), *result.DisabledAt, 1*time.Minute)
 		s.Require().NotNil(result.Comment)
-		s.Equal("test blacklist comment", *result.Comment)
+		s.Equal("test disable comment", *result.Comment)
 		s.Nil(result.DeletedAt)
 		s.Nil(result.SuspendedAt)
 		s.Equal(org.CreatedAt, result.CreatedAt)
 		s.Equal(org.UpdatedAt, result.UpdatedAt)
 	})
 
-	s.Run("should not blacklist an organization if already deleted", func() {
+	s.Run("should not disable an organization if already deleted", func() {
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
 		org := fake.NewOrganization(s.DB, fake.OrganizationDeleted())
 
-		err := repo.BlacklistOrganization(context.Background(), org.ID, "test blacklist comment")
+		err := repo.DisableOrganization(context.Background(), org.ID, "test disable comment")
 		s.Require().NoError(err)
 
-		isBlacklisted := org.IsBlacklisted(s.DB)
-		s.False(isBlacklisted)
+		isDisabled := org.IsDisabled(s.DB)
+		s.False(isDisabled)
 	})
 }
 
-func (s *OrganizationTestSuite) TestRepositoryIntegration_UnblacklistOrganization() {
-	s.Run("should unblacklist an organization", func() {
+func (s *OrganizationTestSuite) TestRepositoryIntegration_EnableOrganization() {
+	s.Run("should enable an organization", func() {
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
-		org := fake.NewOrganization(s.DB, fake.OrganizationBlacklisted())
+		org := fake.NewOrganization(s.DB, fake.OrganizationDisabled())
 
-		err := repo.UnblacklistOrganization(context.Background(), org.ID, "test unblacklist comment")
+		err := repo.EnableOrganization(context.Background(), org.ID, "test enable comment")
 		s.Require().NoError(err)
 
 		result := org.FetchLatest(s.DB)
-		s.Nil(result.BlacklistedAt)
+		s.Nil(result.DisabledAt)
 		s.Require().NotNil(result.Comment)
-		s.Equal("test unblacklist comment", *result.Comment)
+		s.Equal("test enable comment", *result.Comment)
 		s.Nil(result.DeletedAt)
 		s.Nil(result.SuspendedAt)
 		s.Equal(org.CreatedAt, result.CreatedAt)
 		s.Equal(org.UpdatedAt, result.UpdatedAt)
 	})
 
-	s.Run("should not unblacklist an organization if already deleted", func() {
+	s.Run("should not enable an organization if already deleted", func() {
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
-		org := fake.NewOrganization(s.DB, fake.OrganizationBlacklisted(), fake.OrganizationDeleted())
+		org := fake.NewOrganization(s.DB, fake.OrganizationDisabled(), fake.OrganizationDeleted())
 
-		err := repo.UnblacklistOrganization(context.Background(), org.ID, "test unblacklist comment")
+		err := repo.EnableOrganization(context.Background(), org.ID, "test enable comment")
 		s.Require().NoError(err)
 
-		isBlacklisted := org.IsBlacklisted(s.DB)
-		s.True(isBlacklisted)
+		isDisabled := org.IsDisabled(s.DB)
+		s.True(isDisabled)
 	})
 }

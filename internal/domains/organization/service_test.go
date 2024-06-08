@@ -413,7 +413,7 @@ func TestService_UnsuspendOrganization(t *testing.T) {
 	})
 }
 
-func TestService_BlacklistOrganization(t *testing.T) {
+func TestService_DisableOrganization(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should return an error when the repository call fails", func(t *testing.T) {
@@ -422,33 +422,33 @@ func TestService_BlacklistOrganization(t *testing.T) {
 		mockRepo := organization.NewMockRepository(t)
 		service := organization.NewService(mockRepo)
 		orgID := gofakeit.Int64()
-		comment := "test blacklist"
+		comment := "test disable"
 
-		mockRepo.On("BlacklistOrganization", context.Background(), orgID, comment).
+		mockRepo.On("DisableOrganization", context.Background(), orgID, comment).
 			Return(assert.AnError)
 
-		err := service.BlacklistOrganization(context.Background(), orgID, comment)
+		err := service.DisableOrganization(context.Background(), orgID, comment)
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
 
-	t.Run("should return nil when the organization is blacklisted", func(t *testing.T) {
+	t.Run("should return nil when the organization is disabled", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := organization.NewMockRepository(t)
 		service := organization.NewService(mockRepo)
 		orgID := gofakeit.Int64()
-		comment := "test blacklist"
+		comment := "test disable"
 
-		mockRepo.On("BlacklistOrganization", context.Background(), orgID, comment).
+		mockRepo.On("DisableOrganization", context.Background(), orgID, comment).
 			Return(nil)
 
-		err := service.BlacklistOrganization(context.Background(), orgID, comment)
+		err := service.DisableOrganization(context.Background(), orgID, comment)
 		require.NoError(t, err)
 	})
 }
 
-func TestService_UnblacklistOrganization(t *testing.T) {
+func TestService_EnableOrganization(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should return an error when the repository call fails", func(t *testing.T) {
@@ -457,28 +457,28 @@ func TestService_UnblacklistOrganization(t *testing.T) {
 		mockRepo := organization.NewMockRepository(t)
 		service := organization.NewService(mockRepo)
 		orgID := gofakeit.Int64()
-		comment := "test unblacklist"
+		comment := "test enable"
 
-		mockRepo.On("UnblacklistOrganization", context.Background(), orgID, comment).
+		mockRepo.On("EnableOrganization", context.Background(), orgID, comment).
 			Return(assert.AnError)
 
-		err := service.UnblacklistOrganization(context.Background(), orgID, comment)
+		err := service.EnableOrganization(context.Background(), orgID, comment)
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
 
-	t.Run("should return nil when the organization is unblacklisted", func(t *testing.T) {
+	t.Run("should return nil when the organization is enabled", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := organization.NewMockRepository(t)
 		service := organization.NewService(mockRepo)
 		orgID := gofakeit.Int64()
-		comment := "test unblacklist"
+		comment := "test enable"
 
-		mockRepo.On("UnblacklistOrganization", context.Background(), orgID, comment).
+		mockRepo.On("EnableOrganization", context.Background(), orgID, comment).
 			Return(nil)
 
-		err := service.UnblacklistOrganization(context.Background(), orgID, comment)
+		err := service.EnableOrganization(context.Background(), orgID, comment)
 		require.NoError(t, err)
 	})
 }

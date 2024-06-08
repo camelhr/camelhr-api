@@ -1,12 +1,12 @@
--- unblacklistOrganizationQuery
+-- enableOrganizationQuery
 -- $1: organization_id
 -- $2: comment
 UPDATE
     organizations
 SET
-    blacklisted_at = NULL,
+    disabled_at = NULL,
     comment = $2
 WHERE
     organization_id = $1
-    AND blacklisted_at IS NOT NULL
+    AND disabled_at IS NOT NULL
     AND deleted_at IS NULL;
