@@ -1,10 +1,13 @@
 package organization
 
 import (
+	"errors"
 	"time"
 
 	"github.com/camelhr/camelhr-api/internal/base"
 )
+
+var ErrOrganizationDisabled = errors.New("organization is disabled")
 
 // Organization represents an organization.
 type Organization struct {

@@ -131,6 +131,25 @@ func TestService_Login(t *testing.T) {
 			require.ErrorIs(t, assert.AnError, err)
 		})
 
+	t.Run("should return error when org is disabled", func(t *testing.T) {
+		t.Parallel()
+
+		ctx := context.Background()
+		subdomain := gofakeit.Word()
+		now := time.Now()
+		o := organization.Organization{ID: gofakeit.Int64(), DisabledAt: &now}
+
+		orgService := organization.NewMockService(t)
+		orgService.On("GetOrganizationBySubdomain", ctx, subdomain).
+			Return(o, nil)
+
+		authService := auth.NewService(nil, orgService, nil, "secret")
+		_, err := authService.Login(ctx, subdomain, gofakeit.Email(), "@paSSw0rd")
+
+		require.Error(t, err)
+		require.ErrorIs(t, organization.ErrOrganizationDisabled, err)
+	})
+
 	t.Run("should return error when userService.GetUserByOrgIDEmail returns error",
 		func(t *testing.T) {
 			t.Parallel()

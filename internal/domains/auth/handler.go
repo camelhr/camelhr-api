@@ -66,7 +66,8 @@ func (h *handler) Login(w http.ResponseWriter, r *http.Request) {
 
 	token, err := h.service.Login(ctx, subdomain, email, password)
 	if err != nil {
-		if errors.Is(err, ErrInvalidCredentials) || errors.Is(err, ErrUserDisabled) {
+		if errors.Is(err, ErrInvalidCredentials) || errors.Is(err, ErrUserDisabled) ||
+			errors.Is(err, organization.ErrOrganizationDisabled) {
 			response.ErrorResponse(w, base.WrapError(err, base.ErrorHTTPStatus(http.StatusUnauthorized)))
 			return
 		}

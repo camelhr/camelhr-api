@@ -81,6 +81,11 @@ func (s *service) Login(ctx context.Context, subdomain, email, password string) 
 		return "", err
 	}
 
+	// prevent login for disabled organization
+	if org.DisabledAt != nil {
+		return "", organization.ErrOrganizationDisabled
+	}
+
 	u, err := s.userService.GetUserByOrgIDEmail(ctx, org.ID, email)
 	if err != nil {
 		if base.IsNotFoundError(err) {
