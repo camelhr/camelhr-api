@@ -57,7 +57,7 @@ func TestGenerateJWT(t *testing.T) {
 	})
 }
 
-func TestParseAndValidateJWT(t *testing.T) { //nolint:maintidx // test function
+func TestParseAndValidateJWT(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should parse and validate a valid jwt token", func(t *testing.T) {

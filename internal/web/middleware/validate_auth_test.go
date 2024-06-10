@@ -19,7 +19,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-//nolint:maintidx // all these tests belong to the single method
 func TestAuthMiddleware_ValidateAuth(t *testing.T) {
 	t.Parallel()
 

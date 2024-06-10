@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestExec(t *testing.T) { //nolint:maintidx // test function
+func TestExec(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should call underlying db.ExecContext when dest is nil", func(t *testing.T) {
