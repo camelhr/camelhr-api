@@ -12,7 +12,8 @@ import (
 )
 
 type Service interface {
-	// Register registers a new user and organization.
+	// Register registers a new organization with owner.
+	// The organization is set disabled by default.
 	Register(ctx context.Context, email, password, subdomain, orgName string) error
 
 	// Login logs in a user and returns a jwt token.
@@ -55,14 +56,18 @@ func (s *service) Register(ctx context.Context, email, password, subdomain, orgN
 		return err
 	}
 
-	// create a new organization and user
+	// create a new organization with owner. disable the newly created organizations
 	err = s.transactor.WithTx(ctx, func(ctx context.Context) error {
 		org, err := s.orgService.CreateOrganization(ctx, subdomain, orgName)
 		if err != nil {
 			return err
 		}
 
-		_, err = s.userService.CreateUser(ctx, org.ID, email, password)
+		if err := s.orgService.DisableOrganization(ctx, org.ID, NewOrgDisableComment); err != nil {
+			return err
+		}
+
+		_, err = s.userService.CreateOwner(ctx, org.ID, email, password)
 
 		return err
 	})
