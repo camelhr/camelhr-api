@@ -2,8 +2,10 @@ package user
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 
+	"github.com/camelhr/camelhr-api/internal/base"
 	"github.com/camelhr/camelhr-api/internal/domains/organization"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -52,7 +54,10 @@ type Service interface {
 	SetEmailVerified(ctx context.Context, id int64) error
 }
 
-var ErrUserCommentMissing = errors.New("comment is missing")
+var (
+	ErrUserCommentMissing = errors.New("comment is missing")
+	ErrUserIsOwner        = errors.New("operation not allowed. user is owner")
+)
 
 type service struct {
 	repo Repository
@@ -64,11 +69,29 @@ func NewService(repo Repository) *service {
 }
 
 func (s *service) GetUserByID(ctx context.Context, id int64) (User, error) {
-	return s.repo.GetUserByID(ctx, id)
+	u, err := s.repo.GetUserByID(ctx, id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return User{}, base.NewNotFoundError("user not found for the given id")
+		}
+
+		return User{}, err
+	}
+
+	return u, nil
 }
 
 func (s *service) GetUserByAPIToken(ctx context.Context, apiToken string) (User, error) {
-	return s.repo.GetUserByAPIToken(ctx, apiToken)
+	u, err := s.repo.GetUserByAPIToken(ctx, apiToken)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return User{}, base.NewNotFoundError("user not found for the given api-token")
+		}
+
+		return User{}, err
+	}
+
+	return u, nil
 }
 
 func (s *service) GetUserByOrgSubdomainAPIToken(ctx context.Context, orgSubdomain, apiToken string) (User, error) {
@@ -76,7 +99,16 @@ func (s *service) GetUserByOrgSubdomainAPIToken(ctx context.Context, orgSubdomai
 		return User{}, err
 	}
 
-	return s.repo.GetUserByOrgSubdomainAPIToken(ctx, orgSubdomain, apiToken)
+	u, err := s.repo.GetUserByOrgSubdomainAPIToken(ctx, orgSubdomain, apiToken)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return User{}, base.NewNotFoundError("user not found for the given org-subdomain and api-token")
+		}
+
+		return User{}, err
+	}
+
+	return u, nil
 }
 
 func (s *service) GetUserByOrgIDEmail(ctx context.Context, orgID int64, email string) (User, error) {
@@ -84,7 +116,16 @@ func (s *service) GetUserByOrgIDEmail(ctx context.Context, orgID int64, email st
 		return User{}, err
 	}
 
-	return s.repo.GetUserByOrgIDEmail(ctx, orgID, email)
+	u, err := s.repo.GetUserByOrgIDEmail(ctx, orgID, email)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return User{}, base.NewNotFoundError("user not found for the given org-id and email")
+		}
+
+		return User{}, err
+	}
+
+	return u, nil
 }
 
 func (s *service) GetUserByOrgSubdomainEmail(ctx context.Context, orgSubdomain, email string) (User, error) {
@@ -96,7 +137,16 @@ func (s *service) GetUserByOrgSubdomainEmail(ctx context.Context, orgSubdomain, 
 		return User{}, err
 	}
 
-	return s.repo.GetUserByOrgSubdomainEmail(ctx, orgSubdomain, email)
+	u, err := s.repo.GetUserByOrgSubdomainEmail(ctx, orgSubdomain, email)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return User{}, base.NewNotFoundError("user not found for the given org-subdomain and email")
+		}
+
+		return User{}, err
+	}
+
+	return u, nil
 }
 
 func (s *service) CreateUser(ctx context.Context, orgID int64, email, password string) (User, error) {
@@ -147,12 +197,38 @@ func (s *service) ResetPassword(ctx context.Context, id int64, newPassword strin
 }
 
 func (s *service) DeleteUser(ctx context.Context, id int64) error {
+	u, err := s.repo.GetUserByID(ctx, id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return base.NewNotFoundError("user not found for the given id")
+		}
+
+		return err
+	}
+
+	if u.IsOwner {
+		return ErrUserIsOwner
+	}
+
 	return s.repo.DeleteUser(ctx, id)
 }
 
 func (s *service) DisableUser(ctx context.Context, id int64, comment string) error {
 	if comment == "" {
 		return ErrUserCommentMissing
+	}
+
+	u, err := s.repo.GetUserByID(ctx, id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return base.NewNotFoundError("user not found for the given id")
+		}
+
+		return err
+	}
+
+	if u.IsOwner {
+		return ErrUserIsOwner
 	}
 
 	return s.repo.DisableUser(ctx, id, comment)

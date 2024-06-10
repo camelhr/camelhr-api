@@ -9,4 +9,5 @@ SET
 WHERE
     user_id = $1
     AND deleted_at IS NULL
-    AND disabled_at IS NULL;
+    AND disabled_at IS NULL
+    AND NOT is_owner;

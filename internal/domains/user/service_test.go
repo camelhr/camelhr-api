@@ -2,11 +2,13 @@ package user_test
 
 import (
 	"context"
+	"database/sql"
 	"math/rand"
 	"testing"
 	"time"
 
 	"github.com/brianvoe/gofakeit/v7"
+	"github.com/camelhr/camelhr-api/internal/base"
 	"github.com/camelhr/camelhr-api/internal/domains/user"
 	"github.com/camelhr/camelhr-api/internal/tests/fake"
 	"github.com/stretchr/testify/assert"
@@ -28,6 +30,21 @@ func TestService_GetUserByID(t *testing.T) {
 		_, err := service.GetUserByID(context.Background(), int64(1))
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
+	})
+
+	t.Run("should return base.NotFoundError when user not found", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := user.NewMockRepository(t)
+		service := user.NewService(mockRepo)
+
+		mockRepo.On("GetUserByID", context.Background(), int64(1)).
+			Return(user.User{}, sql.ErrNoRows)
+
+		_, err := service.GetUserByID(context.Background(), int64(1))
+		require.Error(t, err)
+		require.IsType(t, &base.NotFoundError{}, err)
+		assert.ErrorContains(t, err, "user not found for the given id")
 	})
 
 	t.Run("should return user by id", func(t *testing.T) {
@@ -68,6 +85,21 @@ func TestService_GetUserByAPIToken(t *testing.T) {
 		assert.ErrorIs(t, assert.AnError, err)
 	})
 
+	t.Run("should return error when user not found for the given api token", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := user.NewMockRepository(t)
+		service := user.NewService(mockRepo)
+
+		mockRepo.On("GetUserByAPIToken", context.Background(), "token").
+			Return(user.User{}, sql.ErrNoRows)
+
+		_, err := service.GetUserByAPIToken(context.Background(), "token")
+		require.Error(t, err)
+		require.IsType(t, &base.NotFoundError{}, err)
+		assert.ErrorContains(t, err, "user not found for the given api-token")
+	})
+
 	t.Run("should return user by api token", func(t *testing.T) {
 		t.Parallel()
 
@@ -104,6 +136,21 @@ func TestService_GetUserByOrgSubdomainAPIToken(t *testing.T) {
 		_, err := service.GetUserByOrgSubdomainAPIToken(context.Background(), "subdomain", "token")
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
+	})
+
+	t.Run("should return error when user not found for the given subdomain and api token", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := user.NewMockRepository(t)
+		service := user.NewService(mockRepo)
+
+		mockRepo.On("GetUserByOrgSubdomainAPIToken", context.Background(), "subdomain", "token").
+			Return(user.User{}, sql.ErrNoRows)
+
+		_, err := service.GetUserByOrgSubdomainAPIToken(context.Background(), "subdomain", "token")
+		require.Error(t, err)
+		require.IsType(t, &base.NotFoundError{}, err)
+		assert.ErrorContains(t, err, "user not found for the given org-subdomain and api-token")
 	})
 
 	t.Run("should return error when subdomain is invalid", func(t *testing.T) {
@@ -156,6 +203,22 @@ func TestService_GetUserByOrgIDEmail(t *testing.T) {
 		assert.ErrorIs(t, assert.AnError, err)
 	})
 
+	t.Run("should return error when user not found for the given organization id and email", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := user.NewMockRepository(t)
+		service := user.NewService(mockRepo)
+		email := gofakeit.Email()
+
+		mockRepo.On("GetUserByOrgIDEmail", context.Background(), int64(1), email).
+			Return(user.User{}, sql.ErrNoRows)
+
+		_, err := service.GetUserByOrgIDEmail(context.Background(), int64(1), email)
+		require.Error(t, err)
+		require.IsType(t, &base.NotFoundError{}, err)
+		assert.ErrorContains(t, err, "user not found for the given org-id and email")
+	})
+
 	t.Run("should return error when email is invalid", func(t *testing.T) {
 		t.Parallel()
 
@@ -205,6 +268,22 @@ func TestService_GetUserByOrgSubdomainEmail(t *testing.T) {
 		_, err := service.GetUserByOrgSubdomainEmail(context.Background(), "subdomain", email)
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
+	})
+
+	t.Run("should return error when user not found for the given subdomain and email", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := user.NewMockRepository(t)
+		service := user.NewService(mockRepo)
+		email := gofakeit.Email()
+
+		mockRepo.On("GetUserByOrgSubdomainEmail", context.Background(), "subdomain", email).
+			Return(user.User{}, sql.ErrNoRows)
+
+		_, err := service.GetUserByOrgSubdomainEmail(context.Background(), "subdomain", email)
+		require.Error(t, err)
+		require.IsType(t, &base.NotFoundError{}, err)
+		assert.ErrorContains(t, err, "user not found for the given org-subdomain and email")
 	})
 
 	t.Run("should return error when subdomain is invalid", func(t *testing.T) {
@@ -437,12 +516,28 @@ func TestService_ResetPassword(t *testing.T) {
 func TestService_DeleteUser(t *testing.T) {
 	t.Parallel()
 
-	t.Run("should return error when repository return error", func(t *testing.T) {
+	t.Run("should return error when repo.GetUserByID return error", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 
+		mockRepo.On("GetUserByID", context.Background(), int64(1)).
+			Return(user.User{}, assert.AnError)
+
+		err := service.DeleteUser(context.Background(), int64(1))
+		require.Error(t, err)
+		assert.ErrorIs(t, assert.AnError, err)
+	})
+
+	t.Run("should return error when repo.DeleteUser return error", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := user.NewMockRepository(t)
+		service := user.NewService(mockRepo)
+
+		mockRepo.On("GetUserByID", context.Background(), int64(1)).
+			Return(user.User{}, nil)
 		mockRepo.On("DeleteUser", context.Background(), int64(1)).
 			Return(assert.AnError)
 
@@ -451,12 +546,50 @@ func TestService_DeleteUser(t *testing.T) {
 		assert.ErrorIs(t, assert.AnError, err)
 	})
 
+	t.Run("should return base.NotFoundError when user not found for the given id", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := user.NewMockRepository(t)
+		service := user.NewService(mockRepo)
+
+		mockRepo.On("GetUserByID", context.Background(), int64(1)).
+			Return(user.User{}, sql.ErrNoRows)
+
+		err := service.DeleteUser(context.Background(), int64(1))
+		require.Error(t, err)
+		require.IsType(t, &base.NotFoundError{}, err)
+		assert.ErrorContains(t, err, "user not found for the given id")
+	})
+
+	t.Run("should return error when user is owner of the organization", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := user.NewMockRepository(t)
+		service := user.NewService(mockRepo)
+
+		u := user.User{
+			ID:             gofakeit.Int64(),
+			OrganizationID: gofakeit.Int64(),
+			Email:          gofakeit.Email(),
+			IsOwner:        true,
+		}
+
+		mockRepo.On("GetUserByID", context.Background(), u.ID).
+			Return(u, nil)
+
+		err := service.DeleteUser(context.Background(), u.ID)
+		require.Error(t, err)
+		assert.ErrorIs(t, user.ErrUserIsOwner, err)
+	})
+
 	t.Run("should delete user", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 
+		mockRepo.On("GetUserByID", context.Background(), int64(1)).
+			Return(user.User{}, nil)
 		mockRepo.On("DeleteUser", context.Background(), int64(1)).
 			Return(nil)
 
@@ -468,19 +601,74 @@ func TestService_DeleteUser(t *testing.T) {
 func TestService_DisableUser(t *testing.T) {
 	t.Parallel()
 
-	t.Run("should return error when repository return error", func(t *testing.T) {
+	t.Run("should return error when repo.GetUserByID return error", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo)
 		comment := gofakeit.SentenceSimple()
 
+		mockRepo.On("GetUserByID", context.Background(), int64(1)).
+			Return(user.User{}, assert.AnError)
+
+		err := service.DisableUser(context.Background(), int64(1), comment)
+		require.Error(t, err)
+		assert.ErrorIs(t, assert.AnError, err)
+	})
+
+	t.Run("should return error when repo.DisableUser return error", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := user.NewMockRepository(t)
+		service := user.NewService(mockRepo)
+		comment := gofakeit.SentenceSimple()
+
+		mockRepo.On("GetUserByID", context.Background(), int64(1)).
+			Return(user.User{}, nil)
 		mockRepo.On("DisableUser", context.Background(), int64(1), comment).
 			Return(assert.AnError)
 
 		err := service.DisableUser(context.Background(), int64(1), comment)
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
+	})
+
+	t.Run("should return error when user not found for the given id", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := user.NewMockRepository(t)
+		service := user.NewService(mockRepo)
+		comment := gofakeit.SentenceSimple()
+
+		mockRepo.On("GetUserByID", context.Background(), int64(1)).
+			Return(user.User{}, sql.ErrNoRows)
+
+		err := service.DisableUser(context.Background(), int64(1), comment)
+		require.Error(t, err)
+		require.IsType(t, &base.NotFoundError{}, err)
+		assert.ErrorContains(t, err, "user not found for the given id")
+	})
+
+	t.Run("should return error when user is owner of the organization", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := user.NewMockRepository(t)
+		service := user.NewService(mockRepo)
+		comment := gofakeit.SentenceSimple()
+
+		u := user.User{
+			ID:             gofakeit.Int64(),
+			OrganizationID: gofakeit.Int64(),
+			Email:          gofakeit.Email(),
+			IsOwner:        true,
+		}
+
+		mockRepo.On("GetUserByID", context.Background(), u.ID).
+			Return(u, nil)
+
+		err := service.DisableUser(context.Background(), u.ID, comment)
+		require.Error(t, err)
+		assert.ErrorIs(t, user.ErrUserIsOwner, err)
 	})
 
 	t.Run("should return error when comment is empty", func(t *testing.T) {
@@ -501,6 +689,8 @@ func TestService_DisableUser(t *testing.T) {
 		service := user.NewService(mockRepo)
 		comment := gofakeit.SentenceSimple()
 
+		mockRepo.On("GetUserByID", context.Background(), int64(1)).
+			Return(user.User{}, nil)
 		mockRepo.On("DisableUser", context.Background(), int64(1), comment).
 			Return(nil)
 

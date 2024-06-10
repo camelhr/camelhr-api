@@ -6,4 +6,5 @@ SET
     deleted_at = now()
 WHERE
     user_id = $1
-    AND deleted_at IS NULL;
+    AND deleted_at IS NULL
+    AND NOT is_owner;
