@@ -19,6 +19,8 @@ type Config struct {
 	DBMaxOpen         int    `mapstructure:"db_max_open"`
 	DBMaxIdle         int    `mapstructure:"db_max_idle"`
 	DBMaxIdleConnTime int    `mapstructure:"db_max_idle_conn_time"`
+
+	RedisConn string `mapstructure:"redis_conn"`
 }
 
 const (
@@ -28,9 +30,10 @@ const (
 )
 
 func init() {
-	// set the default values. make sure to set the default values for all the configs
-	// that are being used in the application. the default values should be suitable for production
-	// to avoid any runtime issues.
+	// make sure to set the default values for all the configs
+	// that are being used in the application.
+	// the default values are used when the environment variables are not set.
+	// the environment variables take precedence over the default values.
 
 	// secure configs
 	// app secret is used to sign the jwt tokens.
@@ -50,6 +53,9 @@ func init() {
 	viper.SetDefault("db_max_open", defaultDBMaxOpen)
 	viper.SetDefault("db_max_idle", defaultDBMaxIdle)
 	viper.SetDefault("db_max_idle_conn_time", defaultDBMaxIdleConnTime) // in minutes
+
+	// redis configs
+	viper.SetDefault("redis_conn", "") // secret value. must be set in the environment.
 
 	// override default values with environment variables.
 	viper.AutomaticEnv()

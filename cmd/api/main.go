@@ -16,6 +16,7 @@ import (
 	"github.com/camelhr/log"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
+	"github.com/redis/go-redis/v9"
 )
 
 const (
@@ -42,8 +43,16 @@ func main() {
 	// create a new instance of the postgresDatabase
 	pgDB := database.NewPostgresDatabase(db)
 
+	// connect to redis
+	redisClient, err := connectToRedis(configs)
+	if err != nil {
+		log.Error("failed to connect to redis %v", err)
+		return
+	}
+	defer redisClient.Close()
+
 	// setup routes and start the server
-	handler := web.SetupRoutes(pgDB, configs)
+	handler := web.SetupRoutes(pgDB, redisClient, configs)
 	server := &http.Server{
 		Addr:              configs.HTTPAddress,
 		Handler:           handler,
@@ -71,15 +80,15 @@ func main() {
 	})
 }
 
-func connectToDatabase(configs config.Config) (*sqlx.DB, error) {
-	db, err := sqlx.Open("pgx", configs.DBConn)
+func connectToDatabase(c config.Config) (*sqlx.DB, error) {
+	db, err := sqlx.Open("pgx", c.DBConn)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
 
-	db.SetMaxOpenConns(configs.DBMaxOpen)
-	db.SetMaxIdleConns(configs.DBMaxIdle)
-	db.SetConnMaxIdleTime(time.Duration(configs.DBMaxIdleConnTime) * time.Minute)
+	db.SetMaxOpenConns(c.DBMaxOpen)
+	db.SetMaxIdleConns(c.DBMaxIdle)
+	db.SetConnMaxIdleTime(time.Duration(c.DBMaxIdleConnTime) * time.Minute)
 	db.SetConnMaxLifetime(0)
 
 	if err = db.Ping(); err != nil {
@@ -87,6 +96,20 @@ func connectToDatabase(configs config.Config) (*sqlx.DB, error) {
 	}
 
 	return db, nil
+}
+
+func connectToRedis(c config.Config) (*redis.Client, error) {
+	opts, err := redis.ParseURL(c.RedisConn)
+	if err != nil {
+		return nil, err
+	}
+
+	client := redis.NewClient(opts)
+	if err := client.Ping(context.Background()).Err(); err != nil {
+		return nil, err
+	}
+
+	return client, nil
 }
 
 func trapTerminateSignal(onTerminate func()) {

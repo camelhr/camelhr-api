@@ -5,14 +5,17 @@ import (
 
 	"github.com/camelhr/camelhr-api/internal/config"
 	"github.com/camelhr/camelhr-api/internal/database"
+	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/suite"
 )
 
 type IntegrationBaseSuite struct {
 	suite.Suite
-	Config      config.Config
-	DB          database.Database
-	PGContainer *PostgreSQLContainer
+	Config         config.Config
+	DB             database.Database
+	RedisClient    *redis.Client
+	RedisContainer *RedisContainer
+	PGContainer    *PostgreSQLContainer
 }
 
 func (s *IntegrationBaseSuite) SetupSuite() {
@@ -31,13 +34,21 @@ func (s *IntegrationBaseSuite) SetupSuite() {
 		AppSecret: "test_secret",
 	}
 
-	c, err := NewPostgresContainer()
+	pgContainer, err := NewPostgresContainer()
 	s.Require().NoError(err)
-	s.PGContainer = c
+	s.PGContainer = pgContainer
 
-	db, err := c.Connect()
+	db, err := pgContainer.Connect()
 	s.Require().NoError(err)
 	s.DB = database.NewPostgresDatabase(db)
+
+	redisContainer, err := NewRedisContainer()
+	s.Require().NoError(err)
+	s.RedisContainer = redisContainer
+
+	redisClient, err := redisContainer.Connect()
+	s.Require().NoError(err)
+	s.RedisClient = redisClient
 
 	err = RunMigrations(db.DB)
 	s.Require().NoError(err)
@@ -46,6 +57,11 @@ func (s *IntegrationBaseSuite) SetupSuite() {
 }
 
 func (s *IntegrationBaseSuite) TearDownSuite() {
-	err := s.PGContainer.Purge()
-	s.Require().NoError(err)
+	if err := s.PGContainer.Purge(); err != nil {
+		s.T().Logf("error purging postgres container: %v", err)
+	}
+
+	if err := s.RedisContainer.Purge(); err != nil {
+		s.T().Logf("error purging redis container: %v", err)
+	}
 }

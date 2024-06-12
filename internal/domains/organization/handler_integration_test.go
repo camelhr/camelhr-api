@@ -34,7 +34,7 @@ func (s *OrganizationTestSuite) TestHandlerIntegration_GetOrganizationBySubdomai
 		s.Require().NoError(err)
 
 		rr := httptest.NewRecorder()
-		h := web.SetupRoutes(s.DB, s.Config)
+		h := web.SetupRoutes(s.DB, s.RedisClient, s.Config)
 		h.ServeHTTP(rr, req)
 
 		// assert the response
@@ -77,7 +77,7 @@ func (s *OrganizationTestSuite) TestHandlerIntegration_UpdateOrganization() {
 		req.SetBasicAuth(*u.APIToken, auth.APITokenBasicAuthPassword)
 
 		rr := httptest.NewRecorder()
-		h := web.SetupRoutes(s.DB, s.Config)
+		h := web.SetupRoutes(s.DB, s.RedisClient, s.Config)
 		h.ServeHTTP(rr, req)
 
 		// assert the response status code
@@ -108,7 +108,7 @@ func (s *OrganizationTestSuite) TestHandlerIntegration_DeleteOrganization() {
 		req.SetBasicAuth(*u.APIToken, auth.APITokenBasicAuthPassword)
 
 		rr := httptest.NewRecorder()
-		h := web.SetupRoutes(s.DB, s.Config)
+		h := web.SetupRoutes(s.DB, s.RedisClient, s.Config)
 		h.ServeHTTP(rr, req)
 
 		// assert the response status code

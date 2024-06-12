@@ -12,10 +12,11 @@ import (
 	"github.com/camelhr/camelhr-api/internal/web/response"
 	"github.com/go-chi/chi/v5"
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
+	"github.com/redis/go-redis/v9"
 )
 
 // SetupRoutes initializes the routes for the web server.
-func SetupRoutes(db database.Database, conf config.Config) http.Handler {
+func SetupRoutes(db database.Database, redisClient *redis.Client, conf config.Config) http.Handler {
 	// initialize dependencies
 	orgRepo := organization.NewRepository(db)
 	orgService := organization.NewService(orgRepo)

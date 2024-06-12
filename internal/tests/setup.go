@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -12,15 +13,35 @@ import (
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
 	"github.com/pressly/goose/v3"
+	"github.com/redis/go-redis/v9"
 )
 
 const resourceExpirationTime = 900
 
 var ErrContainerNotInitialized = errors.New("container is not initialized")
 
-type PostgreSQLContainer struct {
+type TestContainer struct {
 	resource *dockertest.Resource
 	pool     *dockertest.Pool
+}
+
+// Purge purges the TestContainer.
+func (c *TestContainer) Purge() error {
+	if c.pool == nil || c.resource == nil {
+		return nil
+	}
+
+	err := c.pool.Purge(c.resource)
+
+	return err
+}
+
+type PostgreSQLContainer struct {
+	TestContainer
+}
+
+type RedisContainer struct {
+	TestContainer
 }
 
 const (
@@ -67,13 +88,13 @@ func NewPostgresContainer() (*PostgreSQLContainer, error) {
 		config.RestartPolicy = docker.RestartPolicy{Name: "no"}
 	})
 	if err != nil {
-		return nil, fmt.Errorf("could not start resource: %w", err)
+		return nil, fmt.Errorf("could not start postgres container: %w", err)
 	}
 
 	// tell docker to hard kill the container after specified time
 	// this is useful in case a test panics and suite teardown is not called to remove the container
 	if err := resource.Expire(resourceExpirationTime); err != nil {
-		return nil, fmt.Errorf("could not set resource expiration time: %w", err)
+		return nil, fmt.Errorf("could not set resource expiration time for postgres container: %w", err)
 	}
 
 	container.resource = resource
@@ -112,21 +133,81 @@ func (c *PostgreSQLContainer) Connect() (*sqlx.DB, error) {
 
 		return nil
 	}); err != nil {
-		return nil, fmt.Errorf("could not connect to docker: %w", err)
+		return nil, fmt.Errorf("could not connect to postgres container: %w", err)
 	}
 
 	return db, nil
 }
 
-// Purge purges the PostgreSQLcontainer.
-func (c *PostgreSQLContainer) Purge() error {
-	if c.pool == nil || c.resource == nil {
-		return nil
+// NewRedisContainer creates a new redis docker container for testing.
+func NewRedisContainer() (*RedisContainer, error) {
+	container := &RedisContainer{}
+
+	// create a new pool
+	pool, err := dockertest.NewPool("")
+	if err != nil {
+		return nil, fmt.Errorf("could not prepare docker image: %w", err)
 	}
 
-	err := c.pool.Purge(c.resource)
+	if err = pool.Client.Ping(); err != nil {
+		return nil, fmt.Errorf("could not ping docker server: %w", err)
+	}
 
-	return err
+	container.pool = pool
+
+	// start a new redis container
+	// pulls an image, creates a container based on it and runs it
+	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
+		Repository:   "redis",
+		Tag:          "7.2-alpine",
+		ExposedPorts: []string{"6379/tcp"},
+	}, func(config *docker.HostConfig) {
+		// set AutoRemove to true so that stopped container goes away by itself
+		config.AutoRemove = true
+		config.RestartPolicy = docker.RestartPolicy{Name: "no"}
+	})
+	if err != nil {
+		return nil, fmt.Errorf("could not start redis container: %w", err)
+	}
+
+	// tell docker to hard kill the container after specified time
+	// this is useful in case a test panics and suite teardown is not called to remove the container
+	if err := resource.Expire(resourceExpirationTime); err != nil {
+		return nil, fmt.Errorf("could not set resource expiration time for redis container: %w", err)
+	}
+
+	container.resource = resource
+
+	return container, nil
+}
+
+// Connect returns a new redis client to the RedisContainer.
+func (c *RedisContainer) Connect() (*redis.Client, error) {
+	var client *redis.Client
+
+	if c.pool == nil || c.resource == nil {
+		return nil, ErrContainerNotInitialized
+	}
+
+	// exponential backoff-retry, because the application in the container might not be ready to accept connections yet
+	// even if the RedisContainer is up and running
+	if err := c.pool.Retry(func() error {
+		redisClient := redis.NewClient(&redis.Options{
+			Addr: ":" + c.resource.GetPort("6379/tcp"),
+		})
+
+		if err := redisClient.Ping(context.Background()).Err(); err != nil {
+			return fmt.Errorf("could not ping redis: %w", err)
+		}
+
+		client = redisClient
+
+		return nil
+	}); err != nil {
+		return nil, fmt.Errorf("could not connect to redis container: %w", err)
+	}
+
+	return client, nil
 }
 
 // RunMigrations runs the database schema migration.

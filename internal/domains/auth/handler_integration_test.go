@@ -32,7 +32,7 @@ func (s *AuthTestSuite) TestHandlerIntegration_Register() {
 		s.Require().NoError(err)
 
 		rr := httptest.NewRecorder()
-		h := web.SetupRoutes(s.DB, s.Config)
+		h := web.SetupRoutes(s.DB, s.RedisClient, s.Config)
 		h.ServeHTTP(rr, req)
 
 		// assert the response
@@ -59,7 +59,7 @@ func (s *AuthTestSuite) TestHandlerIntegration_Login() {
 		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 		rr := httptest.NewRecorder()
-		h := web.SetupRoutes(s.DB, s.Config)
+		h := web.SetupRoutes(s.DB, s.RedisClient, s.Config)
 		h.ServeHTTP(rr, req)
 
 		// assert the response
@@ -88,7 +88,7 @@ func (s *AuthTestSuite) TestHandlerIntegration_Logout() {
 
 		// login
 		loginRR := httptest.NewRecorder()
-		h := web.SetupRoutes(s.DB, s.Config)
+		h := web.SetupRoutes(s.DB, s.RedisClient, s.Config)
 		h.ServeHTTP(loginRR, loginReq)
 
 		// assert the login response

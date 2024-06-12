@@ -1,6 +1,17 @@
 version: "3.8"
 
 services:
+  redis:
+    image: redis:7.2-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+
   db:
     image: postgres:16.2-alpine
     restart: unless-stopped
@@ -39,8 +50,11 @@ services:
       dockerfile: Dockerfile
     environment:
       DB_CONN: "user=${PGUSER?} password=${PGPASSWORD?} dbname=${PGDATABASE?} host=db port=${PGPORT?} sslmode=${PGSSLMODE}"
+      REDIS_CONN: "redis://redis:6379"
       LOG_LEVEL: DEBUG
     depends_on:
+      redis:
+        condition: service_healthy
       db:
         condition: service_healthy
     restart: unless-stopped
