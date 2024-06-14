@@ -365,6 +365,57 @@ func (s *UserTestSuite) TestRepositoryIntegration_DeleteUser() {
 	})
 }
 
+func (s *UserTestSuite) TestRepositoryIntegration_DeleteAllUsersByOrgID() {
+	s.Run("should delete all users by organization id", func() {
+		s.T().Parallel()
+		repo := user.NewRepository(s.DB)
+		o := fake.NewOrganization(s.DB)
+		u1 := fake.NewUser(s.DB, o.ID)
+		u2 := fake.NewUser(s.DB, o.ID)
+		u3 := fake.NewUser(s.DB, o.ID)
+
+		err := repo.DeleteAllUsersByOrgID(context.Background(), o.ID)
+		s.Require().NoError(err)
+
+		u1Latest := u1.FetchLatest(s.DB)
+		s.NotNil(u1Latest.DeletedAt)
+		s.Equal(time.UTC, u1Latest.DeletedAt.Location())
+		s.WithinDuration(time.Now().UTC(), *u1Latest.DeletedAt, 1*time.Minute)
+
+		u2Latest := u2.FetchLatest(s.DB)
+		s.NotNil(u2Latest.DeletedAt)
+		s.Equal(u1Latest.DeletedAt, u2Latest.DeletedAt)
+
+		u3Latest := u3.FetchLatest(s.DB)
+		s.NotNil(u3Latest.DeletedAt)
+		s.Equal(u1Latest.DeletedAt, u3Latest.DeletedAt)
+	})
+
+	s.Run("should not delete already deleted users", func() {
+		s.T().Parallel()
+		repo := user.NewRepository(s.DB)
+		o := fake.NewOrganization(s.DB)
+		u1 := fake.NewUser(s.DB, o.ID, fake.UserDeleted())
+		u2 := fake.NewUser(s.DB, o.ID, fake.UserDeleted())
+		u3 := fake.NewUser(s.DB, o.ID, fake.UserDeleted())
+
+		err := repo.DeleteAllUsersByOrgID(context.Background(), o.ID)
+		s.Require().NoError(err)
+
+		u1Latest := u1.FetchLatest(s.DB)
+		s.NotNil(u1Latest.DeletedAt)
+		s.Equal(u1.DeletedAt, u1Latest.DeletedAt)
+
+		u2Latest := u2.FetchLatest(s.DB)
+		s.NotNil(u2Latest.DeletedAt)
+		s.Equal(u2.DeletedAt, u2Latest.DeletedAt)
+
+		u3Latest := u3.FetchLatest(s.DB)
+		s.NotNil(u3Latest.DeletedAt)
+		s.Equal(u3.DeletedAt, u3Latest.DeletedAt)
+	})
+}
+
 func (s *UserTestSuite) TestRepositoryIntegration_DisableUser() {
 	s.Run("should disable user", func() {
 		s.T().Parallel()

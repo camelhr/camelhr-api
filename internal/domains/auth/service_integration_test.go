@@ -19,7 +19,7 @@ func (s *AuthTestSuite) TestServiceIntegration_Register() {
 		s.T().Parallel()
 
 		userRepo := user.NewRepository(s.DB)
-		userService := user.NewService(userRepo)
+		userService := user.NewService(userRepo, nil)
 		orgRepo := organization.NewRepository(s.DB)
 		orgService := organization.NewService(orgRepo)
 		sessionManager := session.NewRedisSessionManager(s.RedisClient)
@@ -50,7 +50,7 @@ func (s *AuthTestSuite) TestServiceIntegration_Register() {
 		s.T().Parallel()
 
 		userRepo := user.NewRepository(s.DB)
-		userService := user.NewService(userRepo)
+		userService := user.NewService(userRepo, nil)
 		orgRepo := organization.NewRepository(s.DB)
 		orgService := organization.NewService(orgRepo)
 		sessionManager := session.NewRedisSessionManager(s.RedisClient)
@@ -76,7 +76,7 @@ func (s *AuthTestSuite) TestServiceIntegration_Register() {
 		s.T().Parallel()
 
 		userRepo := user.NewRepository(s.DB)
-		userService := user.NewService(userRepo)
+		userService := user.NewService(userRepo, nil)
 		orgRepo := organization.NewRepository(s.DB)
 		orgService := organization.NewService(orgRepo)
 		sessionManager := session.NewRedisSessionManager(s.RedisClient)
@@ -116,7 +116,7 @@ func (s *AuthTestSuite) TestServiceIntegration_Login() {
 		s.T().Parallel()
 
 		userRepo := user.NewRepository(s.DB)
-		userService := user.NewService(userRepo)
+		userService := user.NewService(userRepo, nil)
 		orgRepo := organization.NewRepository(s.DB)
 		orgService := organization.NewService(orgRepo)
 		sessionManager := session.NewRedisSessionManager(s.RedisClient)
@@ -136,7 +136,7 @@ func (s *AuthTestSuite) TestServiceIntegration_Login() {
 
 		ctx := context.Background()
 		userRepo := user.NewRepository(s.DB)
-		userService := user.NewService(userRepo)
+		userService := user.NewService(userRepo, nil)
 		orgRepo := organization.NewRepository(s.DB)
 		orgService := organization.NewService(orgRepo)
 		sessionManager := session.NewRedisSessionManager(s.RedisClient)
@@ -165,7 +165,7 @@ func (s *AuthTestSuite) TestServiceIntegration_Logout() {
 
 		ctx := context.Background()
 		userRepo := user.NewRepository(s.DB)
-		userService := user.NewService(userRepo)
+		userService := user.NewService(userRepo, nil)
 		orgRepo := organization.NewRepository(s.DB)
 		orgService := organization.NewService(orgRepo)
 		sessionManager := session.NewRedisSessionManager(s.RedisClient)

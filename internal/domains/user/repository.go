@@ -6,6 +6,7 @@ import (
 	"github.com/camelhr/camelhr-api/internal/database"
 )
 
+// Repository is a repository for managing users in the database.
 type Repository interface {
 	// GetUserByID returns a user by its ID.
 	GetUserByID(ctx context.Context, id int64) (User, error)
@@ -30,6 +31,9 @@ type Repository interface {
 
 	// DeleteUser deletes a user by its ID.
 	DeleteUser(ctx context.Context, id int64) error
+
+	// DeleteAllUsersByOrgID deletes all users of an organization.
+	DeleteAllUsersByOrgID(ctx context.Context, orgID int64) error
 
 	// DisableUser disables a user by its ID.
 	DisableUser(ctx context.Context, id int64, comment string) error
@@ -103,6 +107,10 @@ func (r *repository) ResetPassword(ctx context.Context, id int64, passwordHash s
 
 func (r *repository) DeleteUser(ctx context.Context, id int64) error {
 	return r.db.Exec(ctx, nil, deleteUserQuery, id)
+}
+
+func (r *repository) DeleteAllUsersByOrgID(ctx context.Context, orgID int64) error {
+	return r.db.Exec(ctx, nil, deleteAllUsersByOrgIDQuery, orgID)
 }
 
 func (r *repository) DisableUser(ctx context.Context, id int64, comment string) error {

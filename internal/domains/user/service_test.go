@@ -9,6 +9,7 @@ import (
 
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/camelhr/camelhr-api/internal/base"
+	"github.com/camelhr/camelhr-api/internal/domains/session"
 	"github.com/camelhr/camelhr-api/internal/domains/user"
 	"github.com/camelhr/camelhr-api/internal/tests/fake"
 	"github.com/stretchr/testify/assert"
@@ -22,7 +23,7 @@ func TestService_GetUserByID(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 
 		mockRepo.On("GetUserByID", context.Background(), int64(1)).
 			Return(user.User{}, assert.AnError)
@@ -36,7 +37,7 @@ func TestService_GetUserByID(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 
 		mockRepo.On("GetUserByID", context.Background(), int64(1)).
 			Return(user.User{}, sql.ErrNoRows)
@@ -51,7 +52,7 @@ func TestService_GetUserByID(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 
 		u := user.User{
 			ID:             gofakeit.Int64(),
@@ -75,7 +76,7 @@ func TestService_GetUserByAPIToken(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 
 		mockRepo.On("GetUserByAPIToken", context.Background(), "token").
 			Return(user.User{}, assert.AnError)
@@ -89,7 +90,7 @@ func TestService_GetUserByAPIToken(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 
 		mockRepo.On("GetUserByAPIToken", context.Background(), "token").
 			Return(user.User{}, sql.ErrNoRows)
@@ -104,7 +105,7 @@ func TestService_GetUserByAPIToken(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 
 		u := user.User{
 			ID:             gofakeit.Int64(),
@@ -128,7 +129,7 @@ func TestService_GetUserByOrgSubdomainAPIToken(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 
 		mockRepo.On("GetUserByOrgSubdomainAPIToken", context.Background(), "subdomain", "token").
 			Return(user.User{}, assert.AnError)
@@ -142,7 +143,7 @@ func TestService_GetUserByOrgSubdomainAPIToken(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 
 		mockRepo.On("GetUserByOrgSubdomainAPIToken", context.Background(), "subdomain", "token").
 			Return(user.User{}, sql.ErrNoRows)
@@ -157,7 +158,7 @@ func TestService_GetUserByOrgSubdomainAPIToken(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 
 		_, err := service.GetUserByOrgSubdomainAPIToken(context.Background(), "invalid_sub", "token")
 		require.Error(t, err)
@@ -168,7 +169,7 @@ func TestService_GetUserByOrgSubdomainAPIToken(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 
 		u := user.User{
 			ID:             gofakeit.Int64(),
@@ -192,7 +193,7 @@ func TestService_GetUserByOrgIDEmail(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 		email := gofakeit.Email()
 
 		mockRepo.On("GetUserByOrgIDEmail", context.Background(), int64(1), email).
@@ -207,7 +208,7 @@ func TestService_GetUserByOrgIDEmail(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 		email := gofakeit.Email()
 
 		mockRepo.On("GetUserByOrgIDEmail", context.Background(), int64(1), email).
@@ -223,7 +224,7 @@ func TestService_GetUserByOrgIDEmail(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 		email := "invalid@invalid"
 
 		_, err := service.GetUserByOrgIDEmail(context.Background(), int64(1), email)
@@ -235,7 +236,7 @@ func TestService_GetUserByOrgIDEmail(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 
 		u := user.User{
 			ID:             gofakeit.Int64(),
@@ -259,7 +260,7 @@ func TestService_GetUserByOrgSubdomainEmail(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 		email := gofakeit.Email()
 
 		mockRepo.On("GetUserByOrgSubdomainEmail", context.Background(), "subdomain", email).
@@ -274,7 +275,7 @@ func TestService_GetUserByOrgSubdomainEmail(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 		email := gofakeit.Email()
 
 		mockRepo.On("GetUserByOrgSubdomainEmail", context.Background(), "subdomain", email).
@@ -290,7 +291,7 @@ func TestService_GetUserByOrgSubdomainEmail(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 
 		_, err := service.GetUserByOrgSubdomainEmail(context.Background(), "@#invalid", gofakeit.Email())
 		require.Error(t, err)
@@ -301,7 +302,7 @@ func TestService_GetUserByOrgSubdomainEmail(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 		email := ""
 
 		_, err := service.GetUserByOrgSubdomainEmail(context.Background(), "subdomain", email)
@@ -313,7 +314,7 @@ func TestService_GetUserByOrgSubdomainEmail(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 		email := gofakeit.Email()
 
 		u := user.User{
@@ -338,7 +339,7 @@ func TestService_CreateUser(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 		password := generatePassword()
 
 		u := user.User{
@@ -359,7 +360,7 @@ func TestService_CreateUser(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 		password := generatePassword()
 
 		_, err := service.CreateUser(context.Background(), int64(1), "invalid", password)
@@ -371,7 +372,7 @@ func TestService_CreateUser(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 
 		_, err := service.CreateUser(context.Background(), int64(1), gofakeit.Email(), "invalid")
 		require.Error(t, err)
@@ -382,7 +383,7 @@ func TestService_CreateUser(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 		password := generatePassword()
 
 		u := user.User{
@@ -407,7 +408,7 @@ func TestService_CreateOwner(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 		password := generatePassword()
 
 		u := user.User{
@@ -428,7 +429,7 @@ func TestService_CreateOwner(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 		password := generatePassword()
 
 		_, err := service.CreateOwner(context.Background(), int64(1), "invalid", password)
@@ -440,7 +441,7 @@ func TestService_CreateOwner(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 
 		_, err := service.CreateOwner(context.Background(), int64(1), gofakeit.Email(), "invalid123")
 		require.Error(t, err)
@@ -451,7 +452,7 @@ func TestService_CreateOwner(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 		password := generatePassword()
 
 		u := user.User{
@@ -476,7 +477,7 @@ func TestService_ResetPassword(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 		password := generatePassword()
 
 		mockRepo.On("ResetPassword", context.Background(), int64(1), fake.MockString).
@@ -491,7 +492,7 @@ func TestService_ResetPassword(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 
 		err := service.ResetPassword(context.Background(), int64(1), "Invalid123")
 		require.Error(t, err)
@@ -502,7 +503,7 @@ func TestService_ResetPassword(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 		password := generatePassword()
 
 		mockRepo.On("ResetPassword", context.Background(), int64(1), fake.MockString).
@@ -520,7 +521,7 @@ func TestService_DeleteUser(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 
 		mockRepo.On("GetUserByID", context.Background(), int64(1)).
 			Return(user.User{}, assert.AnError)
@@ -534,7 +535,7 @@ func TestService_DeleteUser(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 
 		mockRepo.On("GetUserByID", context.Background(), int64(1)).
 			Return(user.User{}, nil)
@@ -550,7 +551,7 @@ func TestService_DeleteUser(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 
 		mockRepo.On("GetUserByID", context.Background(), int64(1)).
 			Return(user.User{}, sql.ErrNoRows)
@@ -565,7 +566,7 @@ func TestService_DeleteUser(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 
 		u := user.User{
 			ID:             gofakeit.Int64(),
@@ -582,18 +583,103 @@ func TestService_DeleteUser(t *testing.T) {
 		assert.ErrorIs(t, user.ErrUserIsOwner, err)
 	})
 
+	t.Run("should return error when user session deletion failed", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := user.NewMockRepository(t)
+		sessionManager := session.NewMockSessionManager(t)
+		service := user.NewService(mockRepo, sessionManager)
+
+		u := user.User{
+			ID:             gofakeit.Int64(),
+			OrganizationID: gofakeit.Int64(),
+			Email:          gofakeit.Email(),
+		}
+
+		mockRepo.On("GetUserByID", context.Background(), u.ID).
+			Return(u, nil)
+		mockRepo.On("DeleteUser", context.Background(), u.ID).
+			Return(nil)
+		sessionManager.On("DeleteSession", context.Background(), u.ID, u.OrganizationID).
+			Return(assert.AnError)
+
+		err := service.DeleteUser(context.Background(), u.ID)
+		require.Error(t, err)
+		assert.ErrorIs(t, assert.AnError, err)
+	})
+
 	t.Run("should delete user", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		sessionManager := session.NewMockSessionManager(t)
+		service := user.NewService(mockRepo, sessionManager)
 
-		mockRepo.On("GetUserByID", context.Background(), int64(1)).
-			Return(user.User{}, nil)
-		mockRepo.On("DeleteUser", context.Background(), int64(1)).
+		u := user.User{
+			ID:             gofakeit.Int64(),
+			OrganizationID: gofakeit.Int64(),
+			Email:          gofakeit.Email(),
+		}
+
+		mockRepo.On("GetUserByID", context.Background(), u.ID).
+			Return(u, nil)
+		mockRepo.On("DeleteUser", context.Background(), u.ID).
+			Return(nil)
+		sessionManager.On("DeleteSession", context.Background(), u.ID, u.OrganizationID).
 			Return(nil)
 
-		err := service.DeleteUser(context.Background(), int64(1))
+		err := service.DeleteUser(context.Background(), u.ID)
+		require.NoError(t, err)
+	})
+}
+
+func TestService_DeleteAllUsersByOrgID(t *testing.T) {
+	t.Parallel()
+
+	t.Run("should return error when repository return error", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := user.NewMockRepository(t)
+		service := user.NewService(mockRepo, nil)
+
+		mockRepo.On("DeleteAllUsersByOrgID", context.Background(), int64(1)).
+			Return(assert.AnError)
+
+		err := service.DeleteAllUsersByOrgID(context.Background(), int64(1))
+		require.Error(t, err)
+		assert.ErrorIs(t, assert.AnError, err)
+	})
+
+	t.Run("should return error when user session deletion failed", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := user.NewMockRepository(t)
+		sessionManager := session.NewMockSessionManager(t)
+		service := user.NewService(mockRepo, sessionManager)
+
+		mockRepo.On("DeleteAllUsersByOrgID", context.Background(), int64(1)).
+			Return(nil)
+		sessionManager.On("DeleteAllOrgSessions", context.Background(), int64(1)).
+			Return(assert.AnError)
+
+		err := service.DeleteAllUsersByOrgID(context.Background(), int64(1))
+		require.Error(t, err)
+		assert.ErrorIs(t, assert.AnError, err)
+	})
+
+	t.Run("should delete all users by organization id", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := user.NewMockRepository(t)
+		sessionManager := session.NewMockSessionManager(t)
+		service := user.NewService(mockRepo, sessionManager)
+
+		mockRepo.On("DeleteAllUsersByOrgID", context.Background(), int64(1)).
+			Return(nil)
+		sessionManager.On("DeleteAllOrgSessions", context.Background(), int64(1)).
+			Return(nil)
+
+		err := service.DeleteAllUsersByOrgID(context.Background(), int64(1))
 		require.NoError(t, err)
 	})
 }
@@ -605,7 +691,7 @@ func TestService_DisableUser(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 		comment := gofakeit.SentenceSimple()
 
 		mockRepo.On("GetUserByID", context.Background(), int64(1)).
@@ -620,7 +706,7 @@ func TestService_DisableUser(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 		comment := gofakeit.SentenceSimple()
 
 		mockRepo.On("GetUserByID", context.Background(), int64(1)).
@@ -637,7 +723,7 @@ func TestService_DisableUser(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 		comment := gofakeit.SentenceSimple()
 
 		mockRepo.On("GetUserByID", context.Background(), int64(1)).
@@ -653,7 +739,7 @@ func TestService_DisableUser(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 		comment := gofakeit.SentenceSimple()
 
 		u := user.User{
@@ -675,26 +761,61 @@ func TestService_DisableUser(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 
 		err := service.DisableUser(context.Background(), int64(1), "")
 		require.Error(t, err)
 		assert.ErrorIs(t, user.ErrUserCommentMissing, err)
 	})
 
+	t.Run("should return error when user session deletion failed", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := user.NewMockRepository(t)
+		sessionManager := session.NewMockSessionManager(t)
+		service := user.NewService(mockRepo, sessionManager)
+		comment := gofakeit.SentenceSimple()
+
+		u := user.User{
+			ID:             gofakeit.Int64(),
+			OrganizationID: gofakeit.Int64(),
+			Email:          gofakeit.Email(),
+		}
+
+		mockRepo.On("GetUserByID", context.Background(), u.ID).
+			Return(u, nil)
+		mockRepo.On("DisableUser", context.Background(), u.ID, comment).
+			Return(nil)
+		sessionManager.On("DeleteSession", context.Background(), u.ID, u.OrganizationID).
+			Return(assert.AnError)
+
+		err := service.DisableUser(context.Background(), u.ID, comment)
+		require.Error(t, err)
+		assert.ErrorIs(t, assert.AnError, err)
+	})
+
 	t.Run("should disable user", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		sessionManager := session.NewMockSessionManager(t)
+		service := user.NewService(mockRepo, sessionManager)
 		comment := gofakeit.SentenceSimple()
 
-		mockRepo.On("GetUserByID", context.Background(), int64(1)).
-			Return(user.User{}, nil)
-		mockRepo.On("DisableUser", context.Background(), int64(1), comment).
+		u := user.User{
+			ID:             gofakeit.Int64(),
+			OrganizationID: gofakeit.Int64(),
+			Email:          gofakeit.Email(),
+		}
+
+		mockRepo.On("GetUserByID", context.Background(), u.ID).
+			Return(u, nil)
+		mockRepo.On("DisableUser", context.Background(), u.ID, comment).
+			Return(nil)
+		sessionManager.On("DeleteSession", context.Background(), u.ID, u.OrganizationID).
 			Return(nil)
 
-		err := service.DisableUser(context.Background(), int64(1), comment)
+		err := service.DisableUser(context.Background(), u.ID, comment)
 		require.NoError(t, err)
 	})
 }
@@ -706,7 +827,7 @@ func TestService_EnableUser(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 		comment := gofakeit.SentenceSimple()
 
 		mockRepo.On("EnableUser", context.Background(), int64(1), comment).
@@ -721,7 +842,7 @@ func TestService_EnableUser(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 
 		err := service.DisableUser(context.Background(), int64(1), "")
 		require.Error(t, err)
@@ -732,7 +853,7 @@ func TestService_EnableUser(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 		comment := gofakeit.SentenceSimple()
 
 		mockRepo.On("EnableUser", context.Background(), int64(1), comment).
@@ -750,7 +871,7 @@ func TestService_GenerateAPIToken(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 
 		mockRepo.On("GenerateAPIToken", context.Background(), int64(1)).
 			Return(assert.AnError)
@@ -764,7 +885,7 @@ func TestService_GenerateAPIToken(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 
 		mockRepo.On("GenerateAPIToken", context.Background(), int64(1)).
 			Return(nil)
@@ -781,7 +902,7 @@ func TestService_ResetAPIToken(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 
 		mockRepo.On("ResetAPIToken", context.Background(), int64(1)).
 			Return(assert.AnError)
@@ -795,7 +916,7 @@ func TestService_ResetAPIToken(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 
 		mockRepo.On("ResetAPIToken", context.Background(), int64(1)).
 			Return(nil)
@@ -812,7 +933,7 @@ func TestService_SetEmailVerified(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 
 		mockRepo.On("SetEmailVerified", context.Background(), int64(1)).
 			Return(assert.AnError)
@@ -826,7 +947,7 @@ func TestService_SetEmailVerified(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo)
+		service := user.NewService(mockRepo, nil)
 
 		mockRepo.On("SetEmailVerified", context.Background(), int64(1)).
 			Return(nil)

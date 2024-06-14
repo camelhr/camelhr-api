@@ -26,7 +26,7 @@ func SetupRoutes(db database.Database, redisClient *redis.Client, conf config.Co
 	orgService := organization.NewService(orgRepo)
 	orgHandler := organization.NewHandler(orgService)
 	userRepo := user.NewRepository(db)
-	userService := user.NewService(userRepo)
+	userService := user.NewService(userRepo, sessionManager)
 	authService := auth.NewService(conf.AppSecret, db, orgService, userService, sessionManager)
 	authHandler := auth.NewHandler(authService)
 	authMiddleware := middleware.NewAuthMiddleware(conf.AppSecret, userService, sessionManager)
