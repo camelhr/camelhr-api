@@ -80,6 +80,54 @@ func (_c *MockService_Login_Call) RunAndReturn(run func(context.Context, string,
 	return _c
 }
 
+// Logout provides a mock function with given fields: ctx, userID, orgID
+func (_m *MockService) Logout(ctx context.Context, userID int64, orgID int64) error {
+	ret := _m.Called(ctx, userID, orgID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Logout")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, int64, int64) error); ok {
+		r0 = rf(ctx, userID, orgID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockService_Logout_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Logout'
+type MockService_Logout_Call struct {
+	*mock.Call
+}
+
+// Logout is a helper method to define mock.On call
+//   - ctx context.Context
+//   - userID int64
+//   - orgID int64
+func (_e *MockService_Expecter) Logout(ctx interface{}, userID interface{}, orgID interface{}) *MockService_Logout_Call {
+	return &MockService_Logout_Call{Call: _e.mock.On("Logout", ctx, userID, orgID)}
+}
+
+func (_c *MockService_Logout_Call) Run(run func(ctx context.Context, userID int64, orgID int64)) *MockService_Logout_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(int64), args[2].(int64))
+	})
+	return _c
+}
+
+func (_c *MockService_Logout_Call) Return(_a0 error) *MockService_Logout_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockService_Logout_Call) RunAndReturn(run func(context.Context, int64, int64) error) *MockService_Logout_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Register provides a mock function with given fields: ctx, email, password, subdomain, orgName
 func (_m *MockService) Register(ctx context.Context, email string, password string, subdomain string, orgName string) error {
 	ret := _m.Called(ctx, email, password, subdomain, orgName)

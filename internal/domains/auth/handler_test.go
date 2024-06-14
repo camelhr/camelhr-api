@@ -13,6 +13,7 @@ import (
 	"github.com/camelhr/camelhr-api/internal/domains/auth"
 	"github.com/camelhr/camelhr-api/internal/domains/organization"
 	"github.com/camelhr/camelhr-api/internal/tests/fake"
+	"github.com/camelhr/camelhr-api/internal/web/request"
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -21,7 +22,7 @@ import (
 const (
 	registerPath = "/api/v1/auth/register"
 	loginPath    = "/api/v1/subdomains/{subdomain}/auth/login"
-	logoutPath   = "/api/v1/auth/logout"
+	logoutPath   = "/api/v1/subdomains/{subdomain}/auth/logout"
 )
 
 func TestHandler_Register(t *testing.T) {
@@ -461,15 +462,33 @@ func TestHandler_Login(t *testing.T) {
 func TestHandler_Logout(t *testing.T) {
 	t.Parallel()
 
-	t.Run("should logout", func(t *testing.T) {
+	t.Run("should logout successfully", func(t *testing.T) {
 		t.Parallel()
 
-		req, err := http.NewRequest(http.MethodPost, loginPath, nil)
+		req, err := http.NewRequest(http.MethodPost, logoutPath, nil)
 		require.NoError(t, err)
+
+		// set required values in request context
+		subdomain := gofakeit.Word()
+		userID := gofakeit.Int64()
+		orgID := gofakeit.Int64()
+		ctx := req.Context()
+		ctx = context.WithValue(ctx, request.CtxOrgSubdomainKey, subdomain)
+		ctx = context.WithValue(ctx, request.CtxUserIDKey, userID)
+		ctx = context.WithValue(ctx, request.CtxOrgIDKey, orgID)
+
+		// simulate chi's URL parameters
+		reqContext := chi.NewRouteContext()
+		reqContext.URLParams.Add("subdomain", subdomain)
+		ctx = context.WithValue(ctx, chi.RouteCtxKey, reqContext)
+		req = req.WithContext(ctx)
 
 		mockService := auth.NewMockService(t)
 		rr := httptest.NewRecorder()
 		handler := auth.NewHandler(mockService)
+
+		// mock the service calls
+		mockService.On("Logout", fake.MockContext, userID, orgID).Return(nil)
 
 		// call the handler
 		handler.Logout(rr, req)
@@ -481,5 +500,93 @@ func TestHandler_Logout(t *testing.T) {
 			"jwt_session_id=; Max-Age=0; HttpOnly; Secure; SameSite=Strict",
 			rr.Header().Get("Set-Cookie"),
 		)
+	})
+
+	t.Run("should return error when service call fails", func(t *testing.T) {
+		t.Parallel()
+
+		req, err := http.NewRequest(http.MethodPost, logoutPath, nil)
+		require.NoError(t, err)
+
+		// set required values in request context
+		subdomain := gofakeit.Word()
+		userID := gofakeit.Int64()
+		orgID := gofakeit.Int64()
+		ctx := req.Context()
+		ctx = context.WithValue(ctx, request.CtxOrgSubdomainKey, subdomain)
+		ctx = context.WithValue(ctx, request.CtxUserIDKey, userID)
+		ctx = context.WithValue(ctx, request.CtxOrgIDKey, orgID)
+
+		// simulate chi's URL parameters
+		reqContext := chi.NewRouteContext()
+		reqContext.URLParams.Add("subdomain", subdomain)
+		ctx = context.WithValue(ctx, chi.RouteCtxKey, reqContext)
+		req = req.WithContext(ctx)
+
+		mockService := auth.NewMockService(t)
+		rr := httptest.NewRecorder()
+		handler := auth.NewHandler(mockService)
+
+		// mock the service calls
+		mockService.On("Logout", fake.MockContext, userID, orgID).Return(assert.AnError)
+
+		// call the handler
+		handler.Logout(rr, req)
+
+		// check the result
+		require.Equal(t, http.StatusInternalServerError, rr.Code)
+		assert.JSONEq(t, `{"error":""}`, rr.Body.String())
+	})
+
+	t.Run("should return bad request when user-id is not found in the request context", func(t *testing.T) {
+		t.Parallel()
+
+		req, err := http.NewRequest(http.MethodPost, logoutPath, nil)
+		require.NoError(t, err)
+
+		// set required values in request context
+		subdomain := gofakeit.Word()
+		orgID := gofakeit.Int64()
+		ctx := req.Context()
+		ctx = context.WithValue(ctx, request.CtxOrgSubdomainKey, subdomain)
+		ctx = context.WithValue(ctx, request.CtxOrgIDKey, orgID)
+		req = req.WithContext(ctx)
+
+		mockService := auth.NewMockService(t)
+		rr := httptest.NewRecorder()
+		handler := auth.NewHandler(mockService)
+
+		// call the handler
+		handler.Logout(rr, req)
+
+		// check the result
+		require.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.JSONEq(t, `{"error":"user id not found in the request context: invalid context"}`, rr.Body.String())
+	})
+
+	t.Run("should return bad request when org-id is not found in the request context", func(t *testing.T) {
+		t.Parallel()
+
+		req, err := http.NewRequest(http.MethodPost, logoutPath, nil)
+		require.NoError(t, err)
+
+		// set required values in request context
+		subdomain := gofakeit.Word()
+		userID := gofakeit.Int64()
+		ctx := req.Context()
+		ctx = context.WithValue(ctx, request.CtxOrgSubdomainKey, subdomain)
+		ctx = context.WithValue(ctx, request.CtxUserIDKey, userID)
+		req = req.WithContext(ctx)
+
+		mockService := auth.NewMockService(t)
+		rr := httptest.NewRecorder()
+		handler := auth.NewHandler(mockService)
+
+		// call the handler
+		handler.Logout(rr, req)
+
+		// check the result
+		require.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.JSONEq(t, `{"error":"org id not found in the request context: invalid context"}`, rr.Body.String())
 	})
 }

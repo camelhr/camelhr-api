@@ -17,6 +17,8 @@ import (
 )
 
 // SetupRoutes initializes the routes for the web server.
+//
+//nolint:funlen // ignore function length since this is a setup function
 func SetupRoutes(db database.Database, redisClient *redis.Client, conf config.Config) http.Handler {
 	// initialize dependencies
 	sessionManager := session.NewRedisSessionManager(redisClient)
@@ -48,7 +50,6 @@ func SetupRoutes(db database.Database, redisClient *redis.Client, conf config.Co
 		})
 
 		r.Post("/auth/register", authHandler.Register)
-		r.Post("/auth/logout", authHandler.Logout)
 	})
 
 	// create a sub-router for v1 subdomain endpoints
@@ -58,6 +59,13 @@ func SetupRoutes(db database.Database, redisClient *redis.Client, conf config.Co
 	v1Subdomain.Route("/auth", func(r chi.Router) {
 		// open routes. no auth required
 		r.Post("/login", authHandler.Login)
+
+		// protected routes. auth required
+		r.Group(func(r chi.Router) {
+			r.Use(authMiddleware.ValidateAuth)
+
+			r.Post("/logout", authHandler.Logout)
+		})
 	})
 
 	v1Subdomain.Route("/organizations", func(r chi.Router) {

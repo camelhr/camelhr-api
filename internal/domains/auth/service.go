@@ -19,6 +19,9 @@ type Service interface {
 
 	// Login logs in a user and returns a jwt token.
 	Login(ctx context.Context, subdomain, email, password string) (string, error)
+
+	// Logout logs out a user by deleting the session.
+	Logout(ctx context.Context, userID, orgID int64) error
 }
 
 type service struct {
@@ -128,6 +131,10 @@ func (s *service) Login(ctx context.Context, subdomain, email, password string) 
 	}
 
 	return jwtToken, nil
+}
+
+func (s *service) Logout(ctx context.Context, userID, orgID int64) error {
+	return s.sessionManager.DeleteSession(ctx, userID, orgID)
 }
 
 func ptrToString(s *string) string {

@@ -158,3 +158,32 @@ func (s *AuthTestSuite) TestServiceIntegration_Login() {
 		s.Equal(jwt, sessionData["jwt"])
 	})
 }
+
+func (s *AuthTestSuite) TestServiceIntegration_Logout() {
+	s.Run("should logout successfully", func() {
+		s.T().Parallel()
+
+		ctx := context.Background()
+		userRepo := user.NewRepository(s.DB)
+		userService := user.NewService(userRepo)
+		orgRepo := organization.NewRepository(s.DB)
+		orgService := organization.NewService(orgRepo)
+		sessionManager := session.NewRedisSessionManager(s.RedisClient)
+		authService := auth.NewService(s.Config.AppSecret, s.DB, orgService, userService, sessionManager)
+
+		password := validPassword
+		o := fake.NewOrganization(s.DB)
+		u := fake.NewUser(s.DB, o.ID, fake.UserPassword(password))
+		sessionKey := fmt.Sprintf("session:org:%v:user:%v", o.ID, u.ID)
+
+		jwt, err := authService.Login(context.Background(), o.Subdomain, u.Email, password)
+		s.Require().NoError(err)
+		s.NotEmpty(jwt)
+
+		err = authService.Logout(context.Background(), u.ID, o.ID)
+		s.Require().NoError(err)
+
+		sessionData := s.RedisClient.HGetAll(ctx, sessionKey).Val()
+		s.Require().Empty(sessionData)
+	})
+}

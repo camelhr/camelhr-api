@@ -14,7 +14,8 @@ import (
 )
 
 const (
-	loginPathFormat = "/api/v1/subdomains/%s/auth/login"
+	loginPathFormat  = "/api/v1/subdomains/%s/auth/login"
+	logoutPathFormat = "/api/v1/subdomains/%s/auth/logout"
 )
 
 func (s *AuthTestSuite) TestHandlerIntegration_Register() {
@@ -77,7 +78,7 @@ func (s *AuthTestSuite) TestHandlerIntegration_Logout() {
 		o := fake.NewOrganization(s.DB)
 		u := fake.NewUser(s.DB, o.ID, fake.UserPassword(validPassword))
 
-		// create a login request
+		// create a login request first
 		form := url.Values{}
 		form.Add("email", u.Email)
 		form.Add("password", validPassword)
@@ -97,7 +98,7 @@ func (s *AuthTestSuite) TestHandlerIntegration_Logout() {
 		s.Contains(loginRR.Header().Get("Set-Cookie"), auth.JWTCookieName)
 
 		// create a logout request
-		logoutReq, err := http.NewRequest(http.MethodPost, logoutPath, nil)
+		logoutReq, err := http.NewRequest(http.MethodPost, fmt.Sprintf(logoutPathFormat, o.Subdomain), nil)
 		s.Require().NoError(err)
 		logoutReq.Header.Add("Cookie", loginRR.Header().Get("Set-Cookie"))
 

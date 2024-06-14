@@ -319,3 +319,40 @@ func TestService_Login(t *testing.T) {
 		require.NotEmpty(t, token)
 	})
 }
+
+func TestService_Logout(t *testing.T) {
+	t.Parallel()
+
+	t.Run("should return error when sessionManager.DeleteSession returns error", func(t *testing.T) {
+		t.Parallel()
+
+		ctx := context.Background()
+		userID := gofakeit.Int64()
+		orgID := gofakeit.Int64()
+
+		sessionManager := session.NewMockSessionManager(t)
+		sessionManager.On("DeleteSession", ctx, userID, orgID).Return(assert.AnError)
+
+		authService := auth.NewService("", nil, nil, nil, sessionManager)
+		err := authService.Logout(ctx, userID, orgID)
+
+		require.Error(t, err)
+		require.ErrorIs(t, assert.AnError, err)
+	})
+
+	t.Run("should logout successfully", func(t *testing.T) {
+		t.Parallel()
+
+		ctx := context.Background()
+		userID := gofakeit.Int64()
+		orgID := gofakeit.Int64()
+
+		sessionManager := session.NewMockSessionManager(t)
+		sessionManager.On("DeleteSession", ctx, userID, orgID).Return(nil)
+
+		authService := auth.NewService("", nil, nil, nil, sessionManager)
+		err := authService.Logout(ctx, userID, orgID)
+
+		require.NoError(t, err)
+	})
+}

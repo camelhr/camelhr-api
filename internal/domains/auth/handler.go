@@ -2,6 +2,7 @@ package auth
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/camelhr/camelhr-api/internal/base"
@@ -11,6 +12,8 @@ import (
 	"github.com/camelhr/camelhr-api/internal/web/response"
 )
 
+var ErrInvalidContext = errors.New("invalid context")
+
 type handler struct {
 	service Service
 }
@@ -19,6 +22,7 @@ func NewHandler(service Service) *handler {
 	return &handler{service}
 }
 
+// Register registers a new organization with owner.
 func (h *handler) Register(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -38,6 +42,7 @@ func (h *handler) Register(w http.ResponseWriter, r *http.Request) {
 	response.Empty(w, http.StatusCreated)
 }
 
+// Login logs in a user.
 func (h *handler) Login(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -81,7 +86,36 @@ func (h *handler) Login(w http.ResponseWriter, r *http.Request) {
 	response.Empty(w, http.StatusOK)
 }
 
+// Logout logs out a user.
 func (h *handler) Logout(w http.ResponseWriter, r *http.Request) {
 	response.RemoveCookie(w, JWTCookieName)
+
+	userID, orgID, err := h.extractUserIDOrgIDSubdomain(r)
+	if err != nil {
+		response.ErrorResponse(w, base.WrapError(err, base.ErrorHTTPStatus(http.StatusBadRequest)))
+		return
+	}
+
+	if err := h.service.Logout(r.Context(), userID, orgID); err != nil {
+		response.ErrorResponse(w, err)
+		return
+	}
+
 	response.Empty(w, http.StatusOK)
+}
+
+// extractUserIDOrgIDSubdomain extracts the user id, org id and subdomain from the request context.
+func (h *handler) extractUserIDOrgIDSubdomain(r *http.Request) (int64, int64, error) {
+	// return userID, orgID, subdomain from the request context
+	userID, ok := r.Context().Value(request.CtxUserIDKey).(int64)
+	if !ok {
+		return 0, 0, fmt.Errorf("user id not found in the request context: %w", ErrInvalidContext)
+	}
+
+	orgID, ok := r.Context().Value(request.CtxOrgIDKey).(int64)
+	if !ok {
+		return 0, 0, fmt.Errorf("org id not found in the request context: %w", ErrInvalidContext)
+	}
+
+	return userID, orgID, nil
 }
