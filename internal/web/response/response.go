@@ -156,7 +156,7 @@ func SetCookie(w http.ResponseWriter, name, value string, maxAge int) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     name,
 		Value:    value,
-		MaxAge:   maxAge,
+		MaxAge:   maxAge,                  // time in seconds until the cookie expires
 		HttpOnly: true,                    // prevent javascript access
 		Secure:   true,                    // only send over https
 		SameSite: http.SameSiteStrictMode, // do not send on cross-site requests. prevent csrf

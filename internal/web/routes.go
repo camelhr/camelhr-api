@@ -7,6 +7,7 @@ import (
 	"github.com/camelhr/camelhr-api/internal/database"
 	"github.com/camelhr/camelhr-api/internal/domains/auth"
 	"github.com/camelhr/camelhr-api/internal/domains/organization"
+	"github.com/camelhr/camelhr-api/internal/domains/session"
 	"github.com/camelhr/camelhr-api/internal/domains/user"
 	"github.com/camelhr/camelhr-api/internal/web/middleware"
 	"github.com/camelhr/camelhr-api/internal/web/response"
@@ -18,14 +19,15 @@ import (
 // SetupRoutes initializes the routes for the web server.
 func SetupRoutes(db database.Database, redisClient *redis.Client, conf config.Config) http.Handler {
 	// initialize dependencies
+	sessionManager := session.NewRedisSessionManager(redisClient)
 	orgRepo := organization.NewRepository(db)
 	orgService := organization.NewService(orgRepo)
 	orgHandler := organization.NewHandler(orgService)
 	userRepo := user.NewRepository(db)
 	userService := user.NewService(userRepo)
-	authService := auth.NewService(db, orgService, userService, conf.AppSecret)
+	authService := auth.NewService(conf.AppSecret, db, orgService, userService, sessionManager)
 	authHandler := auth.NewHandler(authService)
-	authMiddleware := middleware.NewAuthMiddleware(conf.AppSecret, userService)
+	authMiddleware := middleware.NewAuthMiddleware(conf.AppSecret, userService, sessionManager)
 
 	// create a default router
 	r := chi.NewRouter()

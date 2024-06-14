@@ -1,12 +1,15 @@
 package auth
 
+import "time"
+
 const (
 	// APITokenBasicAuthPassword is the basic auth password when using api token.
 	APITokenBasicAuthPassword = "api_token"
 	// JWTCookieName is the name of the cookie that stores the jwt token.
 	JWTCookieName = "jwt_session_id"
-	// JWTMaxAgeSeconds is the max age of the jwt token in seconds.
-	JWTMaxAgeSeconds = 2 * 60 * 60
+
+	// SessionTTLDuration is the time duration to keep the session alive.
+	SessionTTLDuration = 24 * time.Hour
 
 	// NewOrgDisableComment is the comment message used when creating new org with registration.
 	NewOrgDisableComment = "disabled since newly registered"

@@ -77,7 +77,7 @@ func (h *handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response.SetCookie(w, JWTCookieName, token, JWTMaxAgeSeconds)
+	response.SetCookie(w, JWTCookieName, token, int(SessionTTLDuration.Seconds()))
 	response.Empty(w, http.StatusOK)
 }
 

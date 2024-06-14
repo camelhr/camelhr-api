@@ -111,14 +111,13 @@ func TestParseAndValidateJWT(t *testing.T) {
 		orgSubdomain := gofakeit.Username()
 
 		// generate expired jwt token
-		const expiry = -auth.JWTMaxAgeSeconds + 120
 		claims := auth.AppClaims{
 			UserID:       userID,
 			OrgID:        orgID,
 			OrgSubdomain: orgSubdomain,
 			RegisteredClaims: jwt.RegisteredClaims{
 				IssuedAt:  jwt.NewNumericDate(time.Now()),
-				ExpiresAt: jwt.NewNumericDate(time.Now().Add(expiry * time.Second)),
+				ExpiresAt: jwt.NewNumericDate(time.Now()),
 			},
 		}
 		token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(appSecret))

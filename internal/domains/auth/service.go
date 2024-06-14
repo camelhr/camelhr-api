@@ -7,6 +7,7 @@ import (
 	"github.com/camelhr/camelhr-api/internal/base"
 	"github.com/camelhr/camelhr-api/internal/database"
 	"github.com/camelhr/camelhr-api/internal/domains/organization"
+	"github.com/camelhr/camelhr-api/internal/domains/session"
 	"github.com/camelhr/camelhr-api/internal/domains/user"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -21,21 +22,23 @@ type Service interface {
 }
 
 type service struct {
-	appSecret   string
-	transactor  database.Transactor
-	orgService  organization.Service
-	userService user.Service
+	appSecret      string
+	transactor     database.Transactor
+	orgService     organization.Service
+	userService    user.Service
+	sessionManager session.SessionManager
 }
 
 func NewService(
-	transactor database.Transactor, orgService organization.Service,
-	userService user.Service, appSecret string,
+	appSecret string, transactor database.Transactor, orgService organization.Service,
+	userService user.Service, sessionManager session.SessionManager,
 ) Service {
 	return &service{
-		appSecret:   appSecret,
-		transactor:  transactor,
-		orgService:  orgService,
-		userService: userService,
+		appSecret:      appSecret,
+		transactor:     transactor,
+		orgService:     orgService,
+		userService:    userService,
+		sessionManager: sessionManager,
 	}
 }
 
@@ -111,5 +114,26 @@ func (s *service) Login(ctx context.Context, subdomain, email, password string) 
 		return "", err
 	}
 
+	// create session with the currently generated jwt token
+	// if the session already exists, it will be updated with the new jwt token
+	if err := s.sessionManager.CreateSession(
+		ctx,
+		u.ID,
+		org.ID,
+		jwtToken,
+		ptrToString(u.APIToken),
+		SessionTTLDuration,
+	); err != nil {
+		return "", err
+	}
+
 	return jwtToken, nil
+}
+
+func ptrToString(s *string) string {
+	if s != nil {
+		return *s
+	}
+
+	return ""
 }

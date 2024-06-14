@@ -2,11 +2,14 @@ package auth_test
 
 import (
 	"context"
+	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/camelhr/camelhr-api/internal/domains/auth"
 	"github.com/camelhr/camelhr-api/internal/domains/organization"
+	"github.com/camelhr/camelhr-api/internal/domains/session"
 	"github.com/camelhr/camelhr-api/internal/domains/user"
 	"github.com/camelhr/camelhr-api/internal/tests/fake"
 )
@@ -19,7 +22,8 @@ func (s *AuthTestSuite) TestServiceIntegration_Register() {
 		userService := user.NewService(userRepo)
 		orgRepo := organization.NewRepository(s.DB)
 		orgService := organization.NewService(orgRepo)
-		authService := auth.NewService(s.DB, orgService, userService, s.Config.AppSecret)
+		sessionManager := session.NewRedisSessionManager(s.RedisClient)
+		authService := auth.NewService(s.Config.AppSecret, s.DB, orgService, userService, sessionManager)
 
 		subdomain := gofakeit.LetterN(20)
 		orgName := gofakeit.LetterN(50)
@@ -49,7 +53,8 @@ func (s *AuthTestSuite) TestServiceIntegration_Register() {
 		userService := user.NewService(userRepo)
 		orgRepo := organization.NewRepository(s.DB)
 		orgService := organization.NewService(orgRepo)
-		authService := auth.NewService(s.DB, orgService, userService, s.Config.AppSecret)
+		sessionManager := session.NewRedisSessionManager(s.RedisClient)
+		authService := auth.NewService(s.Config.AppSecret, s.DB, orgService, userService, sessionManager)
 
 		subdomain := gofakeit.LetterN(20)
 		orgName := gofakeit.LetterN(50)
@@ -74,7 +79,8 @@ func (s *AuthTestSuite) TestServiceIntegration_Register() {
 		userService := user.NewService(userRepo)
 		orgRepo := organization.NewRepository(s.DB)
 		orgService := organization.NewService(orgRepo)
-		authService := auth.NewService(s.DB, orgService, userService, s.Config.AppSecret)
+		sessionManager := session.NewRedisSessionManager(s.RedisClient)
+		authService := auth.NewService(s.Config.AppSecret, s.DB, orgService, userService, sessionManager)
 
 		subdomain := gofakeit.LetterN(20)
 		orgName := gofakeit.LetterN(50)
@@ -113,7 +119,8 @@ func (s *AuthTestSuite) TestServiceIntegration_Login() {
 		userService := user.NewService(userRepo)
 		orgRepo := organization.NewRepository(s.DB)
 		orgService := organization.NewService(orgRepo)
-		authService := auth.NewService(s.DB, orgService, userService, s.Config.AppSecret)
+		sessionManager := session.NewRedisSessionManager(s.RedisClient)
+		authService := auth.NewService(s.Config.AppSecret, s.DB, orgService, userService, sessionManager)
 
 		password := "2iG3@#fj"
 		o := fake.NewOrganization(s.DB)
@@ -127,18 +134,27 @@ func (s *AuthTestSuite) TestServiceIntegration_Login() {
 	s.Run("should login successfully", func() {
 		s.T().Parallel()
 
+		ctx := context.Background()
 		userRepo := user.NewRepository(s.DB)
 		userService := user.NewService(userRepo)
 		orgRepo := organization.NewRepository(s.DB)
 		orgService := organization.NewService(orgRepo)
-		authService := auth.NewService(s.DB, orgService, userService, s.Config.AppSecret)
+		sessionManager := session.NewRedisSessionManager(s.RedisClient)
+		authService := auth.NewService(s.Config.AppSecret, s.DB, orgService, userService, sessionManager)
 
 		password := validPassword
 		o := fake.NewOrganization(s.DB)
 		u := fake.NewUser(s.DB, o.ID, fake.UserPassword(password))
+		sessionKey := fmt.Sprintf("session:org:%v:user:%v", o.ID, u.ID)
 
-		token, err := authService.Login(context.Background(), o.Subdomain, u.Email, password)
+		jwt, err := authService.Login(context.Background(), o.Subdomain, u.Email, password)
 		s.Require().NoError(err)
-		s.NotEmpty(token)
+		s.NotEmpty(jwt)
+
+		sessionData := s.RedisClient.HGetAll(ctx, sessionKey).Val()
+		s.Require().Len(sessionData, 4)
+		s.Equal(strconv.FormatInt(u.ID, 10), sessionData["user"])
+		s.Equal(strconv.FormatInt(o.ID, 10), sessionData["org"])
+		s.Equal(jwt, sessionData["jwt"])
 	})
 }

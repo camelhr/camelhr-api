@@ -9,19 +9,25 @@ import (
 
 	"github.com/camelhr/camelhr-api/internal/base"
 	"github.com/camelhr/camelhr-api/internal/domains/auth"
+	"github.com/camelhr/camelhr-api/internal/domains/session"
 	"github.com/camelhr/camelhr-api/internal/domains/user"
 	"github.com/camelhr/camelhr-api/internal/web/request"
 	"github.com/camelhr/camelhr-api/internal/web/response"
 )
 
 type authMiddleware struct {
-	appSecret   string
-	userService user.Service
+	appSecret      string
+	userService    user.Service
+	sessionManager session.SessionManager
 }
 
 // NewAuthMiddleware creates a new auth middleware.
-func NewAuthMiddleware(appSecret string, userService user.Service) *authMiddleware {
-	return &authMiddleware{appSecret: appSecret, userService: userService}
+func NewAuthMiddleware(
+	appSecret string,
+	userService user.Service,
+	sessionManager session.SessionManager,
+) *authMiddleware {
+	return &authMiddleware{appSecret, userService, sessionManager}
 }
 
 // ValidateAuth is a middleware that authenticates the request.
@@ -62,6 +68,7 @@ func (m *authMiddleware) ValidateAuth(next http.Handler) http.Handler {
 }
 
 // processJWT parses and validates the jwt token.
+// It then ensures that the token is present in the session.
 // If the token is valid, it sets the user-id, org-id and org-subdomain in the request context.
 func (m *authMiddleware) processJWT(next http.Handler, w http.ResponseWriter, r *http.Request, jwtString string) {
 	token, claims, err := auth.ParseAndValidateJWT(jwtString, m.appSecret)
@@ -74,6 +81,15 @@ func (m *authMiddleware) processJWT(next http.Handler, w http.ResponseWriter, r 
 
 	if token == nil || !token.Valid || claims == nil {
 		response.ErrorResponse(w, base.NewAPIError("invalid token", base.ErrorHTTPStatus(http.StatusUnauthorized)))
+		return
+	}
+
+	// only one most recent jwt is stored in the session upon login
+	// validate the session to ensure that the same jwt is present in the session
+	if err := m.sessionManager.ValidateJWTSession(r.Context(), claims.UserID, claims.OrgID, jwtString); err != nil {
+		response.ErrorResponse(w, base.NewAPIError("invalid token", base.ErrorCause(err),
+			base.ErrorHTTPStatus(http.StatusUnauthorized)))
+
 		return
 	}
 
@@ -94,7 +110,9 @@ func (m *authMiddleware) processJWT(next http.Handler, w http.ResponseWriter, r 
 }
 
 // processAPIToken validates the api token from the basic auth header.
-// If the token is valid, it sets the user-id, org-id and org-subdomain in the request context.
+// It first checks the api-token in the session.
+// If the token is not present in the session, it queries the database to get the user.
+// It sets the user-id, org-id and org-subdomain in the request context.
 func (m *authMiddleware) processAPIToken(
 	next http.Handler,
 	w http.ResponseWriter,
@@ -121,25 +139,47 @@ func (m *authMiddleware) processAPIToken(
 
 	subdomain := request.URLParam(r, "subdomain")
 
-	// get user for the given subdomain and api token
-	u, err := m.userService.GetUserByOrgSubdomainAPIToken(r.Context(), subdomain, apiToken)
+	userID, orgID, err := m.getUserForAPIToken(r.Context(), apiToken, subdomain)
 	if err != nil {
-		response.ErrorResponse(w, base.NewAPIError("invalid api token", base.ErrorCause(err),
-			base.ErrorHTTPStatus(http.StatusUnauthorized)))
-
-		return
-	}
-
-	if u.DisabledAt != nil {
-		response.ErrorResponse(w, base.NewAPIError("user is disabled", base.ErrorHTTPStatus(http.StatusUnauthorized)))
-
+		response.ErrorResponse(w, err)
 		return
 	}
 
 	// set user-id, org-id and org-subdomain in the request context
-	ctx := context.WithValue(r.Context(), request.CtxUserIDKey, u.ID)
-	ctx = context.WithValue(ctx, request.CtxOrgIDKey, u.OrganizationID)
+	ctx := context.WithValue(r.Context(), request.CtxUserIDKey, userID)
+	ctx = context.WithValue(ctx, request.CtxOrgIDKey, orgID)
 	ctx = context.WithValue(ctx, request.CtxOrgSubdomainKey, subdomain)
 
 	next.ServeHTTP(w, r.WithContext(ctx))
+}
+
+func (m *authMiddleware) getUserForAPIToken(ctx context.Context, apiToken, subdomain string) (int64, int64, error) {
+	// check if the api token is present in the session and get associated ids
+	if userID, orgID, err := m.sessionManager.ValidateAPITokenSession(ctx, apiToken); err == nil {
+		return userID, orgID, nil
+	}
+
+	// if not, get user for the given subdomain and api token from the database
+	u, err := m.userService.GetUserByOrgSubdomainAPIToken(ctx, subdomain, apiToken)
+	if err != nil {
+		if base.IsNotFoundError(err) {
+			return 0, 0, base.NewAPIError("invalid api token", base.ErrorCause(err),
+				base.ErrorHTTPStatus(http.StatusUnauthorized))
+		}
+
+		return 0, 0, err
+	}
+
+	// ensure that the user is not disabled
+	if u.DisabledAt != nil {
+		return 0, 0, base.WrapError(auth.ErrUserDisabled, base.ErrorHTTPStatus(http.StatusUnauthorized))
+	}
+
+	// set the api token in the session
+	if err := m.sessionManager.CreateSession(ctx, u.ID, u.OrganizationID, "",
+		apiToken, auth.SessionTTLDuration); err != nil {
+		return 0, 0, err
+	}
+
+	return u.ID, u.OrganizationID, nil
 }

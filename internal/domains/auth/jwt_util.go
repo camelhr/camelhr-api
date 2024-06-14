@@ -41,7 +41,7 @@ func GenerateJWT(appSecret string, userID, orgID int64, orgSubdomain string) (st
 		OrgSubdomain: orgSubdomain,
 		RegisteredClaims: jwt.RegisteredClaims{
 			IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
-			ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(JWTMaxAgeSeconds * time.Second)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(SessionTTLDuration)),
 		},
 	}
 

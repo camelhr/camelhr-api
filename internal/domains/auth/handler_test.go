@@ -451,7 +451,8 @@ func TestHandler_Login(t *testing.T) {
 		assert.Empty(t, rr.Body.String())
 		assert.Equal(
 			t,
-			fmt.Sprintf("jwt_session_id=%s; Max-Age=7200; HttpOnly; Secure; SameSite=Strict", jwt),
+			fmt.Sprintf("jwt_session_id=%s; Max-Age=%d; HttpOnly; Secure; SameSite=Strict",
+				jwt, int(auth.SessionTTLDuration.Seconds())),
 			rr.Header().Get("Set-Cookie"),
 		)
 	})
