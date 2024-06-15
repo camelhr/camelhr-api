@@ -500,6 +500,21 @@ func TestSessionManager_DeleteAllOrgSessions(t *testing.T) {
 		require.ErrorIs(t, err, assert.AnError)
 	})
 
+	t.Run("should not delete any session when no session found", func(t *testing.T) {
+		t.Parallel()
+
+		ctx := context.Background()
+		orgID := gofakeit.Int64()
+
+		redisClient, redisClientMock := redismock.NewClientMock()
+		sessionManager := session.NewRedisSessionManager(redisClient)
+
+		redisClientMock.ExpectKeys(fmt.Sprintf("session:org:%d:user:*", orgID)).SetVal([]string{})
+
+		err := sessionManager.DeleteAllOrgSessions(ctx, orgID)
+		require.NoError(t, err)
+	})
+
 	t.Run("should delete all org sessions successfully", func(t *testing.T) {
 		t.Parallel()
 

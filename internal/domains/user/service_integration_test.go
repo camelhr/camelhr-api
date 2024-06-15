@@ -185,10 +185,13 @@ func (s *UserTestSuite) TestServiceIntegration_DeleteUser() {
 		svc := user.NewService(repo, sessionManager)
 		o := fake.NewOrganization(s.DB)
 		u := fake.NewUser(s.DB, o.ID)
-		sessionKey := fmt.Sprintf("session:org:%v:user:%v", o.ID, u.ID)
-		s.RedisClient.HSet(context.Background(), sessionKey, "jwt", gofakeit.UUID())
 
-		err := svc.DeleteUser(context.Background(), u.ID)
+		// create session for user
+		sessionKey := fmt.Sprintf("session:org:%v:user:%v", o.ID, u.ID)
+		err := s.RedisClient.HSet(context.Background(), sessionKey, "jwt", gofakeit.UUID()).Err()
+		s.Require().NoError(err)
+
+		err = svc.DeleteUser(context.Background(), u.ID)
 		s.Require().NoError(err)
 
 		result := u.IsDeleted(s.DB)
@@ -209,10 +212,13 @@ func (s *UserTestSuite) TestServiceIntegration_DisableUser() {
 		svc := user.NewService(repo, sessionManager)
 		o := fake.NewOrganization(s.DB)
 		u := fake.NewUser(s.DB, o.ID)
-		sessionKey := fmt.Sprintf("session:org:%v:user:%v", o.ID, u.ID)
-		s.RedisClient.HSet(context.Background(), sessionKey, "jwt", gofakeit.UUID())
 
-		err := svc.DisableUser(context.Background(), u.ID, "test")
+		// create session for user
+		sessionKey := fmt.Sprintf("session:org:%v:user:%v", o.ID, u.ID)
+		err := s.RedisClient.HSet(context.Background(), sessionKey, "jwt", gofakeit.UUID()).Err()
+		s.Require().NoError(err)
+
+		err = svc.DisableUser(context.Background(), u.ID, "test")
 		s.Require().NoError(err)
 
 		result, err := svc.GetUserByID(context.Background(), u.ID)

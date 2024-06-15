@@ -185,6 +185,10 @@ func (m *sessionManager) DeleteAllOrgSessions(ctx context.Context, orgID int64) 
 			orgID, err)
 	}
 
+	if len(sessionHKeys) == 0 {
+		return nil
+	}
+
 	if err := m.redisClient.Del(ctx, sessionHKeys...).Err(); err != nil {
 		return fmt.Errorf("failed to delete session keys for org: %d: %w",
 			orgID, err)

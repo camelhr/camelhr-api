@@ -6,6 +6,7 @@ import (
 	"errors"
 
 	"github.com/camelhr/camelhr-api/internal/base"
+	"github.com/camelhr/camelhr-api/internal/domains/session"
 )
 
 type Service interface {
@@ -41,13 +42,12 @@ type Service interface {
 }
 
 type service struct {
-	repo Repository
+	repo           Repository
+	sessionManager session.SessionManager
 }
 
-func NewService(repo Repository) Service {
-	return &service{
-		repo: repo,
-	}
+func NewService(repo Repository, sessionManager session.SessionManager) Service {
+	return &service{repo, sessionManager}
 }
 
 func (s *service) GetOrganizationByID(ctx context.Context, id int64) (Organization, error) {
@@ -106,7 +106,11 @@ func (s *service) UpdateOrganization(ctx context.Context, id int64, name string)
 }
 
 func (s *service) DeleteOrganization(ctx context.Context, id int64) error {
-	return s.repo.DeleteOrganization(ctx, id)
+	if err := s.repo.DeleteOrganization(ctx, id); err != nil {
+		return err
+	}
+
+	return s.sessionManager.DeleteAllOrgSessions(ctx, id)
 }
 
 func (s *service) SuspendOrganization(ctx context.Context, id int64, comment string) error {

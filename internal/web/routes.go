@@ -23,7 +23,7 @@ func SetupRoutes(db database.Database, redisClient *redis.Client, conf config.Co
 	// initialize dependencies
 	sessionManager := session.NewRedisSessionManager(redisClient)
 	orgRepo := organization.NewRepository(db)
-	orgService := organization.NewService(orgRepo)
+	orgService := organization.NewService(orgRepo, sessionManager)
 	orgHandler := organization.NewHandler(orgService)
 	userRepo := user.NewRepository(db)
 	userService := user.NewService(userRepo, sessionManager)

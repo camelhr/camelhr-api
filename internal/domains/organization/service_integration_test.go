@@ -2,8 +2,11 @@ package organization_test
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/camelhr/camelhr-api/internal/domains/organization"
+	"github.com/camelhr/camelhr-api/internal/domains/session"
 	"github.com/camelhr/camelhr-api/internal/tests/fake"
 )
 
@@ -11,7 +14,7 @@ func (s *OrganizationTestSuite) TestServiceIntegration_GetOrganizationByID() {
 	s.Run("should return organization", func() {
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
-		svc := organization.NewService(repo)
+		svc := organization.NewService(repo, nil)
 		org := fake.NewOrganization(s.DB)
 
 		result, err := svc.GetOrganizationByID(context.Background(), org.ID)
@@ -32,7 +35,7 @@ func (s *OrganizationTestSuite) TestServiceIntegration_GetOrganizationBySubdomai
 	s.Run("should return organization", func() {
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
-		svc := organization.NewService(repo)
+		svc := organization.NewService(repo, nil)
 		org := fake.NewOrganization(s.DB)
 
 		result, err := svc.GetOrganizationBySubdomain(context.Background(), org.Subdomain)
@@ -52,7 +55,7 @@ func (s *OrganizationTestSuite) TestServiceIntegration_GetOrganizationByName() {
 	s.Run("should return organization", func() {
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
-		svc := organization.NewService(repo)
+		svc := organization.NewService(repo, nil)
 		org := fake.NewOrganization(s.DB)
 
 		result, err := svc.GetOrganizationByName(context.Background(), org.Name)
@@ -72,7 +75,7 @@ func (s *OrganizationTestSuite) TestServiceIntegration_CreateOrganization() {
 	s.Run("should create organization with default values", func() {
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
-		svc := organization.NewService(repo)
+		svc := organization.NewService(repo, nil)
 		org := organization.Organization{
 			Subdomain: randomOrganizationSubdomain(),
 			Name:      randomOrganizationName(),
@@ -96,7 +99,7 @@ func (s *OrganizationTestSuite) TestServiceIntegration_UpdateOrganization() {
 	s.Run("should update organization", func() {
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
-		svc := organization.NewService(repo)
+		svc := organization.NewService(repo, nil)
 		org := fake.NewOrganization(s.DB)
 		newOrgName := randomOrganizationName()
 
@@ -118,15 +121,37 @@ func (s *OrganizationTestSuite) TestServiceIntegration_UpdateOrganization() {
 func (s *OrganizationTestSuite) TestServiceIntegration_DeleteOrganization() {
 	s.Run("should delete organization", func() {
 		s.T().Parallel()
-		repo := organization.NewRepository(s.DB)
-		svc := organization.NewService(repo)
-		org := fake.NewOrganization(s.DB)
 
-		err := svc.DeleteOrganization(context.Background(), org.ID)
+		sessionManager := session.NewRedisSessionManager(s.RedisClient)
+		repo := organization.NewRepository(s.DB)
+		svc := organization.NewService(repo, sessionManager)
+		org := fake.NewOrganization(s.DB)
+		u1 := fake.NewUser(s.DB, org.ID)
+		u2 := fake.NewUser(s.DB, org.ID)
+
+		// create session for users
+		sessionKey := fmt.Sprintf("session:org:%v:user:%v", org.ID, u1.ID)
+		err := s.RedisClient.HSet(context.Background(), sessionKey, "jwt", gofakeit.UUID()).Err()
+		s.Require().NoError(err)
+
+		sessionKey = fmt.Sprintf("session:org:%v:user:%v", org.ID, u2.ID)
+		err = s.RedisClient.HSet(context.Background(), sessionKey, "jwt", gofakeit.UUID()).Err()
+		s.Require().NoError(err)
+
+		err = svc.DeleteOrganization(context.Background(), org.ID)
 		s.Require().NoError(err)
 
 		result := org.FetchLatest(s.DB)
 		s.NotNil(result.DeletedAt)
+
+		// check if all user sessions are deleted
+		sessionKey = fmt.Sprintf("session:org:%v:user:%v", org.ID, u1.ID)
+		exist := s.RedisClient.Exists(context.Background(), sessionKey).Val()
+		s.Zero(exist)
+
+		sessionKey = fmt.Sprintf("session:org:%v:user:%v", org.ID, u2.ID)
+		exist = s.RedisClient.Exists(context.Background(), sessionKey).Val()
+		s.Zero(exist)
 	})
 }
 
@@ -134,7 +159,7 @@ func (s *OrganizationTestSuite) TestServiceIntegration_SuspendOrganization() {
 	s.Run("should suspend organization", func() {
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
-		svc := organization.NewService(repo)
+		svc := organization.NewService(repo, nil)
 		org := fake.NewOrganization(s.DB)
 
 		err := svc.SuspendOrganization(context.Background(), org.ID, "test suspend")
@@ -155,7 +180,7 @@ func (s *OrganizationTestSuite) TestServiceIntegration_UnsuspendOrganization() {
 	s.Run("should unsuspend organization", func() {
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
-		svc := organization.NewService(repo)
+		svc := organization.NewService(repo, nil)
 		org := fake.NewOrganization(s.DB, fake.OrganizationSuspended())
 
 		err := svc.UnsuspendOrganization(context.Background(), org.ID, "test unsuspend")
@@ -176,7 +201,7 @@ func (s *OrganizationTestSuite) TestServiceIntegration_DisableOrganization() {
 	s.Run("should disable organization", func() {
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
-		svc := organization.NewService(repo)
+		svc := organization.NewService(repo, nil)
 		org := fake.NewOrganization(s.DB)
 
 		err := svc.DisableOrganization(context.Background(), org.ID, "test disable")
@@ -197,7 +222,7 @@ func (s *OrganizationTestSuite) TestServiceIntegration_EnableOrganization() {
 	s.Run("should enable organization", func() {
 		s.T().Parallel()
 		repo := organization.NewRepository(s.DB)
-		svc := organization.NewService(repo)
+		svc := organization.NewService(repo, nil)
 		org := fake.NewOrganization(s.DB, fake.OrganizationDisabled())
 
 		err := svc.EnableOrganization(context.Background(), org.ID, "test enable")

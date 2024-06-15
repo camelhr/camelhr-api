@@ -21,7 +21,7 @@ func (s *AuthTestSuite) TestServiceIntegration_Register() {
 		userRepo := user.NewRepository(s.DB)
 		userService := user.NewService(userRepo, nil)
 		orgRepo := organization.NewRepository(s.DB)
-		orgService := organization.NewService(orgRepo)
+		orgService := organization.NewService(orgRepo, nil)
 		sessionManager := session.NewRedisSessionManager(s.RedisClient)
 		authService := auth.NewService(s.Config.AppSecret, s.DB, orgService, userService, sessionManager)
 
@@ -52,7 +52,7 @@ func (s *AuthTestSuite) TestServiceIntegration_Register() {
 		userRepo := user.NewRepository(s.DB)
 		userService := user.NewService(userRepo, nil)
 		orgRepo := organization.NewRepository(s.DB)
-		orgService := organization.NewService(orgRepo)
+		orgService := organization.NewService(orgRepo, nil)
 		sessionManager := session.NewRedisSessionManager(s.RedisClient)
 		authService := auth.NewService(s.Config.AppSecret, s.DB, orgService, userService, sessionManager)
 
@@ -78,7 +78,7 @@ func (s *AuthTestSuite) TestServiceIntegration_Register() {
 		userRepo := user.NewRepository(s.DB)
 		userService := user.NewService(userRepo, nil)
 		orgRepo := organization.NewRepository(s.DB)
-		orgService := organization.NewService(orgRepo)
+		orgService := organization.NewService(orgRepo, nil)
 		sessionManager := session.NewRedisSessionManager(s.RedisClient)
 		authService := auth.NewService(s.Config.AppSecret, s.DB, orgService, userService, sessionManager)
 
@@ -118,7 +118,7 @@ func (s *AuthTestSuite) TestServiceIntegration_Login() {
 		userRepo := user.NewRepository(s.DB)
 		userService := user.NewService(userRepo, nil)
 		orgRepo := organization.NewRepository(s.DB)
-		orgService := organization.NewService(orgRepo)
+		orgService := organization.NewService(orgRepo, nil)
 		sessionManager := session.NewRedisSessionManager(s.RedisClient)
 		authService := auth.NewService(s.Config.AppSecret, s.DB, orgService, userService, sessionManager)
 
@@ -138,7 +138,7 @@ func (s *AuthTestSuite) TestServiceIntegration_Login() {
 		userRepo := user.NewRepository(s.DB)
 		userService := user.NewService(userRepo, nil)
 		orgRepo := organization.NewRepository(s.DB)
-		orgService := organization.NewService(orgRepo)
+		orgService := organization.NewService(orgRepo, nil)
 		sessionManager := session.NewRedisSessionManager(s.RedisClient)
 		authService := auth.NewService(s.Config.AppSecret, s.DB, orgService, userService, sessionManager)
 
@@ -167,7 +167,7 @@ func (s *AuthTestSuite) TestServiceIntegration_Logout() {
 		userRepo := user.NewRepository(s.DB)
 		userService := user.NewService(userRepo, nil)
 		orgRepo := organization.NewRepository(s.DB)
-		orgService := organization.NewService(orgRepo)
+		orgService := organization.NewService(orgRepo, nil)
 		sessionManager := session.NewRedisSessionManager(s.RedisClient)
 		authService := auth.NewService(s.Config.AppSecret, s.DB, orgService, userService, sessionManager)
 
