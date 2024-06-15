@@ -31,10 +31,31 @@ BEFORE TRUNCATE ON users
 FOR EACH STATEMENT
 EXECUTE FUNCTION operation_not_allowed();
 
-CREATE TRIGGER prevent_delete_on_users
+CREATE TRIGGER prevent_hard_delete_on_users
 BEFORE DELETE ON users
 FOR EACH ROW
 EXECUTE FUNCTION operation_not_allowed();
+
+-- create trigger to soft delete users of the org when the org is soft deleted
+CREATE OR REPLACE FUNCTION soft_delete_org_users()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- check if the organization is being soft deleted (i.e., deleted_at is being set)
+    IF NEW.deleted_at IS NOT NULL AND OLD.deleted_at IS NULL THEN
+        -- perform soft delete on users belonging to the organization
+        UPDATE users
+        SET deleted_at = CURRENT_TIMESTAMP,
+            comment = 'deletion_reason: associated_organization_deleted'
+        WHERE organization_id = OLD.organization_id AND deleted_at IS NULL;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER soft_delete_users_on_org_soft_delete
+BEFORE UPDATE ON organizations
+FOR EACH ROW
+EXECUTE FUNCTION soft_delete_org_users();
 -- +goose StatementEnd
 
 -- +goose Down

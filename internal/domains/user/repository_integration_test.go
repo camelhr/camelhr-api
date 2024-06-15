@@ -10,20 +10,46 @@ import (
 	"github.com/camelhr/camelhr-api/internal/tests/fake"
 )
 
-func (s *UserTestSuite) TestRepositoryIntegration_ForbiddenOperations() {
-	s.Run("should return error when user is truncated", func() {
+func (s *UserTestSuite) TestRepositoryIntegration_Triggers() {
+	// tests to ensure that the triggers are working as expected
+	s.Run("should forbid truncate operation on users table", func() {
 		s.T().Parallel()
 		err := s.DB.Exec(context.Background(), nil, "TRUNCATE users CASCADE")
 		s.Require().Error(err)
 		s.ErrorContains(err, "TRUNCATE operation on table users is not allowed: prevent_truncate_on_users")
 	})
 
-	s.Run("should return error when delete query is performed on users", func() {
+	s.Run("should forbid delete operation on users table", func() {
 		s.T().Parallel()
 		fake.NewUser(s.DB, fake.NewOrganization(s.DB).ID)
 		err := s.DB.Exec(context.Background(), nil, "DELETE FROM users WHERE user_id = 1")
 		s.Require().Error(err)
-		s.ErrorContains(err, "DELETE operation on table users is not allowed: prevent_delete_on_users")
+		s.ErrorContains(err, "DELETE operation on table users is not allowed: prevent_hard_delete_on_users")
+	})
+
+	s.Run("should soft delete users if the organization is deleted", func() {
+		s.T().Parallel()
+		o := fake.NewOrganization(s.DB)
+		u1 := fake.NewUser(s.DB, o.ID)
+		u2 := fake.NewUser(s.DB, o.ID)
+		u3 := fake.NewUser(s.DB, o.ID, fake.UserDeleted())
+		o.Delete(s.DB)
+
+		u1Latest := u1.FetchLatest(s.DB)
+		s.NotNil(u1Latest.DeletedAt)
+		s.NotNil(u1Latest.Comment)
+		s.Equal("deletion_reason: associated_organization_deleted", *u1Latest.Comment)
+
+		u2Latest := u2.FetchLatest(s.DB)
+		s.NotNil(u2Latest.DeletedAt)
+		s.NotNil(u2Latest.Comment)
+		s.Equal("deletion_reason: associated_organization_deleted", *u2Latest.Comment)
+
+		// should not delete already deleted user
+		u3Latest := u3.FetchLatest(s.DB)
+		s.NotNil(u3Latest.DeletedAt)
+		s.Nil(u3Latest.Comment)
+		s.Equal(u3.DeletedAt, u3Latest.DeletedAt)
 	})
 }
 
@@ -362,57 +388,6 @@ func (s *UserTestSuite) TestRepositoryIntegration_DeleteUser() {
 
 		isDeleted := u.IsDeleted(s.DB)
 		s.False(isDeleted)
-	})
-}
-
-func (s *UserTestSuite) TestRepositoryIntegration_DeleteAllUsersByOrgID() {
-	s.Run("should delete all users by organization id", func() {
-		s.T().Parallel()
-		repo := user.NewRepository(s.DB)
-		o := fake.NewOrganization(s.DB)
-		u1 := fake.NewUser(s.DB, o.ID)
-		u2 := fake.NewUser(s.DB, o.ID)
-		u3 := fake.NewUser(s.DB, o.ID)
-
-		err := repo.DeleteAllUsersByOrgID(context.Background(), o.ID)
-		s.Require().NoError(err)
-
-		u1Latest := u1.FetchLatest(s.DB)
-		s.NotNil(u1Latest.DeletedAt)
-		s.Equal(time.UTC, u1Latest.DeletedAt.Location())
-		s.WithinDuration(time.Now().UTC(), *u1Latest.DeletedAt, 1*time.Minute)
-
-		u2Latest := u2.FetchLatest(s.DB)
-		s.NotNil(u2Latest.DeletedAt)
-		s.Equal(u1Latest.DeletedAt, u2Latest.DeletedAt)
-
-		u3Latest := u3.FetchLatest(s.DB)
-		s.NotNil(u3Latest.DeletedAt)
-		s.Equal(u1Latest.DeletedAt, u3Latest.DeletedAt)
-	})
-
-	s.Run("should not delete already deleted users", func() {
-		s.T().Parallel()
-		repo := user.NewRepository(s.DB)
-		o := fake.NewOrganization(s.DB)
-		u1 := fake.NewUser(s.DB, o.ID, fake.UserDeleted())
-		u2 := fake.NewUser(s.DB, o.ID, fake.UserDeleted())
-		u3 := fake.NewUser(s.DB, o.ID, fake.UserDeleted())
-
-		err := repo.DeleteAllUsersByOrgID(context.Background(), o.ID)
-		s.Require().NoError(err)
-
-		u1Latest := u1.FetchLatest(s.DB)
-		s.NotNil(u1Latest.DeletedAt)
-		s.Equal(u1.DeletedAt, u1Latest.DeletedAt)
-
-		u2Latest := u2.FetchLatest(s.DB)
-		s.NotNil(u2Latest.DeletedAt)
-		s.Equal(u2.DeletedAt, u2Latest.DeletedAt)
-
-		u3Latest := u3.FetchLatest(s.DB)
-		s.NotNil(u3Latest.DeletedAt)
-		s.Equal(u3.DeletedAt, u3Latest.DeletedAt)
 	})
 }
 

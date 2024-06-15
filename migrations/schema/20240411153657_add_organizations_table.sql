@@ -21,7 +21,7 @@ BEFORE TRUNCATE ON organizations
 FOR EACH STATEMENT
 EXECUTE FUNCTION operation_not_allowed();
 
-CREATE TRIGGER prevent_delete_on_organizations
+CREATE TRIGGER prevent_hard_delete_on_organizations
 BEFORE DELETE ON organizations
 FOR EACH ROW
 EXECUTE FUNCTION operation_not_allowed();

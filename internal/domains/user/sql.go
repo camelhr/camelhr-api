@@ -26,9 +26,6 @@ var resetPasswordQuery string
 //go:embed sql/delete_user.sql
 var deleteUserQuery string
 
-//go:embed sql/delete_all_users_by_org_id.sql
-var deleteAllUsersByOrgIDQuery string
-
 //go:embed sql/disable_user.sql
 var disableUserQuery string
 

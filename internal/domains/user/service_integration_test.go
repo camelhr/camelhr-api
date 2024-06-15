@@ -200,38 +200,6 @@ func (s *UserTestSuite) TestServiceIntegration_DeleteUser() {
 	})
 }
 
-func (s *UserTestSuite) TestServiceIntegration_DeleteAllUsersByOrgID() {
-	s.Run("should delete all users by org id", func() {
-		s.T().Parallel()
-
-		sessionManager := session.NewRedisSessionManager(s.RedisClient)
-		repo := user.NewRepository(s.DB)
-		svc := user.NewService(repo, sessionManager)
-		o := fake.NewOrganization(s.DB)
-		u1 := fake.NewUser(s.DB, o.ID)
-		sessionKey1 := fmt.Sprintf("session:org:%v:user:%v", o.ID, u1.ID)
-		s.RedisClient.HSet(context.Background(), sessionKey1, "jwt", gofakeit.UUID())
-		u2 := fake.NewUser(s.DB, o.ID)
-		sessionKey2 := fmt.Sprintf("session:org:%v:user:%v", o.ID, u2.ID)
-		s.RedisClient.HSet(context.Background(), sessionKey2, "jwt", gofakeit.UUID())
-
-		err := svc.DeleteAllUsersByOrgID(context.Background(), o.ID)
-		s.Require().NoError(err)
-
-		result1 := u1.IsDeleted(s.DB)
-		s.True(result1)
-
-		result2 := u2.IsDeleted(s.DB)
-		s.True(result2)
-
-		// check if the user's sessions are deleted
-		exist1 := s.RedisClient.Exists(context.Background(), sessionKey1).Val()
-		s.Zero(exist1)
-		exist2 := s.RedisClient.Exists(context.Background(), sessionKey2).Val()
-		s.Zero(exist2)
-	})
-}
-
 func (s *UserTestSuite) TestServiceIntegration_DisableUser() {
 	s.Run("should disable user", func() {
 		s.T().Parallel()

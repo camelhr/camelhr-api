@@ -106,6 +106,16 @@ func (o *FakeOrganization) persist(db database.Database) error {
 		o.Comment, o.CreatedAt, o.UpdatedAt, o.DeletedAt)
 }
 
+// Delete deletes the organization from the database.
+// Use it when you want to delete the organization after it's created.
+// If you want to delete the organization during creation, use OrganizationDeleted option.
+func (o *FakeOrganization) Delete(db database.Database) {
+	query := "UPDATE organizations SET deleted_at = NOW() WHERE organization_id = $1"
+	if err := db.Exec(context.Background(), nil, query, o.ID); err != nil {
+		panic(err)
+	}
+}
+
 // IsDeleted returns deleted status of the organization by querying the database.
 func (o *FakeOrganization) IsDeleted(db database.Database) bool {
 	var isDeleted bool

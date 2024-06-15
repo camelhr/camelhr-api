@@ -324,37 +324,6 @@ func TestRepository_DeleteUser(t *testing.T) {
 	})
 }
 
-func TestRepository_DeleteAllUsersByOrgID(t *testing.T) {
-	t.Parallel()
-
-	t.Run("should return an error when the database call fails", func(t *testing.T) {
-		t.Parallel()
-
-		mockDB := database.NewMockDatabase(t)
-		repo := user.NewRepository(mockDB)
-
-		mockDB.On("Exec", context.Background(), nil, tests.QueryMatcher("deleteAllUsersByOrgIDQuery"), int64(1)).
-			Return(assert.AnError)
-
-		err := repo.DeleteAllUsersByOrgID(context.Background(), 1)
-		require.Error(t, err)
-		assert.ErrorIs(t, assert.AnError, err)
-	})
-
-	t.Run("should return nil when all users are deleted", func(t *testing.T) {
-		t.Parallel()
-
-		mockDB := database.NewMockDatabase(t)
-		repo := user.NewRepository(mockDB)
-
-		mockDB.On("Exec", context.Background(), nil, tests.QueryMatcher("deleteAllUsersByOrgIDQuery"), int64(1)).
-			Return(nil)
-
-		err := repo.DeleteAllUsersByOrgID(context.Background(), 1)
-		require.NoError(t, err)
-	})
-}
-
 func TestRepository_DisableUser(t *testing.T) {
 	t.Parallel()
 

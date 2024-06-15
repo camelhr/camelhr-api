@@ -633,57 +633,6 @@ func TestService_DeleteUser(t *testing.T) {
 	})
 }
 
-func TestService_DeleteAllUsersByOrgID(t *testing.T) {
-	t.Parallel()
-
-	t.Run("should return error when repository return error", func(t *testing.T) {
-		t.Parallel()
-
-		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo, nil)
-
-		mockRepo.On("DeleteAllUsersByOrgID", context.Background(), int64(1)).
-			Return(assert.AnError)
-
-		err := service.DeleteAllUsersByOrgID(context.Background(), int64(1))
-		require.Error(t, err)
-		assert.ErrorIs(t, assert.AnError, err)
-	})
-
-	t.Run("should return error when user session deletion failed", func(t *testing.T) {
-		t.Parallel()
-
-		mockRepo := user.NewMockRepository(t)
-		sessionManager := session.NewMockSessionManager(t)
-		service := user.NewService(mockRepo, sessionManager)
-
-		mockRepo.On("DeleteAllUsersByOrgID", context.Background(), int64(1)).
-			Return(nil)
-		sessionManager.On("DeleteAllOrgSessions", context.Background(), int64(1)).
-			Return(assert.AnError)
-
-		err := service.DeleteAllUsersByOrgID(context.Background(), int64(1))
-		require.Error(t, err)
-		assert.ErrorIs(t, assert.AnError, err)
-	})
-
-	t.Run("should delete all users by organization id", func(t *testing.T) {
-		t.Parallel()
-
-		mockRepo := user.NewMockRepository(t)
-		sessionManager := session.NewMockSessionManager(t)
-		service := user.NewService(mockRepo, sessionManager)
-
-		mockRepo.On("DeleteAllUsersByOrgID", context.Background(), int64(1)).
-			Return(nil)
-		sessionManager.On("DeleteAllOrgSessions", context.Background(), int64(1)).
-			Return(nil)
-
-		err := service.DeleteAllUsersByOrgID(context.Background(), int64(1))
-		require.NoError(t, err)
-	})
-}
-
 func TestService_DisableUser(t *testing.T) {
 	t.Parallel()
 

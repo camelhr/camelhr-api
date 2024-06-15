@@ -23,7 +23,7 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_ForbiddenOperations() 
 		fake.NewOrganization(s.DB)
 		err := s.DB.Exec(context.Background(), nil, "DELETE FROM organizations WHERE organization_id = 1")
 		s.Require().Error(err)
-		s.ErrorContains(err, "DELETE operation on table organizations is not allowed: prevent_delete_on_organizations")
+		s.ErrorContains(err, "DELETE operation on table organizations is not allowed: prevent_hard_delete_on_organizations")
 	})
 }
 

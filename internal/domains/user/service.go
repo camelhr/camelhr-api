@@ -41,10 +41,6 @@ type Service interface {
 	// This also deletes the user session.
 	DeleteUser(ctx context.Context, id int64) error
 
-	// DeleteAllUsersByOrgID deletes all users of an organization.
-	// This also deletes the user sessions.
-	DeleteAllUsersByOrgID(ctx context.Context, orgID int64) error
-
 	// DisableUser disables a user by its ID.
 	// This also deletes the user session.
 	DisableUser(ctx context.Context, id int64, comment string) error
@@ -224,14 +220,6 @@ func (s *service) DeleteUser(ctx context.Context, id int64) error {
 	}
 
 	return s.sessionManager.DeleteSession(ctx, u.ID, u.OrganizationID)
-}
-
-func (s *service) DeleteAllUsersByOrgID(ctx context.Context, orgID int64) error {
-	if err := s.repo.DeleteAllUsersByOrgID(ctx, orgID); err != nil {
-		return err
-	}
-
-	return s.sessionManager.DeleteAllOrgSessions(ctx, orgID)
 }
 
 func (s *service) DisableUser(ctx context.Context, id int64, comment string) error {
