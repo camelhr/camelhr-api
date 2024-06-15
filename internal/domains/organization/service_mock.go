@@ -79,17 +79,17 @@ func (_c *MockService_CreateOrganization_Call) RunAndReturn(run func(context.Con
 	return _c
 }
 
-// DeleteOrganization provides a mock function with given fields: ctx, id
-func (_m *MockService) DeleteOrganization(ctx context.Context, id int64) error {
-	ret := _m.Called(ctx, id)
+// DeleteOrganization provides a mock function with given fields: ctx, id, comment
+func (_m *MockService) DeleteOrganization(ctx context.Context, id int64, comment string) error {
+	ret := _m.Called(ctx, id, comment)
 
 	if len(ret) == 0 {
 		panic("no return value specified for DeleteOrganization")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, int64) error); ok {
-		r0 = rf(ctx, id)
+	if rf, ok := ret.Get(0).(func(context.Context, int64, string) error); ok {
+		r0 = rf(ctx, id, comment)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -105,13 +105,14 @@ type MockService_DeleteOrganization_Call struct {
 // DeleteOrganization is a helper method to define mock.On call
 //   - ctx context.Context
 //   - id int64
-func (_e *MockService_Expecter) DeleteOrganization(ctx interface{}, id interface{}) *MockService_DeleteOrganization_Call {
-	return &MockService_DeleteOrganization_Call{Call: _e.mock.On("DeleteOrganization", ctx, id)}
+//   - comment string
+func (_e *MockService_Expecter) DeleteOrganization(ctx interface{}, id interface{}, comment interface{}) *MockService_DeleteOrganization_Call {
+	return &MockService_DeleteOrganization_Call{Call: _e.mock.On("DeleteOrganization", ctx, id, comment)}
 }
 
-func (_c *MockService_DeleteOrganization_Call) Run(run func(ctx context.Context, id int64)) *MockService_DeleteOrganization_Call {
+func (_c *MockService_DeleteOrganization_Call) Run(run func(ctx context.Context, id int64, comment string)) *MockService_DeleteOrganization_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(int64))
+		run(args[0].(context.Context), args[1].(int64), args[2].(string))
 	})
 	return _c
 }
@@ -121,7 +122,7 @@ func (_c *MockService_DeleteOrganization_Call) Return(_a0 error) *MockService_De
 	return _c
 }
 
-func (_c *MockService_DeleteOrganization_Call) RunAndReturn(run func(context.Context, int64) error) *MockService_DeleteOrganization_Call {
+func (_c *MockService_DeleteOrganization_Call) RunAndReturn(run func(context.Context, int64, string) error) *MockService_DeleteOrganization_Call {
 	_c.Call.Return(run)
 	return _c
 }

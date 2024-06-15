@@ -299,13 +299,15 @@ func TestRepository_DeleteUser(t *testing.T) {
 	t.Run("should return an error when the database call fails", func(t *testing.T) {
 		t.Parallel()
 
+		ctx := context.Background()
 		mockDB := database.NewMockDatabase(t)
 		repo := user.NewRepository(mockDB)
+		comment := gofakeit.Sentence(5)
 
-		mockDB.On("Exec", context.Background(), nil, tests.QueryMatcher("deleteUserQuery"), int64(1)).
+		mockDB.On("Exec", ctx, nil, tests.QueryMatcher("deleteUserQuery"), int64(1), comment).
 			Return(assert.AnError)
 
-		err := repo.DeleteUser(context.Background(), 1)
+		err := repo.DeleteUser(ctx, 1, comment)
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
@@ -313,13 +315,15 @@ func TestRepository_DeleteUser(t *testing.T) {
 	t.Run("should return nil when user is deleted", func(t *testing.T) {
 		t.Parallel()
 
+		ctx := context.Background()
 		mockDB := database.NewMockDatabase(t)
 		repo := user.NewRepository(mockDB)
+		comment := gofakeit.Sentence(5)
 
-		mockDB.On("Exec", context.Background(), nil, tests.QueryMatcher("deleteUserQuery"), int64(1)).
+		mockDB.On("Exec", ctx, nil, tests.QueryMatcher("deleteUserQuery"), int64(1), comment).
 			Return(nil)
 
-		err := repo.DeleteUser(context.Background(), 1)
+		err := repo.DeleteUser(ctx, 1, comment)
 		require.NoError(t, err)
 	})
 }

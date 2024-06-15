@@ -30,7 +30,7 @@ type Repository interface {
 	ResetPassword(ctx context.Context, id int64, passwordHash string) error
 
 	// DeleteUser deletes a user by its ID.
-	DeleteUser(ctx context.Context, id int64) error
+	DeleteUser(ctx context.Context, id int64, comment string) error
 
 	// DisableUser disables a user by its ID.
 	DisableUser(ctx context.Context, id int64, comment string) error
@@ -102,8 +102,8 @@ func (r *repository) ResetPassword(ctx context.Context, id int64, passwordHash s
 	return r.db.Exec(ctx, nil, resetPasswordQuery, id, passwordHash)
 }
 
-func (r *repository) DeleteUser(ctx context.Context, id int64) error {
-	return r.db.Exec(ctx, nil, deleteUserQuery, id)
+func (r *repository) DeleteUser(ctx context.Context, id int64, comment string) error {
+	return r.db.Exec(ctx, nil, deleteUserQuery, id, comment)
 }
 
 func (r *repository) DisableUser(ctx context.Context, id int64, comment string) error {

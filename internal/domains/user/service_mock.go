@@ -139,17 +139,17 @@ func (_c *MockService_CreateUser_Call) RunAndReturn(run func(context.Context, in
 	return _c
 }
 
-// DeleteUser provides a mock function with given fields: ctx, id
-func (_m *MockService) DeleteUser(ctx context.Context, id int64) error {
-	ret := _m.Called(ctx, id)
+// DeleteUser provides a mock function with given fields: ctx, id, comment
+func (_m *MockService) DeleteUser(ctx context.Context, id int64, comment string) error {
+	ret := _m.Called(ctx, id, comment)
 
 	if len(ret) == 0 {
 		panic("no return value specified for DeleteUser")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, int64) error); ok {
-		r0 = rf(ctx, id)
+	if rf, ok := ret.Get(0).(func(context.Context, int64, string) error); ok {
+		r0 = rf(ctx, id, comment)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -165,13 +165,14 @@ type MockService_DeleteUser_Call struct {
 // DeleteUser is a helper method to define mock.On call
 //   - ctx context.Context
 //   - id int64
-func (_e *MockService_Expecter) DeleteUser(ctx interface{}, id interface{}) *MockService_DeleteUser_Call {
-	return &MockService_DeleteUser_Call{Call: _e.mock.On("DeleteUser", ctx, id)}
+//   - comment string
+func (_e *MockService_Expecter) DeleteUser(ctx interface{}, id interface{}, comment interface{}) *MockService_DeleteUser_Call {
+	return &MockService_DeleteUser_Call{Call: _e.mock.On("DeleteUser", ctx, id, comment)}
 }
 
-func (_c *MockService_DeleteUser_Call) Run(run func(ctx context.Context, id int64)) *MockService_DeleteUser_Call {
+func (_c *MockService_DeleteUser_Call) Run(run func(ctx context.Context, id int64, comment string)) *MockService_DeleteUser_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(int64))
+		run(args[0].(context.Context), args[1].(int64), args[2].(string))
 	})
 	return _c
 }
@@ -181,7 +182,7 @@ func (_c *MockService_DeleteUser_Call) Return(_a0 error) *MockService_DeleteUser
 	return _c
 }
 
-func (_c *MockService_DeleteUser_Call) RunAndReturn(run func(context.Context, int64) error) *MockService_DeleteUser_Call {
+func (_c *MockService_DeleteUser_Call) RunAndReturn(run func(context.Context, int64, string) error) *MockService_DeleteUser_Call {
 	_c.Call.Return(run)
 	return _c
 }

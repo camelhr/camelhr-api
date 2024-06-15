@@ -39,7 +39,7 @@ func (h *handler) UpdateOrganization(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var reqPayload Request
+	var reqPayload UpdateRequest
 	if err := request.DecodeAndValidateJSON(r.Body, &reqPayload); err != nil {
 		response.ErrorResponse(w, err)
 
@@ -73,7 +73,19 @@ func (h *handler) DeleteOrganization(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.service.DeleteOrganization(r.Context(), org.ID); err != nil {
+	var reqPayload DeleteRequest
+	if err := request.DecodeAndValidateJSON(r.Body, &reqPayload); err != nil {
+		response.ErrorResponse(w, err)
+
+		return
+	}
+
+	if err := ValidateComment(reqPayload.Comment); err != nil {
+		response.ErrorResponse(w, err)
+		return
+	}
+
+	if err := h.service.DeleteOrganization(r.Context(), org.ID, reqPayload.Comment); err != nil {
 		response.ErrorResponse(w, err)
 		return
 	}

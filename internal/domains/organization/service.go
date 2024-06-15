@@ -26,7 +26,7 @@ type Service interface {
 	UpdateOrganization(ctx context.Context, id int64, name string) error
 
 	// DeleteOrganization deletes an organization by its ID.
-	DeleteOrganization(ctx context.Context, id int64) error
+	DeleteOrganization(ctx context.Context, id int64, comment string) error
 
 	// SuspendOrganization suspends an organization by its ID.
 	SuspendOrganization(ctx context.Context, id int64, comment string) error
@@ -105,8 +105,12 @@ func (s *service) UpdateOrganization(ctx context.Context, id int64, name string)
 	return s.repo.UpdateOrganization(ctx, id, name)
 }
 
-func (s *service) DeleteOrganization(ctx context.Context, id int64) error {
-	if err := s.repo.DeleteOrganization(ctx, id); err != nil {
+func (s *service) DeleteOrganization(ctx context.Context, id int64, comment string) error {
+	if err := ValidateComment(comment); err != nil {
+		return err
+	}
+
+	if err := s.repo.DeleteOrganization(ctx, id, comment); err != nil {
 		return err
 	}
 
@@ -114,17 +118,33 @@ func (s *service) DeleteOrganization(ctx context.Context, id int64) error {
 }
 
 func (s *service) SuspendOrganization(ctx context.Context, id int64, comment string) error {
+	if err := ValidateComment(comment); err != nil {
+		return err
+	}
+
 	return s.repo.SuspendOrganization(ctx, id, comment)
 }
 
 func (s *service) UnsuspendOrganization(ctx context.Context, id int64, comment string) error {
+	if err := ValidateComment(comment); err != nil {
+		return err
+	}
+
 	return s.repo.UnsuspendOrganization(ctx, id, comment)
 }
 
 func (s *service) DisableOrganization(ctx context.Context, id int64, comment string) error {
+	if err := ValidateComment(comment); err != nil {
+		return err
+	}
+
 	return s.repo.DisableOrganization(ctx, id, comment)
 }
 
 func (s *service) EnableOrganization(ctx context.Context, id int64, comment string) error {
+	if err := ValidateComment(comment); err != nil {
+		return err
+	}
+
 	return s.repo.EnableOrganization(ctx, id, comment)
 }

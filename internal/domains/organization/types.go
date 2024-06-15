@@ -32,9 +32,14 @@ type Organization struct {
 	base.Timestamps
 }
 
-// Request represents a http request to create or update an organization.
-type Request struct {
+// UpdateRequest represents a http request to update an organization.
+type UpdateRequest struct {
 	Name string `json:"name" validate:"required,ascii,max=60"`
+}
+
+// DeleteRequest represents a http request to delete an organization.
+type DeleteRequest struct {
+	Comment string `json:"comment" validate:"required,max=255"`
 }
 
 // Response represents a response of an http response organization.

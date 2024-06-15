@@ -314,17 +314,31 @@ func TestService_UpdateOrganization(t *testing.T) {
 func TestService_DeleteOrganization(t *testing.T) {
 	t.Parallel()
 
-	t.Run("should return an error when the repository call fails", func(t *testing.T) {
+	t.Run("should return an error when comment is empty", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := organization.NewMockRepository(t)
 		service := organization.NewService(mockRepo, nil)
 		orgID := gofakeit.Int64()
 
-		mockRepo.On("DeleteOrganization", context.Background(), orgID).
+		err := service.DeleteOrganization(context.Background(), orgID, "")
+		require.Error(t, err)
+		assert.True(t, base.IsInputValidationError(err))
+		assert.ErrorContains(t, err, "comment is required")
+	})
+
+	t.Run("should return an error when the repository call fails", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := organization.NewMockRepository(t)
+		service := organization.NewService(mockRepo, nil)
+		orgID := gofakeit.Int64()
+		comment := gofakeit.Sentence(5)
+
+		mockRepo.On("DeleteOrganization", context.Background(), orgID, comment).
 			Return(assert.AnError)
 
-		err := service.DeleteOrganization(context.Background(), orgID)
+		err := service.DeleteOrganization(context.Background(), orgID, comment)
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
@@ -336,14 +350,15 @@ func TestService_DeleteOrganization(t *testing.T) {
 		mockSessionManager := session.NewMockSessionManager(t)
 		service := organization.NewService(mockRepo, mockSessionManager)
 		orgID := gofakeit.Int64()
+		comment := gofakeit.Sentence(5)
 
-		mockRepo.On("DeleteOrganization", context.Background(), orgID).
+		mockRepo.On("DeleteOrganization", context.Background(), orgID, comment).
 			Return(nil)
 
 		mockSessionManager.On("DeleteAllOrgSessions", context.Background(), orgID).
 			Return(assert.AnError)
 
-		err := service.DeleteOrganization(context.Background(), orgID)
+		err := service.DeleteOrganization(context.Background(), orgID, comment)
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
@@ -355,19 +370,33 @@ func TestService_DeleteOrganization(t *testing.T) {
 		mockSessionManager := session.NewMockSessionManager(t)
 		service := organization.NewService(mockRepo, mockSessionManager)
 		orgID := gofakeit.Int64()
+		comment := gofakeit.Sentence(5)
 
-		mockRepo.On("DeleteOrganization", context.Background(), orgID).
+		mockRepo.On("DeleteOrganization", context.Background(), orgID, comment).
 			Return(nil)
 		mockSessionManager.On("DeleteAllOrgSessions", context.Background(), orgID).
 			Return(nil)
 
-		err := service.DeleteOrganization(context.Background(), orgID)
+		err := service.DeleteOrganization(context.Background(), orgID, comment)
 		require.NoError(t, err)
 	})
 }
 
 func TestService_SuspendOrganization(t *testing.T) {
 	t.Parallel()
+
+	t.Run("should return an error when comment is empty", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := organization.NewMockRepository(t)
+		service := organization.NewService(mockRepo, nil)
+		orgID := gofakeit.Int64()
+
+		err := service.SuspendOrganization(context.Background(), orgID, "")
+		require.Error(t, err)
+		assert.True(t, base.IsInputValidationError(err))
+		assert.ErrorContains(t, err, "comment is required")
+	})
 
 	t.Run("should return an error when the repository call fails", func(t *testing.T) {
 		t.Parallel()
@@ -404,6 +433,19 @@ func TestService_SuspendOrganization(t *testing.T) {
 func TestService_UnsuspendOrganization(t *testing.T) {
 	t.Parallel()
 
+	t.Run("should return an error when comment is empty", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := organization.NewMockRepository(t)
+		service := organization.NewService(mockRepo, nil)
+		orgID := gofakeit.Int64()
+
+		err := service.UnsuspendOrganization(context.Background(), orgID, "")
+		require.Error(t, err)
+		assert.True(t, base.IsInputValidationError(err))
+		assert.ErrorContains(t, err, "comment is required")
+	})
+
 	t.Run("should return an error when the repository call fails", func(t *testing.T) {
 		t.Parallel()
 
@@ -439,6 +481,19 @@ func TestService_UnsuspendOrganization(t *testing.T) {
 func TestService_DisableOrganization(t *testing.T) {
 	t.Parallel()
 
+	t.Run("should return an error when comment is empty", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := organization.NewMockRepository(t)
+		service := organization.NewService(mockRepo, nil)
+		orgID := gofakeit.Int64()
+
+		err := service.DisableOrganization(context.Background(), orgID, "")
+		require.Error(t, err)
+		assert.True(t, base.IsInputValidationError(err))
+		assert.ErrorContains(t, err, "comment is required")
+	})
+
 	t.Run("should return an error when the repository call fails", func(t *testing.T) {
 		t.Parallel()
 
@@ -473,6 +528,19 @@ func TestService_DisableOrganization(t *testing.T) {
 
 func TestService_EnableOrganization(t *testing.T) {
 	t.Parallel()
+
+	t.Run("should return an error when comment is empty", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := organization.NewMockRepository(t)
+		service := organization.NewService(mockRepo, nil)
+		orgID := gofakeit.Int64()
+
+		err := service.EnableOrganization(context.Background(), orgID, "")
+		require.Error(t, err)
+		assert.True(t, base.IsInputValidationError(err))
+		assert.ErrorContains(t, err, "comment is required")
+	})
 
 	t.Run("should return an error when the repository call fails", func(t *testing.T) {
 		t.Parallel()

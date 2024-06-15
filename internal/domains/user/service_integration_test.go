@@ -185,13 +185,14 @@ func (s *UserTestSuite) TestServiceIntegration_DeleteUser() {
 		svc := user.NewService(repo, sessionManager)
 		o := fake.NewOrganization(s.DB)
 		u := fake.NewUser(s.DB, o.ID)
+		comment := gofakeit.Sentence(5)
 
 		// create session for user
 		sessionKey := fmt.Sprintf("session:org:%v:user:%v", o.ID, u.ID)
 		err := s.RedisClient.HSet(context.Background(), sessionKey, "jwt", gofakeit.UUID()).Err()
 		s.Require().NoError(err)
 
-		err = svc.DeleteUser(context.Background(), u.ID)
+		err = svc.DeleteUser(context.Background(), u.ID, comment)
 		s.Require().NoError(err)
 
 		result := u.IsDeleted(s.DB)

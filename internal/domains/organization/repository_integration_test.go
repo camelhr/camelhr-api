@@ -229,10 +229,12 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_UpdateOrganization() {
 func (s *OrganizationTestSuite) TestRepositoryIntegration_DeleteOrganization() {
 	s.Run("should delete an organization", func() {
 		s.T().Parallel()
+
 		repo := organization.NewRepository(s.DB)
 		org := fake.NewOrganization(s.DB)
+		comment := gofakeit.Sentence(5)
 
-		err := repo.DeleteOrganization(context.Background(), org.ID)
+		err := repo.DeleteOrganization(context.Background(), org.ID, comment)
 		s.Require().NoError(err)
 
 		isDeleted := org.IsDeleted(s.DB)
@@ -242,29 +244,36 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_DeleteOrganization() {
 		s.Require().NotNil(result.DeletedAt)
 		s.Equal(time.UTC, result.DeletedAt.Location())
 		s.WithinDuration(time.Now().UTC(), *result.DeletedAt, 1*time.Minute)
+		s.Require().NotNil(result.Comment)
+		s.Equal(comment, *result.Comment)
 	})
 
 	s.Run("should not delete an organization if already deleted", func() {
 		s.T().Parallel()
+
 		repo := organization.NewRepository(s.DB)
 		org := fake.NewOrganization(s.DB, fake.OrganizationDeleted())
+		comment := gofakeit.Sentence(5)
 
-		err := repo.DeleteOrganization(context.Background(), org.ID)
+		err := repo.DeleteOrganization(context.Background(), org.ID, comment)
 		s.Require().NoError(err)
 
 		result := org.FetchLatest(s.DB)
 		s.NotNil(result.DeletedAt)
 		s.Equal(org.DeletedAt, result.DeletedAt) // delete time should not be updated
+		s.Nil(result.Comment)
 	})
 }
 
 func (s *OrganizationTestSuite) TestRepositoryIntegration_SuspendOrganization() {
 	s.Run("should suspend an organization", func() {
 		s.T().Parallel()
+
 		repo := organization.NewRepository(s.DB)
 		org := fake.NewOrganization(s.DB)
+		comment := gofakeit.Sentence(5)
 
-		err := repo.SuspendOrganization(context.Background(), org.ID, "test suspend comment")
+		err := repo.SuspendOrganization(context.Background(), org.ID, comment)
 		s.Require().NoError(err)
 
 		isSuspended := org.IsSuspended(s.DB)
@@ -275,7 +284,7 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_SuspendOrganization() 
 		s.Equal(time.UTC, result.SuspendedAt.Location())
 		s.WithinDuration(time.Now().UTC(), *result.SuspendedAt, 1*time.Minute)
 		s.Require().NotNil(result.Comment)
-		s.Equal("test suspend comment", *result.Comment)
+		s.Equal(comment, *result.Comment)
 		s.Nil(result.DeletedAt)
 		s.Nil(result.DisabledAt)
 		s.Equal(org.CreatedAt, result.CreatedAt)
@@ -284,30 +293,35 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_SuspendOrganization() 
 
 	s.Run("should not suspend an organization if already deleted", func() {
 		s.T().Parallel()
+
 		repo := organization.NewRepository(s.DB)
 		org := fake.NewOrganization(s.DB, fake.OrganizationDeleted())
+		comment := gofakeit.Sentence(5)
 
-		err := repo.SuspendOrganization(context.Background(), org.ID, "test suspend comment")
+		err := repo.SuspendOrganization(context.Background(), org.ID, comment)
 		s.Require().NoError(err)
 
-		isSuspended := org.IsSuspended(s.DB)
-		s.False(isSuspended)
+		result := org.FetchLatest(s.DB)
+		s.Require().Nil(result.SuspendedAt)
+		s.Nil(result.Comment)
 	})
 }
 
 func (s *OrganizationTestSuite) TestRepositoryIntegration_UnsuspendOrganization() {
 	s.Run("should unsuspend an organization", func() {
 		s.T().Parallel()
+
 		repo := organization.NewRepository(s.DB)
 		org := fake.NewOrganization(s.DB, fake.OrganizationSuspended())
+		comment := gofakeit.Sentence(5)
 
-		err := repo.UnsuspendOrganization(context.Background(), org.ID, "test unsuspend comment")
+		err := repo.UnsuspendOrganization(context.Background(), org.ID, comment)
 		s.Require().NoError(err)
 
 		result := org.FetchLatest(s.DB)
 		s.Nil(result.SuspendedAt)
 		s.Require().NotNil(result.Comment)
-		s.Equal("test unsuspend comment", *result.Comment)
+		s.Equal(comment, *result.Comment)
 		s.Nil(result.DeletedAt)
 		s.Nil(result.DisabledAt)
 		s.Equal(org.CreatedAt, result.CreatedAt)
@@ -316,14 +330,17 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_UnsuspendOrganization(
 
 	s.Run("should not unsuspend an organization if already deleted", func() {
 		s.T().Parallel()
+
+		comment := "test unsuspend comment"
 		repo := organization.NewRepository(s.DB)
 		org := fake.NewOrganization(s.DB, fake.OrganizationSuspended(), fake.OrganizationDeleted())
 
-		err := repo.UnsuspendOrganization(context.Background(), org.ID, "test unsuspend comment")
+		err := repo.UnsuspendOrganization(context.Background(), org.ID, comment)
 		s.Require().NoError(err)
 
-		isSuspended := org.IsSuspended(s.DB)
-		s.True(isSuspended)
+		result := org.FetchLatest(s.DB)
+		s.Require().NotNil(result.SuspendedAt)
+		s.Nil(result.Comment)
 	})
 }
 
@@ -356,8 +373,9 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_DisableOrganization() 
 		err := repo.DisableOrganization(context.Background(), org.ID, "test disable comment")
 		s.Require().NoError(err)
 
-		isDisabled := org.IsDisabled(s.DB)
-		s.False(isDisabled)
+		result := org.FetchLatest(s.DB)
+		s.Require().Nil(result.DisabledAt)
+		s.Nil(result.Comment)
 	})
 }
 
@@ -388,7 +406,8 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_EnableOrganization() {
 		err := repo.EnableOrganization(context.Background(), org.ID, "test enable comment")
 		s.Require().NoError(err)
 
-		isDisabled := org.IsDisabled(s.DB)
-		s.True(isDisabled)
+		result := org.FetchLatest(s.DB)
+		s.Require().NotNil(result.DisabledAt)
+		s.Nil(result.Comment)
 	})
 }

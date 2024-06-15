@@ -73,3 +73,20 @@ func ValidatePassword(password string) error {
 
 	return nil
 }
+
+// ValidateComment validates the comment string.
+func ValidateComment(comment string) error {
+	const allowedMaxLength = 255
+
+	// validate that comment is not empty
+	if comment == "" {
+		return base.NewInputValidationError("comment is required")
+	}
+
+	// validate that comment length does not exceed allowedMaxLength
+	if len(comment) > allowedMaxLength {
+		return base.NewInputValidationError("comment must be a maximum of 255 characters in length")
+	}
+
+	return nil
+}

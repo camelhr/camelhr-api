@@ -39,7 +39,7 @@ type Service interface {
 
 	// DeleteUser deletes a user by its ID.
 	// This also deletes the user session.
-	DeleteUser(ctx context.Context, id int64) error
+	DeleteUser(ctx context.Context, id int64, comment string) error
 
 	// DisableUser disables a user by its ID.
 	// This also deletes the user session.
@@ -58,10 +58,7 @@ type Service interface {
 	SetEmailVerified(ctx context.Context, id int64) error
 }
 
-var (
-	ErrUserCommentMissing = errors.New("comment is missing")
-	ErrUserIsOwner        = errors.New("operation not allowed. user is owner")
-)
+var ErrUserIsOwner = errors.New("operation not allowed. user is owner")
 
 type service struct {
 	repo           Repository
@@ -201,7 +198,11 @@ func (s *service) ResetPassword(ctx context.Context, id int64, newPassword strin
 	return s.repo.ResetPassword(ctx, id, passwordHash)
 }
 
-func (s *service) DeleteUser(ctx context.Context, id int64) error {
+func (s *service) DeleteUser(ctx context.Context, id int64, comment string) error {
+	if err := ValidateComment(comment); err != nil {
+		return err
+	}
+
 	u, err := s.repo.GetUserByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -215,7 +216,7 @@ func (s *service) DeleteUser(ctx context.Context, id int64) error {
 		return ErrUserIsOwner
 	}
 
-	if err := s.repo.DeleteUser(ctx, id); err != nil {
+	if err := s.repo.DeleteUser(ctx, id, comment); err != nil {
 		return err
 	}
 
@@ -223,8 +224,8 @@ func (s *service) DeleteUser(ctx context.Context, id int64) error {
 }
 
 func (s *service) DisableUser(ctx context.Context, id int64, comment string) error {
-	if comment == "" {
-		return ErrUserCommentMissing
+	if err := ValidateComment(comment); err != nil {
+		return err
 	}
 
 	u, err := s.repo.GetUserByID(ctx, id)
@@ -248,8 +249,8 @@ func (s *service) DisableUser(ctx context.Context, id int64, comment string) err
 }
 
 func (s *service) EnableUser(ctx context.Context, id int64, comment string) error {
-	if comment == "" {
-		return ErrUserCommentMissing
+	if err := ValidateComment(comment); err != nil {
+		return err
 	}
 
 	return s.repo.EnableUser(ctx, id, comment)

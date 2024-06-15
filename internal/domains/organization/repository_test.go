@@ -243,13 +243,14 @@ func TestRepository_DeleteOrganization(t *testing.T) {
 	t.Run("should return an error when the database call fails", func(t *testing.T) {
 		t.Parallel()
 
+		ctx := context.Background()
 		mockDB := database.NewMockDatabase(t)
 		repo := organization.NewRepository(mockDB)
 
-		mockDB.On("Exec", context.Background(), nil, tests.QueryMatcher("deleteOrganizationQuery"), int64(1)).
+		mockDB.On("Exec", ctx, nil, tests.QueryMatcher("deleteOrganizationQuery"), int64(1), "test delete").
 			Return(assert.AnError)
 
-		err := repo.DeleteOrganization(context.Background(), 1)
+		err := repo.DeleteOrganization(ctx, 1, "test delete")
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
@@ -257,13 +258,14 @@ func TestRepository_DeleteOrganization(t *testing.T) {
 	t.Run("should return nil when the organization is deleted", func(t *testing.T) {
 		t.Parallel()
 
+		ctx := context.Background()
 		mockDB := database.NewMockDatabase(t)
 		repo := organization.NewRepository(mockDB)
 
-		mockDB.On("Exec", context.Background(), nil, tests.QueryMatcher("deleteOrganizationQuery"), int64(1)).
+		mockDB.On("Exec", ctx, nil, tests.QueryMatcher("deleteOrganizationQuery"), int64(1), "test delete").
 			Return(nil)
 
-		err := repo.DeleteOrganization(context.Background(), 1)
+		err := repo.DeleteOrganization(ctx, 1, "test delete")
 		require.NoError(t, err)
 	})
 }

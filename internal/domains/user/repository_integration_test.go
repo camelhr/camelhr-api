@@ -343,11 +343,13 @@ func (s *UserTestSuite) TestRepositoryIntegration_ResetPassword() {
 func (s *UserTestSuite) TestRepositoryIntegration_DeleteUser() {
 	s.Run("should delete user", func() {
 		s.T().Parallel()
+
 		repo := user.NewRepository(s.DB)
 		o := fake.NewOrganization(s.DB)
 		u := fake.NewUser(s.DB, o.ID)
+		comment := gofakeit.Sentence(5)
 
-		err := repo.DeleteUser(context.Background(), u.ID)
+		err := repo.DeleteUser(context.Background(), u.ID, comment)
 		s.Require().NoError(err)
 
 		isDeleted := u.IsDeleted(s.DB)
@@ -358,6 +360,8 @@ func (s *UserTestSuite) TestRepositoryIntegration_DeleteUser() {
 		s.NotNil(result.DeletedAt)
 		s.Equal(time.UTC, result.DeletedAt.Location())
 		s.WithinDuration(time.Now().UTC(), *result.DeletedAt, 1*time.Minute)
+		s.NotNil(result.Comment)
+		s.Equal(comment, *result.Comment)
 	})
 
 	s.Run("should not delete user if already deleted", func() {
@@ -365,8 +369,9 @@ func (s *UserTestSuite) TestRepositoryIntegration_DeleteUser() {
 		repo := user.NewRepository(s.DB)
 		o := fake.NewOrganization(s.DB)
 		u := fake.NewUser(s.DB, o.ID, fake.UserDeleted())
+		comment := gofakeit.Sentence(5)
 
-		err := repo.DeleteUser(context.Background(), u.ID)
+		err := repo.DeleteUser(context.Background(), u.ID, comment)
 		s.Require().NoError(err)
 
 		isDeleted := u.IsDeleted(s.DB)
@@ -375,6 +380,7 @@ func (s *UserTestSuite) TestRepositoryIntegration_DeleteUser() {
 		result := u.FetchLatest(s.DB)
 		s.Require().NotNil(result)
 		s.Equal(u.DeletedAt, result.DeletedAt)
+		s.Nil(result.Comment)
 	})
 
 	s.Run("should not delete if user is owner", func() {
@@ -382,8 +388,9 @@ func (s *UserTestSuite) TestRepositoryIntegration_DeleteUser() {
 		repo := user.NewRepository(s.DB)
 		o := fake.NewOrganization(s.DB)
 		u := fake.NewUser(s.DB, o.ID, fake.UserIsOwner())
+		comment := gofakeit.Sentence(5)
 
-		err := repo.DeleteUser(context.Background(), u.ID)
+		err := repo.DeleteUser(context.Background(), u.ID, comment)
 		s.Require().NoError(err)
 
 		isDeleted := u.IsDeleted(s.DB)
@@ -476,6 +483,38 @@ func (s *UserTestSuite) TestRepositoryIntegration_EnableUser() {
 		s.Nil(result.DisabledAt)
 		s.NotNil(result.Comment)
 		s.Equal(comment, *result.Comment)
+	})
+
+	s.Run("should not enable user if already enabled", func() {
+		s.T().Parallel()
+		repo := user.NewRepository(s.DB)
+		o := fake.NewOrganization(s.DB)
+		u := fake.NewUser(s.DB, o.ID)
+		comment := gofakeit.Sentence(5)
+
+		err := repo.EnableUser(context.Background(), u.ID, comment)
+		s.Require().NoError(err)
+
+		result := u.FetchLatest(s.DB)
+		s.Require().NotNil(result)
+		s.Nil(result.DisabledAt)
+		s.Nil(result.Comment)
+	})
+
+	s.Run("should not enable deleted user", func() {
+		s.T().Parallel()
+		repo := user.NewRepository(s.DB)
+		o := fake.NewOrganization(s.DB)
+		u := fake.NewUser(s.DB, o.ID, fake.UserDeleted())
+		comment := gofakeit.SentenceSimple()
+
+		err := repo.EnableUser(context.Background(), u.ID, comment)
+		s.Require().NoError(err)
+
+		result := u.FetchLatest(s.DB)
+		s.Require().NotNil(result)
+		s.Require().NotNil(result.DeletedAt)
+		s.Nil(result.DisabledAt)
 	})
 }
 

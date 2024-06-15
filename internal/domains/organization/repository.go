@@ -23,7 +23,7 @@ type Repository interface {
 	UpdateOrganization(ctx context.Context, id int64, name string) error
 
 	// DeleteOrganization deletes an organization by its ID.
-	DeleteOrganization(ctx context.Context, id int64) error
+	DeleteOrganization(ctx context.Context, id int64, comment string) error
 
 	// SuspendOrganization suspends an organization by its ID.
 	SuspendOrganization(ctx context.Context, id int64, comment string) error
@@ -78,8 +78,8 @@ func (r *repository) UpdateOrganization(ctx context.Context, id int64, name stri
 	return r.db.Exec(ctx, nil, updateOrganizationQuery, id, name)
 }
 
-func (r *repository) DeleteOrganization(ctx context.Context, id int64) error {
-	return r.db.Exec(ctx, nil, deleteOrganizationQuery, id)
+func (r *repository) DeleteOrganization(ctx context.Context, id int64, comment string) error {
+	return r.db.Exec(ctx, nil, deleteOrganizationQuery, id, comment)
 }
 
 func (r *repository) SuspendOrganization(ctx context.Context, id int64, comment string) error {

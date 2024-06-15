@@ -12,10 +12,6 @@ import (
 	entranslations "github.com/go-playground/validator/v10/translations/en"
 )
 
-type (
-	InvalidValidationErr = validator.InvalidValidationError
-)
-
 //nolint:gochecknoglobals // global variable is used to initialize the validator once
 var (
 	once sync.Once

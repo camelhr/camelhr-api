@@ -517,16 +517,29 @@ func TestService_ResetPassword(t *testing.T) {
 func TestService_DeleteUser(t *testing.T) {
 	t.Parallel()
 
-	t.Run("should return error when repo.GetUserByID return error", func(t *testing.T) {
+	t.Run("should return error when comment is empty", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo, nil)
 
+		err := service.DeleteUser(context.Background(), int64(1), "")
+		require.Error(t, err)
+		assert.True(t, base.IsInputValidationError(err))
+		assert.ErrorContains(t, err, "comment is required")
+	})
+
+	t.Run("should return error when repo.GetUserByID return error", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := user.NewMockRepository(t)
+		service := user.NewService(mockRepo, nil)
+		comment := gofakeit.Sentence(5)
+
 		mockRepo.On("GetUserByID", context.Background(), int64(1)).
 			Return(user.User{}, assert.AnError)
 
-		err := service.DeleteUser(context.Background(), int64(1))
+		err := service.DeleteUser(context.Background(), int64(1), comment)
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
@@ -536,13 +549,14 @@ func TestService_DeleteUser(t *testing.T) {
 
 		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo, nil)
+		comment := gofakeit.Sentence(5)
 
 		mockRepo.On("GetUserByID", context.Background(), int64(1)).
 			Return(user.User{}, nil)
-		mockRepo.On("DeleteUser", context.Background(), int64(1)).
+		mockRepo.On("DeleteUser", context.Background(), int64(1), comment).
 			Return(assert.AnError)
 
-		err := service.DeleteUser(context.Background(), int64(1))
+		err := service.DeleteUser(context.Background(), int64(1), comment)
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
@@ -552,11 +566,12 @@ func TestService_DeleteUser(t *testing.T) {
 
 		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo, nil)
+		comment := gofakeit.Sentence(5)
 
 		mockRepo.On("GetUserByID", context.Background(), int64(1)).
 			Return(user.User{}, sql.ErrNoRows)
 
-		err := service.DeleteUser(context.Background(), int64(1))
+		err := service.DeleteUser(context.Background(), int64(1), comment)
 		require.Error(t, err)
 		require.IsType(t, &base.NotFoundError{}, err)
 		assert.ErrorContains(t, err, "user not found for the given id")
@@ -567,6 +582,7 @@ func TestService_DeleteUser(t *testing.T) {
 
 		mockRepo := user.NewMockRepository(t)
 		service := user.NewService(mockRepo, nil)
+		comment := gofakeit.Sentence(5)
 
 		u := user.User{
 			ID:             gofakeit.Int64(),
@@ -578,7 +594,7 @@ func TestService_DeleteUser(t *testing.T) {
 		mockRepo.On("GetUserByID", context.Background(), u.ID).
 			Return(u, nil)
 
-		err := service.DeleteUser(context.Background(), u.ID)
+		err := service.DeleteUser(context.Background(), u.ID, comment)
 		require.Error(t, err)
 		assert.ErrorIs(t, user.ErrUserIsOwner, err)
 	})
@@ -589,6 +605,7 @@ func TestService_DeleteUser(t *testing.T) {
 		mockRepo := user.NewMockRepository(t)
 		sessionManager := session.NewMockSessionManager(t)
 		service := user.NewService(mockRepo, sessionManager)
+		comment := gofakeit.Sentence(5)
 
 		u := user.User{
 			ID:             gofakeit.Int64(),
@@ -598,12 +615,12 @@ func TestService_DeleteUser(t *testing.T) {
 
 		mockRepo.On("GetUserByID", context.Background(), u.ID).
 			Return(u, nil)
-		mockRepo.On("DeleteUser", context.Background(), u.ID).
+		mockRepo.On("DeleteUser", context.Background(), u.ID, comment).
 			Return(nil)
 		sessionManager.On("DeleteSession", context.Background(), u.ID, u.OrganizationID).
 			Return(assert.AnError)
 
-		err := service.DeleteUser(context.Background(), u.ID)
+		err := service.DeleteUser(context.Background(), u.ID, comment)
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
 	})
@@ -614,6 +631,7 @@ func TestService_DeleteUser(t *testing.T) {
 		mockRepo := user.NewMockRepository(t)
 		sessionManager := session.NewMockSessionManager(t)
 		service := user.NewService(mockRepo, sessionManager)
+		comment := gofakeit.Sentence(5)
 
 		u := user.User{
 			ID:             gofakeit.Int64(),
@@ -623,18 +641,30 @@ func TestService_DeleteUser(t *testing.T) {
 
 		mockRepo.On("GetUserByID", context.Background(), u.ID).
 			Return(u, nil)
-		mockRepo.On("DeleteUser", context.Background(), u.ID).
+		mockRepo.On("DeleteUser", context.Background(), u.ID, comment).
 			Return(nil)
 		sessionManager.On("DeleteSession", context.Background(), u.ID, u.OrganizationID).
 			Return(nil)
 
-		err := service.DeleteUser(context.Background(), u.ID)
+		err := service.DeleteUser(context.Background(), u.ID, comment)
 		require.NoError(t, err)
 	})
 }
 
 func TestService_DisableUser(t *testing.T) {
 	t.Parallel()
+
+	t.Run("should return error when comment is empty", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := user.NewMockRepository(t)
+		service := user.NewService(mockRepo, nil)
+
+		err := service.DisableUser(context.Background(), int64(1), "")
+		require.Error(t, err)
+		assert.True(t, base.IsInputValidationError(err))
+		assert.ErrorContains(t, err, "comment is required")
+	})
 
 	t.Run("should return error when repo.GetUserByID return error", func(t *testing.T) {
 		t.Parallel()
@@ -706,17 +736,6 @@ func TestService_DisableUser(t *testing.T) {
 		assert.ErrorIs(t, user.ErrUserIsOwner, err)
 	})
 
-	t.Run("should return error when comment is empty", func(t *testing.T) {
-		t.Parallel()
-
-		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo, nil)
-
-		err := service.DisableUser(context.Background(), int64(1), "")
-		require.Error(t, err)
-		assert.ErrorIs(t, user.ErrUserCommentMissing, err)
-	})
-
 	t.Run("should return error when user session deletion failed", func(t *testing.T) {
 		t.Parallel()
 
@@ -772,6 +791,18 @@ func TestService_DisableUser(t *testing.T) {
 func TestService_EnableUser(t *testing.T) {
 	t.Parallel()
 
+	t.Run("should return error when comment is empty", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := user.NewMockRepository(t)
+		service := user.NewService(mockRepo, nil)
+
+		err := service.DisableUser(context.Background(), int64(1), "")
+		require.Error(t, err)
+		assert.True(t, base.IsInputValidationError(err))
+		assert.ErrorContains(t, err, "comment is required")
+	})
+
 	t.Run("should return error when repository return error", func(t *testing.T) {
 		t.Parallel()
 
@@ -785,17 +816,6 @@ func TestService_EnableUser(t *testing.T) {
 		err := service.EnableUser(context.Background(), int64(1), comment)
 		require.Error(t, err)
 		assert.ErrorIs(t, assert.AnError, err)
-	})
-
-	t.Run("should return error when comment is empty", func(t *testing.T) {
-		t.Parallel()
-
-		mockRepo := user.NewMockRepository(t)
-		service := user.NewService(mockRepo, nil)
-
-		err := service.DisableUser(context.Background(), int64(1), "")
-		require.Error(t, err)
-		assert.ErrorIs(t, user.ErrUserCommentMissing, err)
 	})
 
 	t.Run("should enable user", func(t *testing.T) {

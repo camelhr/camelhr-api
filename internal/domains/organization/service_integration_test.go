@@ -128,6 +128,7 @@ func (s *OrganizationTestSuite) TestServiceIntegration_DeleteOrganization() {
 		org := fake.NewOrganization(s.DB)
 		u1 := fake.NewUser(s.DB, org.ID)
 		u2 := fake.NewUser(s.DB, org.ID)
+		comment := gofakeit.Sentence(5)
 
 		// create session for users
 		sessionKey := fmt.Sprintf("session:org:%v:user:%v", org.ID, u1.ID)
@@ -138,7 +139,7 @@ func (s *OrganizationTestSuite) TestServiceIntegration_DeleteOrganization() {
 		err = s.RedisClient.HSet(context.Background(), sessionKey, "jwt", gofakeit.UUID()).Err()
 		s.Require().NoError(err)
 
-		err = svc.DeleteOrganization(context.Background(), org.ID)
+		err = svc.DeleteOrganization(context.Background(), org.ID, comment)
 		s.Require().NoError(err)
 
 		result := org.FetchLatest(s.DB)

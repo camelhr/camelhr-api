@@ -336,8 +336,11 @@ func TestHandler_DeleteOrganization(t *testing.T) {
 
 	t.Run("should delete the organization", func(t *testing.T) {
 		t.Parallel()
-		// create a new request with a URL parameter
-		req, err := http.NewRequest(http.MethodDelete, deleteOrganizationPath, nil)
+
+		comment := gofakeit.Sentence(5)
+		// create a new request with a json payload
+		payload := fmt.Sprintf(`{"comment": "%s"}`, comment)
+		req, err := http.NewRequest(http.MethodDelete, deleteOrganizationPath, strings.NewReader(payload))
 		require.NoError(t, err)
 
 		org := organization.Organization{
@@ -355,7 +358,7 @@ func TestHandler_DeleteOrganization(t *testing.T) {
 
 		// mock the DeleteOrganization function
 		mockService.On("GetOrganizationBySubdomain", req.Context(), org.Subdomain).Return(org, nil)
-		mockService.On("DeleteOrganization", req.Context(), org.ID).Return(nil)
+		mockService.On("DeleteOrganization", req.Context(), org.ID, comment).Return(nil)
 
 		// call the DeleteOrganization function
 		handler.DeleteOrganization(rr, req)
@@ -367,8 +370,11 @@ func TestHandler_DeleteOrganization(t *testing.T) {
 
 	t.Run("should return an error when get service call fails", func(t *testing.T) {
 		t.Parallel()
-		// create a new request with a URL parameter
-		req, err := http.NewRequest(http.MethodDelete, deleteOrganizationPath, nil)
+
+		comment := gofakeit.Sentence(5)
+		// create a new request with a json payload
+		payload := fmt.Sprintf(`{"comment": "%s"}`, comment)
+		req, err := http.NewRequest(http.MethodDelete, deleteOrganizationPath, strings.NewReader(payload))
 		require.NoError(t, err)
 
 		org := organization.Organization{
@@ -398,8 +404,11 @@ func TestHandler_DeleteOrganization(t *testing.T) {
 
 	t.Run("should return an error when the organization is not found", func(t *testing.T) {
 		t.Parallel()
-		// create a new request with a URL parameter
-		req, err := http.NewRequest(http.MethodDelete, deleteOrganizationPath, nil)
+
+		comment := gofakeit.Sentence(5)
+		// create a new request with a json payload
+		payload := fmt.Sprintf(`{"comment": "%s"}`, comment)
+		req, err := http.NewRequest(http.MethodDelete, deleteOrganizationPath, strings.NewReader(payload))
 		require.NoError(t, err)
 
 		org := organization.Organization{
@@ -429,8 +438,11 @@ func TestHandler_DeleteOrganization(t *testing.T) {
 
 	t.Run("should return an error when delete service call fails", func(t *testing.T) {
 		t.Parallel()
-		// create a new request with a URL parameter
-		req, err := http.NewRequest(http.MethodDelete, deleteOrganizationPath, nil)
+
+		comment := gofakeit.Sentence(5)
+		// create a new request with a json payload
+		payload := fmt.Sprintf(`{"comment": "%s"}`, comment)
+		req, err := http.NewRequest(http.MethodDelete, deleteOrganizationPath, strings.NewReader(payload))
 		require.NoError(t, err)
 
 		org := organization.Organization{
@@ -448,7 +460,7 @@ func TestHandler_DeleteOrganization(t *testing.T) {
 
 		// mock the DeleteOrganization function
 		mockService.On("GetOrganizationBySubdomain", req.Context(), org.Subdomain).Return(org, nil)
-		mockService.On("DeleteOrganization", req.Context(), org.ID).
+		mockService.On("DeleteOrganization", req.Context(), org.ID, comment).
 			Return(assert.AnError)
 
 		// call the DeleteOrganization function

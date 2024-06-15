@@ -1,12 +1,13 @@
 package organization_test
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/camelhr/camelhr-api/internal/domains/auth"
 	"github.com/camelhr/camelhr-api/internal/domains/organization"
 	"github.com/camelhr/camelhr-api/internal/tests/fake"
@@ -61,7 +62,7 @@ func (s *OrganizationTestSuite) TestHandlerIntegration_UpdateOrganization() {
 
 		fakeOrg := fake.NewOrganization(s.DB)
 		u := fake.NewUser(s.DB, fakeOrg.Organization.ID)
-		updatePayload := organization.Request{
+		updatePayload := organization.UpdateRequest{
 			Name: randomOrganizationName(),
 		}
 		orgJSON, err := json.Marshal(updatePayload)
@@ -71,7 +72,7 @@ func (s *OrganizationTestSuite) TestHandlerIntegration_UpdateOrganization() {
 		req, err := http.NewRequest(
 			http.MethodPut,
 			fmt.Sprintf(orgPathFormat, fakeOrg.Subdomain),
-			strings.NewReader(string(orgJSON)),
+			bytes.NewReader(orgJSON),
 		)
 		s.Require().NoError(err)
 		req.SetBasicAuth(*u.APIToken, auth.APITokenBasicAuthPassword)
@@ -98,11 +99,17 @@ func (s *OrganizationTestSuite) TestHandlerIntegration_DeleteOrganization() {
 		fakeOrg := fake.NewOrganization(s.DB)
 		u := fake.NewUser(s.DB, fakeOrg.Organization.ID)
 
+		deletePayload := organization.DeleteRequest{
+			Comment: gofakeit.Sentence(5),
+		}
+		deleteJSON, err := json.Marshal(deletePayload)
+		s.Require().NoError(err)
+
 		// create a new request
 		req, err := http.NewRequest(
 			http.MethodDelete,
 			fmt.Sprintf(orgPathFormat, fakeOrg.Subdomain),
-			nil,
+			bytes.NewReader(deleteJSON),
 		)
 		s.Require().NoError(err)
 		req.SetBasicAuth(*u.APIToken, auth.APITokenBasicAuthPassword)
