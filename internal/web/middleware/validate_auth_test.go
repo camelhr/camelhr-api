@@ -38,7 +38,7 @@ func TestAuthMiddleware_ValidateAuth(t *testing.T) {
 		// generate a new jwt token
 		userID := gofakeit.Int64()
 		orgID := gofakeit.Int64()
-		subdomain := gofakeit.Word()
+		subdomain := gofakeit.LetterN(30)
 		token, err := auth.GenerateJWT(appSecret, userID, orgID, subdomain)
 		require.NoError(t, err)
 		require.NotEmpty(t, token)
@@ -51,9 +51,9 @@ func TestAuthMiddleware_ValidateAuth(t *testing.T) {
 		req.Header.Set("Authorization", "Bearer "+token)
 
 		// simulate chi's URL parameters
-		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("subdomain", subdomain)
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
+		routeContext := chi.NewRouteContext()
+		routeContext.URLParams.Add("subdomain", subdomain)
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
 
 		// create a new response recorder
 		rr := httptest.NewRecorder()
@@ -98,7 +98,7 @@ func TestAuthMiddleware_ValidateAuth(t *testing.T) {
 		// generate a new jwt token
 		userID := gofakeit.Int64()
 		orgID := gofakeit.Int64()
-		subdomain := gofakeit.Word()
+		subdomain := gofakeit.LetterN(30)
 		token, err := auth.GenerateJWT(appSecret, userID, orgID, subdomain)
 		require.NoError(t, err)
 		require.NotEmpty(t, token)
@@ -114,9 +114,9 @@ func TestAuthMiddleware_ValidateAuth(t *testing.T) {
 		})
 
 		// simulate chi's URL parameters
-		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("subdomain", subdomain)
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
+		routeContext := chi.NewRouteContext()
+		routeContext.URLParams.Add("subdomain", subdomain)
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
 
 		// create a new response recorder
 		rr := httptest.NewRecorder()
@@ -152,7 +152,7 @@ func TestAuthMiddleware_ValidateAuth(t *testing.T) {
 
 		sessionManager := session.NewMockSessionManager(t)
 		userService := user.NewMockService(t)
-		subdomain := gofakeit.Word()
+		subdomain := gofakeit.LetterN(30)
 		apiToken := gofakeit.UUID()
 		u := user.User{
 			ID:             gofakeit.Int64(),
@@ -181,9 +181,9 @@ func TestAuthMiddleware_ValidateAuth(t *testing.T) {
 		)
 
 		// simulate chi's URL parameters
-		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("subdomain", subdomain)
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
+		routeContext := chi.NewRouteContext()
+		routeContext.URLParams.Add("subdomain", subdomain)
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
 
 		// create a new response recorder
 		rr := httptest.NewRecorder()
@@ -219,7 +219,7 @@ func TestAuthMiddleware_ValidateAuth(t *testing.T) {
 
 		sessionManager := session.NewMockSessionManager(t)
 		userService := user.NewMockService(t)
-		subdomain := gofakeit.Word()
+		subdomain := gofakeit.LetterN(30)
 		apiToken := gofakeit.UUID()
 		u := user.User{
 			ID:             gofakeit.Int64(),
@@ -248,9 +248,9 @@ func TestAuthMiddleware_ValidateAuth(t *testing.T) {
 		)
 
 		// simulate chi's URL parameters
-		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("subdomain", subdomain)
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
+		routeContext := chi.NewRouteContext()
+		routeContext.URLParams.Add("subdomain", subdomain)
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
 
 		// create a new response recorder
 		rr := httptest.NewRecorder()
@@ -269,7 +269,7 @@ func TestAuthMiddleware_ValidateAuth(t *testing.T) {
 
 		sessionManager := session.NewMockSessionManager(t)
 		userService := user.NewMockService(t)
-		subdomain := gofakeit.Word()
+		subdomain := gofakeit.LetterN(30)
 		apiToken := gofakeit.UUID()
 		userID := gofakeit.Int64()
 		orgID := gofakeit.Int64()
@@ -290,9 +290,9 @@ func TestAuthMiddleware_ValidateAuth(t *testing.T) {
 		)
 
 		// simulate chi's URL parameters
-		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("subdomain", subdomain)
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
+		routeContext := chi.NewRouteContext()
+		routeContext.URLParams.Add("subdomain", subdomain)
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
 
 		// create a new response recorder
 		rr := httptest.NewRecorder()
@@ -378,9 +378,9 @@ func TestAuthMiddleware_ValidateAuth(t *testing.T) {
 		req.Header.Set("Authorization", "Bearer "+token)
 
 		// simulate chi's URL parameters
-		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("subdomain", "test")
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
+		routeContext := chi.NewRouteContext()
+		routeContext.URLParams.Add("subdomain", "test")
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
 
 		// create a new response recorder
 		rr := httptest.NewRecorder()
@@ -408,7 +408,7 @@ func TestAuthMiddleware_ValidateAuth(t *testing.T) {
 		// generate a new jwt token
 		userID := gofakeit.Int64()
 		orgID := gofakeit.Int64()
-		subdomain := gofakeit.Word()
+		subdomain := gofakeit.LetterN(30)
 		token, err := auth.GenerateJWT(appSecret, userID, orgID, subdomain)
 		require.NoError(t, err)
 		require.NotEmpty(t, token)
@@ -422,9 +422,9 @@ func TestAuthMiddleware_ValidateAuth(t *testing.T) {
 		req.Header.Set("Authorization", "Bearer "+token)
 
 		// simulate chi's URL parameters
-		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("subdomain", subdomain)
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
+		routeContext := chi.NewRouteContext()
+		routeContext.URLParams.Add("subdomain", subdomain)
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
 
 		// create a new response recorder
 		rr := httptest.NewRecorder()
@@ -443,7 +443,7 @@ func TestAuthMiddleware_ValidateAuth(t *testing.T) {
 
 		sessionManager := session.NewMockSessionManager(t)
 		userService := user.NewMockService(t)
-		subdomain := gofakeit.Word()
+		subdomain := gofakeit.LetterN(30)
 		apiToken := gofakeit.UUID()
 
 		sessionManager.On("ValidateAPITokenSession", fake.MockContext, apiToken).
@@ -463,9 +463,9 @@ func TestAuthMiddleware_ValidateAuth(t *testing.T) {
 		)
 
 		// simulate chi's URL parameters
-		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("subdomain", subdomain)
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
+		routeContext := chi.NewRouteContext()
+		routeContext.URLParams.Add("subdomain", subdomain)
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
 
 		// create a new response recorder
 		rr := httptest.NewRecorder()
@@ -484,7 +484,7 @@ func TestAuthMiddleware_ValidateAuth(t *testing.T) {
 
 		sessionManager := session.NewMockSessionManager(t)
 		userService := user.NewMockService(t)
-		subdomain := gofakeit.Word()
+		subdomain := gofakeit.LetterN(30)
 		apiToken := gofakeit.UUID()
 		now := time.Now()
 		u := user.User{
@@ -509,9 +509,9 @@ func TestAuthMiddleware_ValidateAuth(t *testing.T) {
 		)
 
 		// simulate chi's URL parameters
-		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("subdomain", subdomain)
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
+		routeContext := chi.NewRouteContext()
+		routeContext.URLParams.Add("subdomain", subdomain)
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
 
 		// create a new response recorder
 		rr := httptest.NewRecorder()
@@ -540,9 +540,9 @@ func TestAuthMiddleware_ValidateAuth(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/api/some-endpoint", nil)
 
 		// simulate chi's URL parameters
-		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("subdomain", "test")
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
+		routeContext := chi.NewRouteContext()
+		routeContext.URLParams.Add("subdomain", "test")
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
 
 		// create a new response recorder
 		rr := httptest.NewRecorder()

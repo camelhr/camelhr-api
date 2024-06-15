@@ -32,7 +32,7 @@ func TestService_Register(t *testing.T) {
 		ctx := context.Background()
 		email := gofakeit.Email()
 		orgName := gofakeit.Company()
-		subdomain := gofakeit.Word()
+		subdomain := gofakeit.LetterN(30)
 
 		orgService := organization.NewMockService(t)
 		orgService.On("GetOrganizationBySubdomain", ctx, subdomain).
@@ -53,7 +53,7 @@ func TestService_Register(t *testing.T) {
 			email := gofakeit.Email()
 
 			orgName := gofakeit.Company()
-			subdomain := gofakeit.Word()
+			subdomain := gofakeit.LetterN(30)
 
 			orgService := organization.NewMockService(t)
 			orgService.On("GetOrganizationBySubdomain", ctx, subdomain).
@@ -72,7 +72,7 @@ func TestService_Register(t *testing.T) {
 		ctx := context.Background()
 		email := gofakeit.Email()
 		orgName := gofakeit.Company()
-		subdomain := gofakeit.Word()
+		subdomain := gofakeit.LetterN(30)
 		notFoundErr := base.NewNotFoundError("not found")
 
 		orgService := organization.NewMockService(t)
@@ -95,7 +95,7 @@ func TestService_Register(t *testing.T) {
 		ctx := context.Background()
 		email := gofakeit.Email()
 		orgName := gofakeit.Company()
-		subdomain := gofakeit.Word()
+		subdomain := gofakeit.LetterN(30)
 		notFoundErr := base.NewNotFoundError("not found")
 
 		orgService := organization.NewMockService(t)
@@ -119,7 +119,7 @@ func TestService_Login(t *testing.T) {
 			t.Parallel()
 
 			ctx := context.Background()
-			subdomain := gofakeit.Word()
+			subdomain := gofakeit.LetterN(30)
 
 			orgService := organization.NewMockService(t)
 			orgService.On("GetOrganizationBySubdomain", ctx, subdomain).Return(organization.Organization{}, assert.AnError)
@@ -135,7 +135,7 @@ func TestService_Login(t *testing.T) {
 		t.Parallel()
 
 		ctx := context.Background()
-		subdomain := gofakeit.Word()
+		subdomain := gofakeit.LetterN(30)
 		now := time.Now()
 		o := organization.Organization{ID: gofakeit.Int64(), DisabledAt: &now}
 
@@ -154,7 +154,7 @@ func TestService_Login(t *testing.T) {
 			t.Parallel()
 
 			ctx := context.Background()
-			subdomain := gofakeit.Word()
+			subdomain := gofakeit.LetterN(30)
 			o := organization.Organization{ID: gofakeit.Int64()}
 			email := gofakeit.Email()
 
@@ -176,7 +176,7 @@ func TestService_Login(t *testing.T) {
 			t.Parallel()
 
 			ctx := context.Background()
-			subdomain := gofakeit.Word()
+			subdomain := gofakeit.LetterN(30)
 			o := organization.Organization{ID: gofakeit.Int64()}
 			email := gofakeit.Email()
 
@@ -197,7 +197,7 @@ func TestService_Login(t *testing.T) {
 		t.Parallel()
 
 		ctx := context.Background()
-		subdomain := gofakeit.Word()
+		subdomain := gofakeit.LetterN(30)
 		email := gofakeit.Email()
 		passwordHash, err := bcrypt.GenerateFromPassword([]byte(validPassword), bcrypt.DefaultCost)
 		require.NoError(t, err)
@@ -227,7 +227,7 @@ func TestService_Login(t *testing.T) {
 		t.Parallel()
 
 		ctx := context.Background()
-		subdomain := gofakeit.Word()
+		subdomain := gofakeit.LetterN(30)
 		email := gofakeit.Email()
 		passwordHash, err := bcrypt.GenerateFromPassword([]byte(validPassword), bcrypt.DefaultCost)
 		require.NoError(t, err)
@@ -255,7 +255,7 @@ func TestService_Login(t *testing.T) {
 		t.Parallel()
 
 		ctx := context.Background()
-		subdomain := gofakeit.Word()
+		subdomain := gofakeit.LetterN(30)
 		email := gofakeit.Email()
 		passwordHash, err := bcrypt.GenerateFromPassword([]byte(validPassword), bcrypt.DefaultCost)
 		require.NoError(t, err)
@@ -289,7 +289,7 @@ func TestService_Login(t *testing.T) {
 		t.Parallel()
 
 		ctx := context.Background()
-		subdomain := gofakeit.Word()
+		subdomain := gofakeit.LetterN(30)
 		email := gofakeit.Email()
 		passwordHash, err := bcrypt.GenerateFromPassword([]byte(validPassword), bcrypt.DefaultCost)
 		require.NoError(t, err)

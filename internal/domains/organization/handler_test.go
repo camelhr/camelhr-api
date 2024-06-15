@@ -42,9 +42,9 @@ func TestHandler_GetOrganizationBySubdomain(t *testing.T) {
 			},
 		}
 		// simulate chi's URL parameters
-		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("subdomain", org.Subdomain)
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
+		routeContext := chi.NewRouteContext()
+		routeContext.URLParams.Add("subdomain", org.Subdomain)
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
 
 		expectedBody := fmt.Sprintf(`{"id": %d, "subdomain": "%s", "name": "%s",
 		"suspended_at": null, "disabled_at": null, "created_at": "%s", "updated_at": "%s"}`,
@@ -73,9 +73,9 @@ func TestHandler_GetOrganizationBySubdomain(t *testing.T) {
 		require.NoError(t, err)
 
 		// simulate chi's URL parameters
-		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("subdomain", "sub1")
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
+		routeContext := chi.NewRouteContext()
+		routeContext.URLParams.Add("subdomain", "sub1")
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
 
 		mockService := organization.NewMockService(t)
 		rr := httptest.NewRecorder()
@@ -100,9 +100,9 @@ func TestHandler_GetOrganizationBySubdomain(t *testing.T) {
 		require.NoError(t, err)
 
 		// simulate chi's URL parameters
-		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("subdomain", "sub1")
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
+		routeContext := chi.NewRouteContext()
+		routeContext.URLParams.Add("subdomain", "sub1")
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
 
 		mockService := organization.NewMockService(t)
 		rr := httptest.NewRecorder()
@@ -139,9 +139,9 @@ func TestHandler_UpdateOrganization(t *testing.T) {
 		require.NoError(t, err)
 
 		// simulate chi's URL parameters
-		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("subdomain", subdomain)
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
+		routeContext := chi.NewRouteContext()
+		routeContext.URLParams.Add("subdomain", subdomain)
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
 
 		mockService := organization.NewMockService(t)
 		rr := httptest.NewRecorder()
@@ -169,9 +169,9 @@ func TestHandler_UpdateOrganization(t *testing.T) {
 		require.NoError(t, err)
 
 		// simulate chi's URL parameters
-		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("subdomain", subdomain)
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
+		routeContext := chi.NewRouteContext()
+		routeContext.URLParams.Add("subdomain", subdomain)
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
 
 		mockService := organization.NewMockService(t)
 		rr := httptest.NewRecorder()
@@ -199,9 +199,9 @@ func TestHandler_UpdateOrganization(t *testing.T) {
 		require.NoError(t, err)
 
 		// simulate chi's URL parameters
-		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("subdomain", subdomain)
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
+		routeContext := chi.NewRouteContext()
+		routeContext.URLParams.Add("subdomain", subdomain)
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
 
 		mockService := organization.NewMockService(t)
 		rr := httptest.NewRecorder()
@@ -234,9 +234,9 @@ func TestHandler_UpdateOrganization(t *testing.T) {
 		require.NoError(t, err)
 
 		// simulate chi's URL parameters
-		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("subdomain", subdomain)
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
+		routeContext := chi.NewRouteContext()
+		routeContext.URLParams.Add("subdomain", subdomain)
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
 
 		mockService := organization.NewMockService(t)
 		rr := httptest.NewRecorder()
@@ -314,9 +314,9 @@ func TestHandler_UpdateOrganization(t *testing.T) {
 				require.NoError(t, err)
 
 				// simulate chi's URL parameters
-				reqContext := chi.NewRouteContext()
-				reqContext.URLParams.Add("subdomain", subdomain)
-				req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
+				routeContext := chi.NewRouteContext()
+				routeContext.URLParams.Add("subdomain", subdomain)
+				req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
 
 				mockService := organization.NewMockService(t)
 				rr := httptest.NewRecorder()
@@ -345,9 +345,9 @@ func TestHandler_DeleteOrganization(t *testing.T) {
 			Subdomain: randomOrganizationSubdomain(),
 		}
 		// simulate chi's URL parameters
-		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("subdomain", org.Subdomain)
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
+		routeContext := chi.NewRouteContext()
+		routeContext.URLParams.Add("subdomain", org.Subdomain)
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
 
 		mockService := organization.NewMockService(t)
 		rr := httptest.NewRecorder()
@@ -376,9 +376,9 @@ func TestHandler_DeleteOrganization(t *testing.T) {
 			Subdomain: randomOrganizationSubdomain(),
 		}
 		// simulate chi's URL parameters
-		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("subdomain", org.Subdomain)
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
+		routeContext := chi.NewRouteContext()
+		routeContext.URLParams.Add("subdomain", org.Subdomain)
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
 
 		mockService := organization.NewMockService(t)
 		rr := httptest.NewRecorder()
@@ -407,9 +407,9 @@ func TestHandler_DeleteOrganization(t *testing.T) {
 			Subdomain: randomOrganizationSubdomain(),
 		}
 		// simulate chi's URL parameters
-		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("subdomain", org.Subdomain)
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
+		routeContext := chi.NewRouteContext()
+		routeContext.URLParams.Add("subdomain", org.Subdomain)
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
 
 		mockService := organization.NewMockService(t)
 		rr := httptest.NewRecorder()
@@ -438,9 +438,9 @@ func TestHandler_DeleteOrganization(t *testing.T) {
 			Subdomain: randomOrganizationSubdomain(),
 		}
 		// simulate chi's URL parameters
-		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("subdomain", org.Subdomain)
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
+		routeContext := chi.NewRouteContext()
+		routeContext.URLParams.Add("subdomain", org.Subdomain)
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
 
 		mockService := organization.NewMockService(t)
 		rr := httptest.NewRecorder()

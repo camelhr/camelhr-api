@@ -33,7 +33,7 @@ func TestHandler_Register(t *testing.T) {
 
 		email := "invalid email"
 		password := validPassword
-		subdomain := gofakeit.Word()
+		subdomain := gofakeit.LetterN(30)
 		orgName := gofakeit.Company()
 		payload := fmt.Sprintf(`{"email": "%s","password":"%s","organization_subdomain":"%s","organization_name":"%s"}`,
 			email, password, subdomain, orgName,
@@ -58,7 +58,7 @@ func TestHandler_Register(t *testing.T) {
 
 		email := gofakeit.Email()
 		password := "@2nR"
-		subdomain := gofakeit.Word()
+		subdomain := gofakeit.LetterN(30)
 		orgName := gofakeit.Company()
 		payload := fmt.Sprintf(`{"email": "%s","password":"%s","organization_subdomain":"%s","organization_name":"%s"}`,
 			email, password, subdomain, orgName,
@@ -108,7 +108,7 @@ func TestHandler_Register(t *testing.T) {
 
 		email := gofakeit.Email()
 		password := validPassword
-		subdomain := gofakeit.Word()
+		subdomain := gofakeit.LetterN(30)
 		orgName := gofakeit.LetterN(61)
 		payload := fmt.Sprintf(`{"email": "%s","password":"%s","organization_subdomain":"%s","organization_name":"%s"}`,
 			email, password, subdomain, orgName,
@@ -133,7 +133,7 @@ func TestHandler_Register(t *testing.T) {
 
 		email := gofakeit.Email()
 		password := validPassword
-		subdomain := gofakeit.Word()
+		subdomain := gofakeit.LetterN(30)
 		orgName := gofakeit.Company()
 		payload := fmt.Sprintf(`{"email": "%s","password":"%s","organization_subdomain":"%s","organization_name":"%s"}`,
 			email, password, subdomain, orgName,
@@ -161,7 +161,7 @@ func TestHandler_Register(t *testing.T) {
 
 		email := gofakeit.Email()
 		password := validPassword
-		subdomain := gofakeit.Word()
+		subdomain := gofakeit.LetterN(30)
 		orgName := gofakeit.Company()
 		payload := fmt.Sprintf(`{"email": "%s","password":"%s","organization_subdomain":"%s","organization_name":"%s"}`,
 			email, password, subdomain, orgName,
@@ -196,9 +196,9 @@ func TestHandler_Login(t *testing.T) {
 		require.NoError(t, err)
 
 		// simulate chi's URL parameters
-		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("subdomain", subdomain)
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
+		routeContext := chi.NewRouteContext()
+		routeContext.URLParams.Add("subdomain", subdomain)
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
 
 		mockService := auth.NewMockService(t)
 		rr := httptest.NewRecorder()
@@ -217,7 +217,7 @@ func TestHandler_Login(t *testing.T) {
 
 		email := "invalid email"
 		password := validPassword
-		subdomain := gofakeit.Word()
+		subdomain := gofakeit.LetterN(30)
 
 		// create url-encoded form data
 		form := url.Values{}
@@ -228,9 +228,9 @@ func TestHandler_Login(t *testing.T) {
 		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 		// simulate chi's URL parameters
-		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("subdomain", subdomain)
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
+		routeContext := chi.NewRouteContext()
+		routeContext.URLParams.Add("subdomain", subdomain)
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
 
 		mockService := auth.NewMockService(t)
 		rr := httptest.NewRecorder()
@@ -249,7 +249,7 @@ func TestHandler_Login(t *testing.T) {
 
 		email := gofakeit.Email()
 		password := "@2nR"
-		subdomain := gofakeit.Word()
+		subdomain := gofakeit.LetterN(30)
 
 		// create url-encoded form data
 		form := url.Values{}
@@ -260,9 +260,9 @@ func TestHandler_Login(t *testing.T) {
 		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 		// simulate chi's URL parameters
-		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("subdomain", subdomain)
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
+		routeContext := chi.NewRouteContext()
+		routeContext.URLParams.Add("subdomain", subdomain)
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
 
 		mockService := auth.NewMockService(t)
 		rr := httptest.NewRecorder()
@@ -281,7 +281,7 @@ func TestHandler_Login(t *testing.T) {
 
 		email := gofakeit.Email()
 		password := validPassword
-		subdomain := gofakeit.Word()
+		subdomain := gofakeit.LetterN(30)
 
 		// create url-encoded form data
 		form := url.Values{}
@@ -292,9 +292,9 @@ func TestHandler_Login(t *testing.T) {
 		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 		// simulate chi's URL parameters
-		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("subdomain", subdomain)
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
+		routeContext := chi.NewRouteContext()
+		routeContext.URLParams.Add("subdomain", subdomain)
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
 
 		mockService := auth.NewMockService(t)
 		rr := httptest.NewRecorder()
@@ -316,7 +316,7 @@ func TestHandler_Login(t *testing.T) {
 
 		email := gofakeit.Email()
 		password := validPassword
-		subdomain := gofakeit.Word()
+		subdomain := gofakeit.LetterN(30)
 
 		// create url-encoded form data
 		form := url.Values{}
@@ -327,9 +327,9 @@ func TestHandler_Login(t *testing.T) {
 		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 		// simulate chi's URL parameters
-		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("subdomain", subdomain)
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
+		routeContext := chi.NewRouteContext()
+		routeContext.URLParams.Add("subdomain", subdomain)
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
 
 		mockService := auth.NewMockService(t)
 		rr := httptest.NewRecorder()
@@ -351,7 +351,7 @@ func TestHandler_Login(t *testing.T) {
 
 		email := gofakeit.Email()
 		password := validPassword
-		subdomain := gofakeit.Word()
+		subdomain := gofakeit.LetterN(30)
 
 		// create url-encoded form data
 		form := url.Values{}
@@ -362,9 +362,9 @@ func TestHandler_Login(t *testing.T) {
 		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 		// simulate chi's URL parameters
-		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("subdomain", subdomain)
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
+		routeContext := chi.NewRouteContext()
+		routeContext.URLParams.Add("subdomain", subdomain)
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
 
 		mockService := auth.NewMockService(t)
 		rr := httptest.NewRecorder()
@@ -386,7 +386,7 @@ func TestHandler_Login(t *testing.T) {
 
 		email := gofakeit.Email()
 		password := validPassword
-		subdomain := gofakeit.Word()
+		subdomain := gofakeit.LetterN(30)
 
 		// create url-encoded form data
 		form := url.Values{}
@@ -397,9 +397,9 @@ func TestHandler_Login(t *testing.T) {
 		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 		// simulate chi's URL parameters
-		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("subdomain", subdomain)
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
+		routeContext := chi.NewRouteContext()
+		routeContext.URLParams.Add("subdomain", subdomain)
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
 
 		mockService := auth.NewMockService(t)
 		rr := httptest.NewRecorder()
@@ -422,7 +422,7 @@ func TestHandler_Login(t *testing.T) {
 		jwt := gofakeit.UUID()
 		email := gofakeit.Email()
 		password := validPassword
-		subdomain := gofakeit.Word()
+		subdomain := gofakeit.LetterN(30)
 
 		// create url-encoded form data
 		form := url.Values{}
@@ -433,9 +433,9 @@ func TestHandler_Login(t *testing.T) {
 		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 		// simulate chi's URL parameters
-		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("subdomain", subdomain)
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, reqContext))
+		routeContext := chi.NewRouteContext()
+		routeContext.URLParams.Add("subdomain", subdomain)
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
 
 		mockService := auth.NewMockService(t)
 		rr := httptest.NewRecorder()
@@ -469,7 +469,7 @@ func TestHandler_Logout(t *testing.T) {
 		require.NoError(t, err)
 
 		// set required values in request context
-		subdomain := gofakeit.Word()
+		subdomain := gofakeit.LetterN(30)
 		userID := gofakeit.Int64()
 		orgID := gofakeit.Int64()
 		ctx := req.Context()
@@ -478,9 +478,9 @@ func TestHandler_Logout(t *testing.T) {
 		ctx = context.WithValue(ctx, request.CtxOrgIDKey, orgID)
 
 		// simulate chi's URL parameters
-		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("subdomain", subdomain)
-		ctx = context.WithValue(ctx, chi.RouteCtxKey, reqContext)
+		routeContext := chi.NewRouteContext()
+		routeContext.URLParams.Add("subdomain", subdomain)
+		ctx = context.WithValue(ctx, chi.RouteCtxKey, routeContext)
 		req = req.WithContext(ctx)
 
 		mockService := auth.NewMockService(t)
@@ -509,7 +509,7 @@ func TestHandler_Logout(t *testing.T) {
 		require.NoError(t, err)
 
 		// set required values in request context
-		subdomain := gofakeit.Word()
+		subdomain := gofakeit.LetterN(30)
 		userID := gofakeit.Int64()
 		orgID := gofakeit.Int64()
 		ctx := req.Context()
@@ -518,9 +518,9 @@ func TestHandler_Logout(t *testing.T) {
 		ctx = context.WithValue(ctx, request.CtxOrgIDKey, orgID)
 
 		// simulate chi's URL parameters
-		reqContext := chi.NewRouteContext()
-		reqContext.URLParams.Add("subdomain", subdomain)
-		ctx = context.WithValue(ctx, chi.RouteCtxKey, reqContext)
+		routeContext := chi.NewRouteContext()
+		routeContext.URLParams.Add("subdomain", subdomain)
+		ctx = context.WithValue(ctx, chi.RouteCtxKey, routeContext)
 		req = req.WithContext(ctx)
 
 		mockService := auth.NewMockService(t)
@@ -545,7 +545,7 @@ func TestHandler_Logout(t *testing.T) {
 		require.NoError(t, err)
 
 		// set required values in request context
-		subdomain := gofakeit.Word()
+		subdomain := gofakeit.LetterN(30)
 		orgID := gofakeit.Int64()
 		ctx := req.Context()
 		ctx = context.WithValue(ctx, request.CtxOrgSubdomainKey, subdomain)
@@ -571,7 +571,7 @@ func TestHandler_Logout(t *testing.T) {
 		require.NoError(t, err)
 
 		// set required values in request context
-		subdomain := gofakeit.Word()
+		subdomain := gofakeit.LetterN(30)
 		userID := gofakeit.Int64()
 		ctx := req.Context()
 		ctx = context.WithValue(ctx, request.CtxOrgSubdomainKey, subdomain)
