@@ -1,13 +1,10 @@
 package organization
 
 import (
-	"errors"
 	"time"
 
 	"github.com/camelhr/camelhr-api/internal/base"
 )
-
-var ErrOrganizationDisabled = errors.New("organization is disabled")
 
 // Organization represents an organization.
 type Organization struct {
@@ -22,9 +19,6 @@ type Organization struct {
 
 	// SuspendedAt is the timestamp when the organization was suspended.
 	SuspendedAt *time.Time `db:"suspended_at"`
-
-	// DisabledAt is the timestamp when the organization was disabled.
-	DisabledAt *time.Time `db:"disabled_at"`
 
 	// Comment represents any additional information about the organization's current state.
 	Comment *string `db:"comment"`
@@ -48,6 +42,5 @@ type Response struct {
 	Subdomain   string     `json:"subdomain"`
 	Name        string     `json:"name"`
 	SuspendedAt *time.Time `json:"suspended_at"`
-	DisabledAt  *time.Time `json:"disabled_at"`
 	base.Timestamps
 }

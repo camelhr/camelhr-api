@@ -134,7 +134,6 @@ func toOrganizationResponse(org organization.Organization) organization.Response
 		Subdomain:   org.Subdomain,
 		Name:        org.Name,
 		SuspendedAt: org.SuspendedAt,
-		DisabledAt:  org.DisabledAt,
 		Timestamps:  org.Timestamps,
 	}
 }

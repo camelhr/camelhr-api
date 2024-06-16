@@ -33,12 +33,6 @@ type Service interface {
 
 	// UnsuspendOrganization unsuspend an organization by its ID.
 	UnsuspendOrganization(ctx context.Context, id int64, comment string) error
-
-	// DisableOrganization disables an organization by its ID.
-	DisableOrganization(ctx context.Context, id int64, comment string) error
-
-	// EnableOrganization enable an organization by its ID.
-	EnableOrganization(ctx context.Context, id int64, comment string) error
 }
 
 type service struct {
@@ -131,20 +125,4 @@ func (s *service) UnsuspendOrganization(ctx context.Context, id int64, comment s
 	}
 
 	return s.repo.UnsuspendOrganization(ctx, id, comment)
-}
-
-func (s *service) DisableOrganization(ctx context.Context, id int64, comment string) error {
-	if err := ValidateComment(comment); err != nil {
-		return err
-	}
-
-	return s.repo.DisableOrganization(ctx, id, comment)
-}
-
-func (s *service) EnableOrganization(ctx context.Context, id int64, comment string) error {
-	if err := ValidateComment(comment); err != nil {
-		return err
-	}
-
-	return s.repo.EnableOrganization(ctx, id, comment)
 }

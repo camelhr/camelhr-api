@@ -2,6 +2,7 @@ package auth_test
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"strconv"
 	"time"
@@ -15,45 +16,42 @@ import (
 )
 
 func (s *AuthTestSuite) TestServiceIntegration_Register() {
-	s.Run("should return error when subdomain already exists", func() {
-		s.T().Parallel()
+	// getOrganizationBySubdomain is a helper function that returns an organization by its subdomain
+	// even if the organization is deleted.
+	getOrganizationBySubdomain := func(subdomain string) (organization.Organization, error) {
+		var o organization.Organization
 
-		userRepo := user.NewRepository(s.DB)
-		userService := user.NewService(userRepo, nil)
-		orgRepo := organization.NewRepository(s.DB)
-		orgService := organization.NewService(orgRepo, nil)
-		sessionManager := session.NewRedisSessionManager(s.RedisClient)
-		authService := auth.NewService(s.Config.AppSecret, s.DB, orgService, userService, sessionManager)
+		err := s.DB.Get(context.Background(), &o,
+			"SELECT * FROM organizations WHERE subdomain = $1", subdomain)
+		if err != nil {
+			return organization.Organization{}, err
+		}
 
-		subdomain := gofakeit.LetterN(20)
-		orgName := gofakeit.LetterN(50)
-		email := gofakeit.Email()
-		password := "yiG3@#fj"
+		return o, nil
+	}
 
-		err := authService.Register(context.Background(), email, password, subdomain, orgName)
-		s.Require().NoError(err)
+	// getUserByOrgIDEmail is a helper function that returns a user by its organization ID and email
+	// even if the user is deleted.
+	getUserByOrgIDEmail := func(orgID int64, email string) (user.User, error) {
+		var u user.User
 
-		newOrg, err := orgService.GetOrganizationBySubdomain(context.Background(), subdomain)
-		s.Require().NoError(err)
-		s.NotZero(newOrg.ID)
-		s.Equal(subdomain, newOrg.Subdomain)
-		s.Equal(orgName, newOrg.Name)
+		err := s.DB.Get(context.Background(), &u,
+			"SELECT * FROM users WHERE organization_id = $1 AND email = $2", orgID, email)
+		if err != nil {
+			return user.User{}, err
+		}
 
-		newUser, err := userService.GetUserByOrgIDEmail(context.Background(), newOrg.ID, email)
-		s.Require().NoError(err)
-		s.NotZero(newUser.ID)
-		s.Equal(email, newUser.Email)
-		s.NotEmpty(newUser.PasswordHash)
-	})
+		return u, nil
+	}
 
 	s.Run("should rollback txn and revert org if user creation fails", func() {
 		s.T().Parallel()
 
+		sessionManager := session.NewRedisSessionManager(s.RedisClient)
 		userRepo := user.NewRepository(s.DB)
 		userService := user.NewService(userRepo, nil)
 		orgRepo := organization.NewRepository(s.DB)
-		orgService := organization.NewService(orgRepo, nil)
-		sessionManager := session.NewRedisSessionManager(s.RedisClient)
+		orgService := organization.NewService(orgRepo, sessionManager)
 		authService := auth.NewService(s.Config.AppSecret, s.DB, orgService, userService, sessionManager)
 
 		subdomain := gofakeit.LetterN(20)
@@ -67,19 +65,19 @@ func (s *AuthTestSuite) TestServiceIntegration_Register() {
 		s.Require().Error(err)
 		s.Require().ErrorContains(err, "email must be a valid email address")
 
-		_, err = orgService.GetOrganizationBySubdomain(context.Background(), subdomain)
+		_, err = getOrganizationBySubdomain(subdomain)
 		s.Require().Error(err)
-		s.Require().EqualError(err, "organization not found for the given subdomain")
+		s.ErrorIs(err, sql.ErrNoRows)
 	})
 
 	s.Run("should register a new organization with owner", func() {
 		s.T().Parallel()
 
+		sessionManager := session.NewRedisSessionManager(s.RedisClient)
 		userRepo := user.NewRepository(s.DB)
 		userService := user.NewService(userRepo, nil)
 		orgRepo := organization.NewRepository(s.DB)
-		orgService := organization.NewService(orgRepo, nil)
-		sessionManager := session.NewRedisSessionManager(s.RedisClient)
+		orgService := organization.NewService(orgRepo, sessionManager)
 		authService := auth.NewService(s.Config.AppSecret, s.DB, orgService, userService, sessionManager)
 
 		subdomain := gofakeit.LetterN(20)
@@ -90,21 +88,21 @@ func (s *AuthTestSuite) TestServiceIntegration_Register() {
 		err := authService.Register(context.Background(), email, password, subdomain, orgName)
 		s.Require().NoError(err)
 
-		newOrg, err := orgService.GetOrganizationBySubdomain(context.Background(), subdomain)
+		newOrg, err := getOrganizationBySubdomain(subdomain)
 		s.Require().NoError(err)
 		s.NotZero(newOrg.ID)
 		s.Equal(subdomain, newOrg.Subdomain)
 		s.Equal(orgName, newOrg.Name)
-		s.NotNil(newOrg.DisabledAt)
-		s.Nil(newOrg.DeletedAt)
-		s.WithinDuration(time.Now().UTC(), *newOrg.DisabledAt, 1*time.Minute)
+		s.NotNil(newOrg.DeletedAt)
+		s.WithinDuration(time.Now().UTC(), *newOrg.DeletedAt, 1*time.Minute)
 		s.NotNil(newOrg.Comment)
-		s.Equal(auth.NewOrgDisableComment, *newOrg.Comment)
+		s.Equal(auth.NewOrgDeleteComment, *newOrg.Comment)
 
-		newUser, err := userService.GetUserByOrgIDEmail(context.Background(), newOrg.ID, email)
+		newUser, err := getUserByOrgIDEmail(newOrg.ID, email)
 		s.Require().NoError(err)
 		s.NotZero(newUser.ID)
-		s.Nil(newUser.DeletedAt)
+		s.NotNil(newUser.DeletedAt)
+		s.WithinDuration(time.Now().UTC(), *newUser.DeletedAt, 1*time.Minute)
 		s.Nil(newUser.DisabledAt)
 		s.Equal(email, newUser.Email)
 		s.NotEmpty(newUser.PasswordHash)

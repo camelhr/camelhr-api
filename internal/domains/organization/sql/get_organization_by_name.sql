@@ -5,11 +5,10 @@ SELECT
     subdomain,
     name,
     suspended_at,
-    disabled_at,
-    comment,
     created_at,
     updated_at,
-    deleted_at
+    deleted_at,
+    comment
 FROM
     organizations
 WHERE

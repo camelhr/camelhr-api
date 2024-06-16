@@ -99,7 +99,6 @@ func (h *handler) toResponse(org Organization) *Response {
 		Subdomain:   org.Subdomain,
 		Name:        org.Name,
 		SuspendedAt: org.SuspendedAt,
-		DisabledAt:  org.DisabledAt,
 		Timestamps:  org.Timestamps,
 	}
 }

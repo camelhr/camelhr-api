@@ -21,7 +21,6 @@ func (s *FakeTestSuite) TestFakeOrganization() {
 		s.NotEmpty(o.ID)
 		s.NotEmpty(o.Name)
 		s.Nil(o.SuspendedAt)
-		s.Nil(o.DisabledAt)
 		s.Nil(o.Comment)
 		s.NotZero(o.CreatedAt)
 		s.NotZero(o.UpdatedAt)
@@ -69,22 +68,6 @@ func (s *FakeTestSuite) TestFakeOrganization() {
 		s.Equal(time.UTC, o.SuspendedAt.Location())
 		s.WithinDuration(time.Now().UTC(), *o.SuspendedAt, 1*time.Minute)
 		s.Nil(o.DeletedAt)
-		s.Nil(o.DisabledAt)
-	})
-
-	s.Run("should created a disabled organization", func() {
-		s.T().Parallel()
-
-		// create a disabled organization
-		o := fake.NewOrganization(s.DB, fake.OrganizationDisabled())
-
-		// assert that the organization is disabled
-		s.Require().NotNil(o)
-		s.Require().NotNil(o.DisabledAt)
-		s.Equal(time.UTC, o.DisabledAt.Location())
-		s.WithinDuration(time.Now().UTC(), *o.DisabledAt, 1*time.Minute)
-		s.Nil(o.DeletedAt)
-		s.Nil(o.SuspendedAt)
 	})
 
 	s.Run("should create a deleted organization", func() {
@@ -110,18 +93,6 @@ func (s *FakeTestSuite) TestFakeOrganization() {
 
 		// assert that the organization is suspended
 		s.True(isSuspended)
-	})
-
-	s.Run("should return true if organization is disabled", func() {
-		s.T().Parallel()
-
-		// create a disabled organization
-		o := fake.NewOrganization(s.DB, fake.OrganizationDisabled())
-		s.Require().NotNil(o)
-		isDisabled := o.IsDisabled(s.DB)
-
-		// assert that the organization is disabled
-		s.True(isDisabled)
 	})
 
 	s.Run("should return true if organization is deleted", func() {

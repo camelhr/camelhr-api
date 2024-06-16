@@ -11,7 +11,6 @@ import (
 
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/camelhr/camelhr-api/internal/domains/auth"
-	"github.com/camelhr/camelhr-api/internal/domains/organization"
 	"github.com/camelhr/camelhr-api/internal/tests/fake"
 	"github.com/camelhr/camelhr-api/internal/web/request"
 	"github.com/go-chi/chi/v5"
@@ -379,41 +378,6 @@ func TestHandler_Login(t *testing.T) {
 		// check the result
 		require.Equal(t, http.StatusUnauthorized, rr.Code)
 		assert.JSONEq(t, `{"error":"user is disabled"}`, rr.Body.String())
-	})
-
-	t.Run("should return unauthorized when organization is disabled", func(t *testing.T) {
-		t.Parallel()
-
-		email := gofakeit.Email()
-		password := validPassword
-		subdomain := gofakeit.LetterN(30)
-
-		// create url-encoded form data
-		form := url.Values{}
-		form.Add("email", email)
-		form.Add("password", password)
-		req, err := http.NewRequest(http.MethodPost, loginPath, strings.NewReader(form.Encode()))
-		require.NoError(t, err)
-		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-
-		// simulate chi's URL parameters
-		routeContext := chi.NewRouteContext()
-		routeContext.URLParams.Add("subdomain", subdomain)
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
-
-		mockService := auth.NewMockService(t)
-		rr := httptest.NewRecorder()
-		handler := auth.NewHandler(mockService)
-
-		// mock the service calls
-		mockService.On("Login", fake.MockContext, subdomain, email, password).Return("", organization.ErrOrganizationDisabled)
-
-		// call the handler
-		handler.Login(rr, req)
-
-		// check the result
-		require.Equal(t, http.StatusUnauthorized, rr.Code)
-		assert.JSONEq(t, `{"error":"organization is disabled"}`, rr.Body.String())
 	})
 
 	t.Run("should login", func(t *testing.T) {

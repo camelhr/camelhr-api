@@ -26,7 +26,6 @@ func (s *OrganizationTestSuite) TestServiceIntegration_GetOrganizationByID() {
 		s.NotZero(result.UpdatedAt)
 		s.Equal(result.CreatedAt, result.UpdatedAt)
 		s.Nil(result.SuspendedAt)
-		s.Nil(result.DisabledAt)
 		s.Nil(result.Comment)
 	})
 }
@@ -46,7 +45,6 @@ func (s *OrganizationTestSuite) TestServiceIntegration_GetOrganizationBySubdomai
 		s.NotZero(result.UpdatedAt)
 		s.Equal(result.CreatedAt, result.UpdatedAt)
 		s.Nil(result.SuspendedAt)
-		s.Nil(result.DisabledAt)
 		s.Nil(result.Comment)
 	})
 }
@@ -66,7 +64,6 @@ func (s *OrganizationTestSuite) TestServiceIntegration_GetOrganizationByName() {
 		s.NotZero(result.UpdatedAt)
 		s.Equal(result.CreatedAt, result.UpdatedAt)
 		s.Nil(result.SuspendedAt)
-		s.Nil(result.DisabledAt)
 		s.Nil(result.Comment)
 	})
 }
@@ -90,7 +87,6 @@ func (s *OrganizationTestSuite) TestServiceIntegration_CreateOrganization() {
 		s.NotZero(result.UpdatedAt)
 		s.Equal(result.CreatedAt, result.UpdatedAt)
 		s.Nil(result.SuspendedAt)
-		s.Nil(result.DisabledAt)
 		s.Nil(result.Comment)
 	})
 }
@@ -113,7 +109,6 @@ func (s *OrganizationTestSuite) TestServiceIntegration_UpdateOrganization() {
 		s.NotZero(result.UpdatedAt)
 		s.GreaterOrEqual(result.UpdatedAt, result.CreatedAt) // could be equal if the update is fast
 		s.Nil(result.SuspendedAt)
-		s.Nil(result.DisabledAt)
 		s.Nil(result.Comment)
 	})
 }
@@ -173,7 +168,6 @@ func (s *OrganizationTestSuite) TestServiceIntegration_SuspendOrganization() {
 		s.NotZero(result.CreatedAt)
 		s.NotZero(result.UpdatedAt)
 		s.Nil(result.DeletedAt)
-		s.Nil(result.DisabledAt)
 	})
 }
 
@@ -194,48 +188,5 @@ func (s *OrganizationTestSuite) TestServiceIntegration_UnsuspendOrganization() {
 		s.NotZero(result.CreatedAt)
 		s.NotZero(result.UpdatedAt)
 		s.Nil(result.DeletedAt)
-		s.Nil(result.DisabledAt)
-	})
-}
-
-func (s *OrganizationTestSuite) TestServiceIntegration_DisableOrganization() {
-	s.Run("should disable organization", func() {
-		s.T().Parallel()
-		repo := organization.NewRepository(s.DB)
-		svc := organization.NewService(repo, nil)
-		org := fake.NewOrganization(s.DB)
-
-		err := svc.DisableOrganization(context.Background(), org.ID, "test disable")
-		s.Require().NoError(err)
-
-		result := org.FetchLatest(s.DB)
-		s.Require().NotNil(result.Comment)
-		s.Equal("test disable", *result.Comment)
-		s.NotNil(result.DisabledAt)
-		s.NotZero(result.CreatedAt)
-		s.NotZero(result.UpdatedAt)
-		s.Nil(result.DeletedAt)
-		s.Nil(result.SuspendedAt)
-	})
-}
-
-func (s *OrganizationTestSuite) TestServiceIntegration_EnableOrganization() {
-	s.Run("should enable organization", func() {
-		s.T().Parallel()
-		repo := organization.NewRepository(s.DB)
-		svc := organization.NewService(repo, nil)
-		org := fake.NewOrganization(s.DB, fake.OrganizationDisabled())
-
-		err := svc.EnableOrganization(context.Background(), org.ID, "test enable")
-		s.Require().NoError(err)
-
-		result := org.FetchLatest(s.DB)
-		s.Require().NotNil(result.Comment)
-		s.Equal("test enable", *result.Comment)
-		s.Nil(result.DisabledAt)
-		s.NotZero(result.CreatedAt)
-		s.NotZero(result.UpdatedAt)
-		s.Nil(result.DeletedAt)
-		s.Nil(result.SuspendedAt)
 	})
 }

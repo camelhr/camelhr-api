@@ -136,7 +136,6 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_CreateOrganization() {
 		s.WithinDuration(time.Now().UTC(), result.UpdatedAt, 1*time.Minute)
 		s.Nil(result.DeletedAt)
 		s.Nil(result.SuspendedAt)
-		s.Nil(result.DisabledAt)
 		s.Nil(result.Comment)
 	})
 
@@ -201,7 +200,6 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_UpdateOrganization() {
 		s.WithinDuration(time.Now().UTC(), result.UpdatedAt, 1*time.Minute)
 		s.Nil(result.DeletedAt)
 		s.Nil(result.SuspendedAt)
-		s.Nil(result.DisabledAt)
 		s.Nil(result.Comment)
 	})
 
@@ -221,7 +219,6 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_UpdateOrganization() {
 		s.Equal(org.CreatedAt, result.CreatedAt)
 		s.NotNil(result.DeletedAt)
 		s.Nil(result.SuspendedAt)
-		s.Nil(result.DisabledAt)
 		s.Nil(result.Comment)
 	})
 }
@@ -286,7 +283,6 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_SuspendOrganization() 
 		s.Require().NotNil(result.Comment)
 		s.Equal(comment, *result.Comment)
 		s.Nil(result.DeletedAt)
-		s.Nil(result.DisabledAt)
 		s.Equal(org.CreatedAt, result.CreatedAt)
 		s.Equal(org.UpdatedAt, result.UpdatedAt)
 	})
@@ -323,7 +319,6 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_UnsuspendOrganization(
 		s.Require().NotNil(result.Comment)
 		s.Equal(comment, *result.Comment)
 		s.Nil(result.DeletedAt)
-		s.Nil(result.DisabledAt)
 		s.Equal(org.CreatedAt, result.CreatedAt)
 		s.Equal(org.UpdatedAt, result.UpdatedAt)
 	})
@@ -340,74 +335,6 @@ func (s *OrganizationTestSuite) TestRepositoryIntegration_UnsuspendOrganization(
 
 		result := org.FetchLatest(s.DB)
 		s.Require().NotNil(result.SuspendedAt)
-		s.Nil(result.Comment)
-	})
-}
-
-func (s *OrganizationTestSuite) TestRepositoryIntegration_DisableOrganization() {
-	s.Run("should disable an organization", func() {
-		s.T().Parallel()
-		repo := organization.NewRepository(s.DB)
-		org := fake.NewOrganization(s.DB)
-
-		err := repo.DisableOrganization(context.Background(), org.ID, "test disable comment")
-		s.Require().NoError(err)
-
-		result := org.FetchLatest(s.DB)
-		s.Require().NotNil(result.DisabledAt)
-		s.Equal(time.UTC, result.DisabledAt.Location())
-		s.WithinDuration(time.Now().UTC(), *result.DisabledAt, 1*time.Minute)
-		s.Require().NotNil(result.Comment)
-		s.Equal("test disable comment", *result.Comment)
-		s.Nil(result.DeletedAt)
-		s.Nil(result.SuspendedAt)
-		s.Equal(org.CreatedAt, result.CreatedAt)
-		s.Equal(org.UpdatedAt, result.UpdatedAt)
-	})
-
-	s.Run("should not disable an organization if already deleted", func() {
-		s.T().Parallel()
-		repo := organization.NewRepository(s.DB)
-		org := fake.NewOrganization(s.DB, fake.OrganizationDeleted())
-
-		err := repo.DisableOrganization(context.Background(), org.ID, "test disable comment")
-		s.Require().NoError(err)
-
-		result := org.FetchLatest(s.DB)
-		s.Require().Nil(result.DisabledAt)
-		s.Nil(result.Comment)
-	})
-}
-
-func (s *OrganizationTestSuite) TestRepositoryIntegration_EnableOrganization() {
-	s.Run("should enable an organization", func() {
-		s.T().Parallel()
-		repo := organization.NewRepository(s.DB)
-		org := fake.NewOrganization(s.DB, fake.OrganizationDisabled())
-
-		err := repo.EnableOrganization(context.Background(), org.ID, "test enable comment")
-		s.Require().NoError(err)
-
-		result := org.FetchLatest(s.DB)
-		s.Nil(result.DisabledAt)
-		s.Require().NotNil(result.Comment)
-		s.Equal("test enable comment", *result.Comment)
-		s.Nil(result.DeletedAt)
-		s.Nil(result.SuspendedAt)
-		s.Equal(org.CreatedAt, result.CreatedAt)
-		s.Equal(org.UpdatedAt, result.UpdatedAt)
-	})
-
-	s.Run("should not enable an organization if already deleted", func() {
-		s.T().Parallel()
-		repo := organization.NewRepository(s.DB)
-		org := fake.NewOrganization(s.DB, fake.OrganizationDisabled(), fake.OrganizationDeleted())
-
-		err := repo.EnableOrganization(context.Background(), org.ID, "test enable comment")
-		s.Require().NoError(err)
-
-		result := org.FetchLatest(s.DB)
-		s.Require().NotNil(result.DisabledAt)
 		s.Nil(result.Comment)
 	})
 }

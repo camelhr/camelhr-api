@@ -25,9 +25,3 @@ var suspendOrganizationQuery string
 
 //go:embed sql/unsuspend_organization.sql
 var unsuspendOrganizationQuery string
-
-//go:embed sql/disable_organization.sql
-var disableOrganizationQuery string
-
-//go:embed sql/enable_organization.sql
-var enableOrganizationQuery string

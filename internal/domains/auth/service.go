@@ -62,20 +62,20 @@ func (s *service) Register(ctx context.Context, email, password, subdomain, orgN
 		return err
 	}
 
-	// create a new organization with owner. disable the newly created organizations
+	// create a new organization with owner. keep the organization in deleted state until verified
 	err = s.transactor.WithTx(ctx, func(ctx context.Context) error {
 		org, err := s.orgService.CreateOrganization(ctx, subdomain, orgName)
 		if err != nil {
 			return err
 		}
 
-		if err := s.orgService.DisableOrganization(ctx, org.ID, NewOrgDisableComment); err != nil {
+		if _, err = s.userService.CreateOwner(ctx, org.ID, email, password); err != nil {
 			return err
 		}
 
-		_, err = s.userService.CreateOwner(ctx, org.ID, email, password)
-
-		return err
+		// delete the newly registered organization with a predefined comment
+		// the organization & owner should be activated through backoffice upon verification
+		return s.orgService.DeleteOrganization(ctx, org.ID, NewOrgDeleteComment)
 	})
 
 	return err
@@ -85,11 +85,6 @@ func (s *service) Login(ctx context.Context, subdomain, email, password string) 
 	org, err := s.orgService.GetOrganizationBySubdomain(ctx, subdomain)
 	if err != nil {
 		return "", err
-	}
-
-	// prevent login for disabled organization
-	if org.DisabledAt != nil {
-		return "", organization.ErrOrganizationDisabled
 	}
 
 	u, err := s.userService.GetUserByOrgIDEmail(ctx, org.ID, email)

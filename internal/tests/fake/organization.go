@@ -56,16 +56,6 @@ func OrganizationSuspended() OrganizationOption {
 	}
 }
 
-// OrganizationDisabled sets disabled_at to current timestamp.
-func OrganizationDisabled() OrganizationOption {
-	return func(o *FakeOrganization) (*FakeOrganization, error) {
-		now := time.Now().UTC()
-		o.DisabledAt = &now
-
-		return o, nil
-	}
-}
-
 // NewOrganization creates a fake organization for testing.
 func NewOrganization(db database.Database, options ...OrganizationOption) *FakeOrganization {
 	org := &FakeOrganization{}
@@ -98,11 +88,11 @@ func (o *FakeOrganization) setDefaults() {
 
 func (o *FakeOrganization) persist(db database.Database) error {
 	insertQuery := `INSERT INTO organizations
-			(subdomain, name, suspended_at, disabled_at, comment, created_at, updated_at, deleted_at) VALUES
-			($1, $2, $3, $4, $5, $6, $7, $8)
+			(subdomain, name, suspended_at, comment, created_at, updated_at, deleted_at) VALUES
+			($1, $2, $3, $4, $5, $6, $7)
 			RETURNING *`
 
-	return db.Exec(context.Background(), o, insertQuery, o.Subdomain, o.Name, o.SuspendedAt, o.DisabledAt,
+	return db.Exec(context.Background(), o, insertQuery, o.Subdomain, o.Name, o.SuspendedAt,
 		o.Comment, o.CreatedAt, o.UpdatedAt, o.DeletedAt)
 }
 
@@ -144,20 +134,6 @@ func (o *FakeOrganization) IsSuspended(db database.Database) bool {
 	return isSuspended
 }
 
-// IsDisabled returns disabled status of the organization by querying the database.
-func (o *FakeOrganization) IsDisabled(db database.Database) bool {
-	var isDisabled bool
-
-	query := "SELECT disabled_at IS NOT NULL FROM organizations WHERE organization_id = $1"
-	err := db.Get(context.Background(), &isDisabled, query, o.ID)
-
-	if database.SuppressNoRowsError(err) != nil {
-		panic(err)
-	}
-
-	return isDisabled
-}
-
 // AddUser creates a fake user under the organization.
 func (o *FakeOrganization) AddUser(db database.Database, userOptions ...UserOption) *FakeUser {
 	user := NewUser(db, o.ID, userOptions...)
@@ -174,7 +150,6 @@ func (o *FakeOrganization) FetchLatest(db database.Database) *FakeOrganization {
 				subdomain,
 				name,
 				suspended_at,
-				disabled_at,
 				comment,
 				created_at,
 				updated_at,

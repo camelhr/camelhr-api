@@ -30,12 +30,6 @@ type Repository interface {
 
 	// UnsuspendOrganization unsuspend an organization by its ID.
 	UnsuspendOrganization(ctx context.Context, id int64, comment string) error
-
-	// DisableOrganization disables an organization by its ID.
-	DisableOrganization(ctx context.Context, id int64, comment string) error
-
-	// EnableOrganization enable an organization by its ID.
-	EnableOrganization(ctx context.Context, id int64, comment string) error
 }
 
 type repository struct {
@@ -88,12 +82,4 @@ func (r *repository) SuspendOrganization(ctx context.Context, id int64, comment 
 
 func (r *repository) UnsuspendOrganization(ctx context.Context, id int64, comment string) error {
 	return r.db.Exec(ctx, nil, unsuspendOrganizationQuery, id, comment)
-}
-
-func (r *repository) DisableOrganization(ctx context.Context, id int64, comment string) error {
-	return r.db.Exec(ctx, nil, disableOrganizationQuery, id, comment)
-}
-
-func (r *repository) EnableOrganization(ctx context.Context, id int64, comment string) error {
-	return r.db.Exec(ctx, nil, enableOrganizationQuery, id, comment)
 }

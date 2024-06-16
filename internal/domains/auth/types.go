@@ -11,8 +11,9 @@ const (
 	// SessionTTLDuration is the time duration to keep the session alive.
 	SessionTTLDuration = 24 * time.Hour
 
-	// NewOrgDisableComment is the comment message used when creating new org with registration.
-	NewOrgDisableComment = "disabled since newly registered"
+	// NewOrgDeleteComment is the comment message to identify newly registered organizations
+	// that are pending verification.
+	NewOrgDeleteComment = "deletion_reason: new_unverified_organization"
 )
 
 type (
