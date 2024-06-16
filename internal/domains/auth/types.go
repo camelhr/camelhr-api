@@ -8,8 +8,11 @@ const (
 	// JWTCookieName is the name of the cookie that stores the jwt token.
 	JWTCookieName = "jwt_session_id"
 
-	// SessionTTLDuration is the time duration to keep the session alive.
-	SessionTTLDuration = 24 * time.Hour
+	// DefaultSessionTTL is the time duration to keep the session alive.
+	DefaultSessionTTL = 24 * time.Hour
+
+	// RememberMeSessionTTL is the time duration to keep the session alive when remember me is enabled.
+	RememberMeSessionTTL = 8 * DefaultSessionTTL
 
 	// NewOrgDeleteComment is the comment message to identify newly registered organizations
 	// that are pending verification.

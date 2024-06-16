@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/camelhr/camelhr-api/internal/base"
 	"github.com/camelhr/camelhr-api/internal/database"
@@ -17,8 +18,8 @@ type Service interface {
 	// The organization is set disabled by default.
 	Register(ctx context.Context, email, password, subdomain, orgName string) error
 
-	// Login logs in a user and returns a jwt token.
-	Login(ctx context.Context, subdomain, email, password string) (string, error)
+	// Login logs in a user and returns a jwt token and ttl.
+	Login(ctx context.Context, subdomain, email, password string, rememberMe bool) (string, time.Duration, error)
 
 	// Logout logs out a user by deleting the session.
 	Logout(ctx context.Context, userID, orgID int64) error
@@ -81,35 +82,42 @@ func (s *service) Register(ctx context.Context, email, password, subdomain, orgN
 	return err
 }
 
-func (s *service) Login(ctx context.Context, subdomain, email, password string) (string, error) {
+func (s *service) Login(ctx context.Context, subdomain, email, password string, rememberMe bool) (
+	string, time.Duration, error,
+) {
 	org, err := s.orgService.GetOrganizationBySubdomain(ctx, subdomain)
 	if err != nil {
-		return "", err
+		return "", 0, err
 	}
 
 	u, err := s.userService.GetUserByOrgIDEmail(ctx, org.ID, email)
 	if err != nil {
 		if base.IsNotFoundError(err) {
-			return "", ErrInvalidCredentials
+			return "", 0, ErrInvalidCredentials
 		}
 
-		return "", err
+		return "", 0, err
 	}
 
 	// prevent login for disabled user
 	if u.DisabledAt != nil {
-		return "", ErrUserDisabled
+		return "", 0, ErrUserDisabled
 	}
 
 	// compare the password with bcrypt hash
 	if err := bcrypt.CompareHashAndPassword([]byte(u.PasswordHash), []byte(password)); err != nil {
-		return "", ErrInvalidCredentials
+		return "", 0, ErrInvalidCredentials
+	}
+
+	ttl := DefaultSessionTTL
+	if rememberMe {
+		ttl = RememberMeSessionTTL
 	}
 
 	// generate a new jwt token with user and organization data
-	jwtToken, err := GenerateJWT(s.appSecret, u.ID, org.ID, org.Subdomain)
+	jwtToken, err := GenerateJWT(ttl, s.appSecret, u.ID, org.ID, org.Subdomain)
 	if err != nil {
-		return "", err
+		return "", 0, err
 	}
 
 	// create session with the currently generated jwt token
@@ -120,12 +128,12 @@ func (s *service) Login(ctx context.Context, subdomain, email, password string) 
 		org.ID,
 		jwtToken,
 		ptrToString(u.APIToken),
-		SessionTTLDuration,
+		ttl,
 	); err != nil {
-		return "", err
+		return "", 0, err
 	}
 
-	return jwtToken, nil
+	return jwtToken, ttl, nil
 }
 
 func (s *service) Logout(ctx context.Context, userID, orgID int64) error {

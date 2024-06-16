@@ -177,7 +177,7 @@ func (m *authMiddleware) getUserForAPIToken(ctx context.Context, apiToken, subdo
 
 	// set the api token in the session
 	if err := m.sessionManager.CreateSession(ctx, u.ID, u.OrganizationID, "",
-		apiToken, auth.SessionTTLDuration); err != nil {
+		apiToken, auth.DefaultSessionTTL); err != nil {
 		return 0, 0, err
 	}
 

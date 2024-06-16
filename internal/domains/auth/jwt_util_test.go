@@ -26,7 +26,7 @@ func TestGenerateJWT(t *testing.T) {
 		orgSubdomain := gofakeit.Username()
 
 		// generate jwt token
-		token, err := auth.GenerateJWT(appSecret, userID, orgID, orgSubdomain)
+		token, err := auth.GenerateJWT(auth.DefaultSessionTTL, appSecret, userID, orgID, orgSubdomain)
 		require.NoError(t, err)
 		require.NotEmpty(t, token)
 
@@ -45,10 +45,10 @@ func TestGenerateJWT(t *testing.T) {
 		assert.Equal(t, orgSubdomain, appClaims.OrgSubdomain)
 
 		now := time.Now()
-		exp, err := parsedToken.Claims.GetExpirationTime()
+		expiry, err := parsedToken.Claims.GetExpirationTime()
 		require.NoError(t, err)
-		require.NotNil(t, exp)
-		assert.WithinDuration(t, now, exp.Time, 24*time.Hour) //nolint:testifylint // false positive
+		require.NotNil(t, expiry)
+		assert.WithinDuration(t, now, expiry.Time, auth.DefaultSessionTTL)
 
 		iat, err := parsedToken.Claims.GetIssuedAt()
 		require.NoError(t, err)
@@ -328,7 +328,7 @@ func TestParseAndValidateJWT(t *testing.T) {
 		orgSubdomain := gofakeit.Username()
 
 		// generate jwt token
-		token, err := auth.GenerateJWT(appSecret, userID, orgID, orgSubdomain)
+		token, err := auth.GenerateJWT(auth.DefaultSessionTTL, appSecret, userID, orgID, orgSubdomain)
 		require.NoError(t, err)
 		require.NotEmpty(t, token)
 

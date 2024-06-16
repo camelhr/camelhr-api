@@ -69,7 +69,9 @@ func (h *handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := h.service.Login(ctx, subdomain, email, password)
+	rememberMe := r.Form.Get("remember_me") == "true"
+
+	jwt, ttl, err := h.service.Login(ctx, subdomain, email, password, rememberMe)
 	if err != nil {
 		if errors.Is(err, ErrInvalidCredentials) || errors.Is(err, ErrUserDisabled) {
 			response.ErrorResponse(w, base.WrapError(err, base.ErrorHTTPStatus(http.StatusUnauthorized)))
@@ -81,7 +83,7 @@ func (h *handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response.SetCookie(w, JWTCookieName, token, int(SessionTTLDuration.Seconds()))
+	response.SetCookie(w, JWTCookieName, jwt, int(ttl.Seconds()))
 	response.Empty(w, http.StatusOK)
 }
 

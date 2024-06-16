@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/camelhr/camelhr-api/internal/domains/auth"
@@ -300,7 +301,8 @@ func TestHandler_Login(t *testing.T) {
 		handler := auth.NewHandler(mockService)
 
 		// mock the service calls
-		mockService.On("Login", fake.MockContext, subdomain, email, password).Return("", assert.AnError)
+		mockService.On("Login", fake.MockContext, subdomain, email, password, false).
+			Return("", time.Duration(0), assert.AnError)
 
 		// call the handler
 		handler.Login(rr, req)
@@ -335,7 +337,8 @@ func TestHandler_Login(t *testing.T) {
 		handler := auth.NewHandler(mockService)
 
 		// mock the service calls
-		mockService.On("Login", fake.MockContext, subdomain, email, password).Return("", auth.ErrInvalidCredentials)
+		mockService.On("Login", fake.MockContext, subdomain, email, password, false).
+			Return("", time.Duration(0), auth.ErrInvalidCredentials)
 
 		// call the handler
 		handler.Login(rr, req)
@@ -370,7 +373,8 @@ func TestHandler_Login(t *testing.T) {
 		handler := auth.NewHandler(mockService)
 
 		// mock the service calls
-		mockService.On("Login", fake.MockContext, subdomain, email, password).Return("", auth.ErrUserDisabled)
+		mockService.On("Login", fake.MockContext, subdomain, email, password, false).
+			Return("", time.Duration(0), auth.ErrUserDisabled)
 
 		// call the handler
 		handler.Login(rr, req)
@@ -406,7 +410,8 @@ func TestHandler_Login(t *testing.T) {
 		handler := auth.NewHandler(mockService)
 
 		// mock the service calls
-		mockService.On("Login", fake.MockContext, subdomain, email, password).Return(jwt, nil)
+		mockService.On("Login", fake.MockContext, subdomain, email, password, false).
+			Return(jwt, auth.DefaultSessionTTL, nil)
 
 		// call the handler
 		handler.Login(rr, req)
@@ -417,7 +422,51 @@ func TestHandler_Login(t *testing.T) {
 		assert.Equal(
 			t,
 			fmt.Sprintf("jwt_session_id=%s; Max-Age=%d; HttpOnly; Secure; SameSite=Strict",
-				jwt, int(auth.SessionTTLDuration.Seconds())),
+				jwt, int(auth.DefaultSessionTTL.Seconds())),
+			rr.Header().Get("Set-Cookie"),
+		)
+	})
+
+	t.Run("should login with remember-me", func(t *testing.T) {
+		t.Parallel()
+
+		jwt := gofakeit.UUID()
+		email := gofakeit.Email()
+		password := validPassword
+		subdomain := gofakeit.LetterN(30)
+
+		// create url-encoded form data
+		form := url.Values{}
+		form.Add("email", email)
+		form.Add("password", password)
+		form.Add("remember_me", "true")
+		req, err := http.NewRequest(http.MethodPost, loginPath, strings.NewReader(form.Encode()))
+		require.NoError(t, err)
+		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+		// simulate chi's URL parameters
+		routeContext := chi.NewRouteContext()
+		routeContext.URLParams.Add("subdomain", subdomain)
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
+
+		mockService := auth.NewMockService(t)
+		rr := httptest.NewRecorder()
+		handler := auth.NewHandler(mockService)
+
+		// mock the service calls
+		mockService.On("Login", fake.MockContext, subdomain, email, password, true).
+			Return(jwt, auth.RememberMeSessionTTL, nil)
+
+		// call the handler
+		handler.Login(rr, req)
+
+		// check the result
+		require.Equal(t, http.StatusOK, rr.Code)
+		assert.Empty(t, rr.Body.String())
+		assert.Equal(
+			t,
+			fmt.Sprintf("jwt_session_id=%s; Max-Age=%d; HttpOnly; Secure; SameSite=Strict",
+				jwt, int(auth.RememberMeSessionTTL.Seconds())),
 			rr.Header().Get("Set-Cookie"),
 		)
 	})

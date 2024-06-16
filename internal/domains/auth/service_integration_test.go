@@ -110,25 +110,6 @@ func (s *AuthTestSuite) TestServiceIntegration_Register() {
 }
 
 func (s *AuthTestSuite) TestServiceIntegration_Login() {
-	s.Run("should return error when user is disabled", func() {
-		s.T().Parallel()
-
-		userRepo := user.NewRepository(s.DB)
-		userService := user.NewService(userRepo, nil)
-		orgRepo := organization.NewRepository(s.DB)
-		orgService := organization.NewService(orgRepo, nil)
-		sessionManager := session.NewRedisSessionManager(s.RedisClient)
-		authService := auth.NewService(s.Config.AppSecret, s.DB, orgService, userService, sessionManager)
-
-		password := "2iG3@#fj"
-		o := fake.NewOrganization(s.DB)
-		u := fake.NewUser(s.DB, o.ID, fake.UserPassword(password))
-
-		token, err := authService.Login(context.Background(), o.Subdomain, u.Email, password)
-		s.Require().NoError(err)
-		s.NotEmpty(token)
-	})
-
 	s.Run("should login successfully", func() {
 		s.T().Parallel()
 
@@ -145,15 +126,50 @@ func (s *AuthTestSuite) TestServiceIntegration_Login() {
 		u := fake.NewUser(s.DB, o.ID, fake.UserPassword(password))
 		sessionKey := fmt.Sprintf("session:org:%v:user:%v", o.ID, u.ID)
 
-		jwt, err := authService.Login(context.Background(), o.Subdomain, u.Email, password)
+		jwt, ttl, err := authService.Login(context.Background(), o.Subdomain, u.Email, password, false)
 		s.Require().NoError(err)
 		s.NotEmpty(jwt)
+		s.Equal(auth.DefaultSessionTTL, ttl)
 
 		sessionData := s.RedisClient.HGetAll(ctx, sessionKey).Val()
 		s.Require().Len(sessionData, 4)
 		s.Equal(strconv.FormatInt(u.ID, 10), sessionData["user"])
 		s.Equal(strconv.FormatInt(o.ID, 10), sessionData["org"])
 		s.Equal(jwt, sessionData["jwt"])
+
+		sessionTTL := s.RedisClient.TTL(ctx, sessionKey).Val()
+		s.Require().Equal(auth.DefaultSessionTTL, sessionTTL)
+	})
+
+	s.Run("should login with remember-me successfully", func() {
+		s.T().Parallel()
+
+		ctx := context.Background()
+		userRepo := user.NewRepository(s.DB)
+		userService := user.NewService(userRepo, nil)
+		orgRepo := organization.NewRepository(s.DB)
+		orgService := organization.NewService(orgRepo, nil)
+		sessionManager := session.NewRedisSessionManager(s.RedisClient)
+		authService := auth.NewService(s.Config.AppSecret, s.DB, orgService, userService, sessionManager)
+
+		password := validPassword
+		o := fake.NewOrganization(s.DB)
+		u := fake.NewUser(s.DB, o.ID, fake.UserPassword(password))
+		sessionKey := fmt.Sprintf("session:org:%v:user:%v", o.ID, u.ID)
+
+		jwt, ttl, err := authService.Login(context.Background(), o.Subdomain, u.Email, password, true)
+		s.Require().NoError(err)
+		s.NotEmpty(jwt)
+		s.Equal(auth.RememberMeSessionTTL, ttl)
+
+		sessionData := s.RedisClient.HGetAll(ctx, sessionKey).Val()
+		s.Require().Len(sessionData, 4)
+		s.Equal(strconv.FormatInt(u.ID, 10), sessionData["user"])
+		s.Equal(strconv.FormatInt(o.ID, 10), sessionData["org"])
+		s.Equal(jwt, sessionData["jwt"])
+
+		sessionTTL := s.RedisClient.TTL(ctx, sessionKey).Val()
+		s.Require().Equal(auth.RememberMeSessionTTL, sessionTTL)
 	})
 }
 
@@ -174,9 +190,10 @@ func (s *AuthTestSuite) TestServiceIntegration_Logout() {
 		u := fake.NewUser(s.DB, o.ID, fake.UserPassword(password))
 		sessionKey := fmt.Sprintf("session:org:%v:user:%v", o.ID, u.ID)
 
-		jwt, err := authService.Login(context.Background(), o.Subdomain, u.Email, password)
+		jwt, ttl, err := authService.Login(context.Background(), o.Subdomain, u.Email, password, false)
 		s.Require().NoError(err)
 		s.NotEmpty(jwt)
+		s.Equal(auth.DefaultSessionTTL, ttl)
 
 		err = authService.Logout(context.Background(), u.ID, o.ID)
 		s.Require().NoError(err)

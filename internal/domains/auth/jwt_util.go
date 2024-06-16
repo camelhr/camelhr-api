@@ -34,14 +34,14 @@ func (c *AppClaims) Validate() error {
 }
 
 // GenerateJWT generates a new jwt token.
-func GenerateJWT(appSecret string, userID, orgID int64, orgSubdomain string) (string, error) {
+func GenerateJWT(ttl time.Duration, appSecret string, userID, orgID int64, orgSubdomain string) (string, error) {
 	claims := AppClaims{
 		UserID:       userID,
 		OrgID:        orgID,
 		OrgSubdomain: orgSubdomain,
 		RegisteredClaims: jwt.RegisteredClaims{
 			IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
-			ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(SessionTTLDuration)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(ttl)),
 		},
 	}
 

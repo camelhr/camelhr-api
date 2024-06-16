@@ -125,7 +125,7 @@ func TestService_Login(t *testing.T) {
 			orgService.On("GetOrganizationBySubdomain", ctx, subdomain).Return(organization.Organization{}, assert.AnError)
 
 			authService := auth.NewService("secret", nil, orgService, nil, nil)
-			_, err := authService.Login(ctx, subdomain, gofakeit.Email(), "@paSSw0rd")
+			_, _, err := authService.Login(ctx, subdomain, gofakeit.Email(), "@paSSw0rd", false)
 
 			require.Error(t, err)
 			require.ErrorIs(t, assert.AnError, err)
@@ -147,7 +147,7 @@ func TestService_Login(t *testing.T) {
 			userService.On("GetUserByOrgIDEmail", ctx, o.ID, email).Return(user.User{}, assert.AnError)
 
 			authService := auth.NewService("secret", nil, orgService, userService, nil)
-			_, err := authService.Login(ctx, subdomain, email, validPassword)
+			_, _, err := authService.Login(ctx, subdomain, email, validPassword, false)
 
 			require.Error(t, err)
 			require.ErrorIs(t, assert.AnError, err)
@@ -169,7 +169,7 @@ func TestService_Login(t *testing.T) {
 			userService.On("GetUserByOrgIDEmail", ctx, o.ID, email).Return(user.User{}, base.NewNotFoundError("not found"))
 
 			authService := auth.NewService("secret", nil, orgService, userService, nil)
-			_, err := authService.Login(ctx, subdomain, email, validPassword)
+			_, _, err := authService.Login(ctx, subdomain, email, validPassword, false)
 
 			require.Error(t, err)
 			require.ErrorIs(t, auth.ErrInvalidCredentials, err)
@@ -199,7 +199,7 @@ func TestService_Login(t *testing.T) {
 		userService.On("GetUserByOrgIDEmail", ctx, o.ID, email).Return(u, nil)
 
 		authService := auth.NewService("secret", nil, orgService, userService, nil)
-		_, err = authService.Login(ctx, subdomain, email, validPassword)
+		_, _, err = authService.Login(ctx, subdomain, email, validPassword, false)
 
 		require.Error(t, err)
 		require.ErrorIs(t, auth.ErrUserDisabled, err)
@@ -227,7 +227,7 @@ func TestService_Login(t *testing.T) {
 		userService.On("GetUserByOrgIDEmail", ctx, o.ID, email).Return(u, nil)
 
 		authService := auth.NewService("secret", nil, orgService, userService, nil)
-		_, err = authService.Login(ctx, subdomain, email, validPassword+"ZZZ")
+		_, _, err = authService.Login(ctx, subdomain, email, validPassword+"ZZZ", false)
 
 		require.Error(t, err)
 		require.ErrorIs(t, auth.ErrInvalidCredentials, err)
@@ -258,16 +258,16 @@ func TestService_Login(t *testing.T) {
 
 		sessionManager := session.NewMockSessionManager(t)
 		sessionManager.On("CreateSession", ctx, u.ID, o.ID, fake.MockString, apiToken,
-			auth.SessionTTLDuration).Return(assert.AnError)
+			auth.DefaultSessionTTL).Return(assert.AnError)
 
 		authService := auth.NewService("jwt_secret", nil, orgService, userService, sessionManager)
-		_, err = authService.Login(ctx, subdomain, email, validPassword)
+		_, _, err = authService.Login(ctx, subdomain, email, validPassword, false)
 
 		require.Error(t, err)
 		require.ErrorIs(t, assert.AnError, err)
 	})
 
-	t.Run("should return the jwt token", func(t *testing.T) {
+	t.Run("should return the jwt token and default ttl", func(t *testing.T) {
 		t.Parallel()
 
 		ctx := context.Background()
@@ -292,13 +292,49 @@ func TestService_Login(t *testing.T) {
 
 		sessionManager := session.NewMockSessionManager(t)
 		sessionManager.On("CreateSession", ctx, u.ID, o.ID, fake.MockString, apiToken,
-			auth.SessionTTLDuration).Return(nil)
+			auth.DefaultSessionTTL).Return(nil)
 
 		authService := auth.NewService("jwt_secret", nil, orgService, userService, sessionManager)
-		token, err := authService.Login(ctx, subdomain, email, validPassword)
+		token, ttl, err := authService.Login(ctx, subdomain, email, validPassword, false)
 
 		require.NoError(t, err)
 		require.NotEmpty(t, token)
+		assert.Equal(t, auth.DefaultSessionTTL, ttl)
+	})
+
+	t.Run("should return the jwt token and remember-me ttl", func(t *testing.T) {
+		t.Parallel()
+
+		ctx := context.Background()
+		subdomain := gofakeit.LetterN(30)
+		email := gofakeit.Email()
+		passwordHash, err := bcrypt.GenerateFromPassword([]byte(validPassword), bcrypt.DefaultCost)
+		require.NoError(t, err)
+
+		apiToken := gofakeit.UUID()
+		u := user.User{
+			ID:           gofakeit.Int64(),
+			PasswordHash: string(passwordHash),
+			APIToken:     &apiToken,
+		}
+		o := organization.Organization{ID: gofakeit.Int64()}
+
+		orgService := organization.NewMockService(t)
+		orgService.On("GetOrganizationBySubdomain", ctx, subdomain).Return(o, nil)
+
+		userService := user.NewMockService(t)
+		userService.On("GetUserByOrgIDEmail", ctx, o.ID, email).Return(u, nil)
+
+		sessionManager := session.NewMockSessionManager(t)
+		sessionManager.On("CreateSession", ctx, u.ID, o.ID, fake.MockString, apiToken,
+			auth.RememberMeSessionTTL).Return(nil)
+
+		authService := auth.NewService("jwt_secret", nil, orgService, userService, sessionManager)
+		token, ttl, err := authService.Login(ctx, subdomain, email, validPassword, true)
+
+		require.NoError(t, err)
+		require.NotEmpty(t, token)
+		assert.Equal(t, auth.RememberMeSessionTTL, ttl)
 	})
 }
 

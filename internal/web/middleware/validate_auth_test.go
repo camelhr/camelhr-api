@@ -39,7 +39,7 @@ func TestAuthMiddleware_ValidateAuth(t *testing.T) {
 		userID := gofakeit.Int64()
 		orgID := gofakeit.Int64()
 		subdomain := gofakeit.LetterN(30)
-		token, err := auth.GenerateJWT(appSecret, userID, orgID, subdomain)
+		token, err := auth.GenerateJWT(auth.DefaultSessionTTL, appSecret, userID, orgID, subdomain)
 		require.NoError(t, err)
 		require.NotEmpty(t, token)
 
@@ -99,7 +99,7 @@ func TestAuthMiddleware_ValidateAuth(t *testing.T) {
 		userID := gofakeit.Int64()
 		orgID := gofakeit.Int64()
 		subdomain := gofakeit.LetterN(30)
-		token, err := auth.GenerateJWT(appSecret, userID, orgID, subdomain)
+		token, err := auth.GenerateJWT(auth.DefaultSessionTTL, appSecret, userID, orgID, subdomain)
 		require.NoError(t, err)
 		require.NotEmpty(t, token)
 
@@ -166,7 +166,7 @@ func TestAuthMiddleware_ValidateAuth(t *testing.T) {
 		userService.On("GetUserByOrgSubdomainAPIToken", mock.Anything, subdomain, apiToken).
 			Return(u, nil).Once()
 
-		sessionManager.On("CreateSession", fake.MockContext, u.ID, u.OrganizationID, "", apiToken, auth.SessionTTLDuration).
+		sessionManager.On("CreateSession", fake.MockContext, u.ID, u.OrganizationID, "", apiToken, auth.DefaultSessionTTL).
 			Return(nil).Once()
 
 		// create a new auth middleware
@@ -233,7 +233,7 @@ func TestAuthMiddleware_ValidateAuth(t *testing.T) {
 		userService.On("GetUserByOrgSubdomainAPIToken", mock.Anything, subdomain, apiToken).
 			Return(u, nil).Once()
 
-		sessionManager.On("CreateSession", fake.MockContext, u.ID, u.OrganizationID, "", apiToken, auth.SessionTTLDuration).
+		sessionManager.On("CreateSession", fake.MockContext, u.ID, u.OrganizationID, "", apiToken, auth.DefaultSessionTTL).
 			Return(assert.AnError).Once()
 
 		// create a new auth middleware
@@ -366,7 +366,7 @@ func TestAuthMiddleware_ValidateAuth(t *testing.T) {
 		orgSubdomain := gofakeit.Username()
 
 		// generate jwt token
-		token, err := auth.GenerateJWT(appSecret, userID, orgID, orgSubdomain)
+		token, err := auth.GenerateJWT(auth.DefaultSessionTTL, appSecret, userID, orgID, orgSubdomain)
 		require.NoError(t, err)
 		require.NotEmpty(t, token)
 
@@ -409,7 +409,7 @@ func TestAuthMiddleware_ValidateAuth(t *testing.T) {
 		userID := gofakeit.Int64()
 		orgID := gofakeit.Int64()
 		subdomain := gofakeit.LetterN(30)
-		token, err := auth.GenerateJWT(appSecret, userID, orgID, subdomain)
+		token, err := auth.GenerateJWT(auth.DefaultSessionTTL, appSecret, userID, orgID, subdomain)
 		require.NoError(t, err)
 		require.NotEmpty(t, token)
 

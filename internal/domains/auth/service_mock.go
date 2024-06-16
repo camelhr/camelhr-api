@@ -4,6 +4,7 @@ package auth
 
 import (
 	context "context"
+	time "time"
 
 	mock "github.com/stretchr/testify/mock"
 )
@@ -21,32 +22,39 @@ func (_m *MockService) EXPECT() *MockService_Expecter {
 	return &MockService_Expecter{mock: &_m.Mock}
 }
 
-// Login provides a mock function with given fields: ctx, subdomain, email, password
-func (_m *MockService) Login(ctx context.Context, subdomain string, email string, password string) (string, error) {
-	ret := _m.Called(ctx, subdomain, email, password)
+// Login provides a mock function with given fields: ctx, subdomain, email, password, rememberMe
+func (_m *MockService) Login(ctx context.Context, subdomain string, email string, password string, rememberMe bool) (string, time.Duration, error) {
+	ret := _m.Called(ctx, subdomain, email, password, rememberMe)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Login")
 	}
 
 	var r0 string
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) (string, error)); ok {
-		return rf(ctx, subdomain, email, password)
+	var r1 time.Duration
+	var r2 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string, bool) (string, time.Duration, error)); ok {
+		return rf(ctx, subdomain, email, password, rememberMe)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) string); ok {
-		r0 = rf(ctx, subdomain, email, password)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string, bool) string); ok {
+		r0 = rf(ctx, subdomain, email, password, rememberMe)
 	} else {
 		r0 = ret.Get(0).(string)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, string, string) error); ok {
-		r1 = rf(ctx, subdomain, email, password)
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, string, bool) time.Duration); ok {
+		r1 = rf(ctx, subdomain, email, password, rememberMe)
 	} else {
-		r1 = ret.Error(1)
+		r1 = ret.Get(1).(time.Duration)
 	}
 
-	return r0, r1
+	if rf, ok := ret.Get(2).(func(context.Context, string, string, string, bool) error); ok {
+		r2 = rf(ctx, subdomain, email, password, rememberMe)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
 }
 
 // MockService_Login_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Login'
@@ -59,23 +67,24 @@ type MockService_Login_Call struct {
 //   - subdomain string
 //   - email string
 //   - password string
-func (_e *MockService_Expecter) Login(ctx interface{}, subdomain interface{}, email interface{}, password interface{}) *MockService_Login_Call {
-	return &MockService_Login_Call{Call: _e.mock.On("Login", ctx, subdomain, email, password)}
+//   - rememberMe bool
+func (_e *MockService_Expecter) Login(ctx interface{}, subdomain interface{}, email interface{}, password interface{}, rememberMe interface{}) *MockService_Login_Call {
+	return &MockService_Login_Call{Call: _e.mock.On("Login", ctx, subdomain, email, password, rememberMe)}
 }
 
-func (_c *MockService_Login_Call) Run(run func(ctx context.Context, subdomain string, email string, password string)) *MockService_Login_Call {
+func (_c *MockService_Login_Call) Run(run func(ctx context.Context, subdomain string, email string, password string, rememberMe bool)) *MockService_Login_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string))
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string), args[4].(bool))
 	})
 	return _c
 }
 
-func (_c *MockService_Login_Call) Return(_a0 string, _a1 error) *MockService_Login_Call {
-	_c.Call.Return(_a0, _a1)
+func (_c *MockService_Login_Call) Return(_a0 string, _a1 time.Duration, _a2 error) *MockService_Login_Call {
+	_c.Call.Return(_a0, _a1, _a2)
 	return _c
 }
 
-func (_c *MockService_Login_Call) RunAndReturn(run func(context.Context, string, string, string) (string, error)) *MockService_Login_Call {
+func (_c *MockService_Login_Call) RunAndReturn(run func(context.Context, string, string, string, bool) (string, time.Duration, error)) *MockService_Login_Call {
 	_c.Call.Return(run)
 	return _c
 }
