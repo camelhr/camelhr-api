@@ -7,6 +7,8 @@ export PGUSER ?= postgres
 export PGPASSWORD ?= postgres
 export PGDATABASE ?= camelhr_dev_db
 export PGSSLMODE ?= disable
+export REDIS_HOST ?= localhost
+export REDIS_PORT ?= 6379
 
 up:
 	docker-compose -f docker-compose.yml up -d --build
@@ -18,7 +20,7 @@ nuke:
 	docker-compose -f docker-compose.yml down --volumes --remove-orphans
 
 run:
-	go run cmd/api/main.go
+	DB_CONN=postgres://${PGUSER}:${PGPASSWORD}@${PGHOST}:5432/${PGDATABASE}?sslmode=${PGSSLMODE} REDIS_CONN=redis://${REDIS_HOST}:${REDIS_PORT} go run cmd/api/main.go
 
 build:
 	go build -o bin/ ./...

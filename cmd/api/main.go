@@ -46,7 +46,7 @@ func main() {
 	// connect to redis
 	redisClient, err := connectToRedis(configs)
 	if err != nil {
-		log.Error("failed to connect to redis %v", err)
+		log.Error("failed to connect to redis: %v", err)
 		return
 	}
 	defer redisClient.Close()

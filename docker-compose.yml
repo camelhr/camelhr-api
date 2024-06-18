@@ -50,7 +50,7 @@ services:
       dockerfile: Dockerfile
     environment:
       DB_CONN: "user=${PGUSER?} password=${PGPASSWORD?} dbname=${PGDATABASE?} host=db port=${PGPORT?} sslmode=${PGSSLMODE}"
-      REDIS_CONN: "redis://redis:6379"
+      REDIS_CONN: "redis://redis:${REDIS_PORT?}"
       LOG_LEVEL: DEBUG
     depends_on:
       redis:
