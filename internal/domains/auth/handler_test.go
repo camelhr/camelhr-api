@@ -421,7 +421,7 @@ func TestHandler_Login(t *testing.T) {
 		assert.Empty(t, rr.Body.String())
 		assert.Equal(
 			t,
-			fmt.Sprintf("jwt_session_id=%s; Max-Age=%d; HttpOnly; Secure; SameSite=Strict",
+			fmt.Sprintf("jwt_session_id=%s; Path=/; Max-Age=%d; HttpOnly; Secure; SameSite=Strict",
 				jwt, int(auth.DefaultSessionTTL.Seconds())),
 			rr.Header().Get("Set-Cookie"),
 		)
@@ -465,7 +465,7 @@ func TestHandler_Login(t *testing.T) {
 		assert.Empty(t, rr.Body.String())
 		assert.Equal(
 			t,
-			fmt.Sprintf("jwt_session_id=%s; Max-Age=%d; HttpOnly; Secure; SameSite=Strict",
+			fmt.Sprintf("jwt_session_id=%s; Path=/; Max-Age=%d; HttpOnly; Secure; SameSite=Strict",
 				jwt, int(auth.RememberMeSessionTTL.Seconds())),
 			rr.Header().Get("Set-Cookie"),
 		)
@@ -510,7 +510,7 @@ func TestHandler_Logout(t *testing.T) {
 		require.Equal(t, http.StatusOK, rr.Code)
 		assert.Equal(
 			t,
-			"jwt_session_id=; Max-Age=0; HttpOnly; Secure; SameSite=Strict",
+			"jwt_session_id=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict",
 			rr.Header().Get("Set-Cookie"),
 		)
 	})

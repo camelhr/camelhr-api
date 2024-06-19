@@ -156,6 +156,7 @@ func SetCookie(w http.ResponseWriter, name, value string, maxAge int) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     name,
 		Value:    value,
+		Path:     "/",
 		MaxAge:   maxAge,                  // time in seconds until the cookie expires
 		HttpOnly: true,                    // prevent javascript access
 		Secure:   true,                    // only send over https
@@ -168,6 +169,7 @@ func RemoveCookie(w http.ResponseWriter, name string) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     name,
 		Value:    "",
+		Path:     "/",
 		MaxAge:   -1, // delete the cookie
 		HttpOnly: true,
 		Secure:   true,

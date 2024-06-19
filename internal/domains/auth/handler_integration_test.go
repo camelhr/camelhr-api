@@ -109,6 +109,7 @@ func (s *AuthTestSuite) TestHandlerIntegration_Logout() {
 		// assert the logout response
 		s.Require().Equal(http.StatusOK, logoutRR.Code)
 		s.Empty(logoutRR.Body.String())
-		s.Contains(logoutRR.Header().Get("Set-Cookie"), "jwt_session_id=; Max-Age=0;")
+		s.Contains(logoutRR.Header().Get("Set-Cookie"),
+			"jwt_session_id=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict")
 	})
 }
