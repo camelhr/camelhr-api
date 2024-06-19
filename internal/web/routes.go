@@ -2,6 +2,7 @@ package web
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/camelhr/camelhr-api/internal/config"
 	"github.com/camelhr/camelhr-api/internal/database"
@@ -13,6 +14,7 @@ import (
 	"github.com/camelhr/camelhr-api/internal/web/response"
 	"github.com/go-chi/chi/v5"
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -35,6 +37,7 @@ func SetupRoutes(db database.Database, redisClient *redis.Client, conf config.Co
 	r := chi.NewRouter()
 
 	// add middlewares
+	r.Use(cors.Handler(corsOptions()))
 	r.Use(chimiddleware.RequestID)
 	r.Use(middleware.ChiRequestLoggerMiddleware()) // <--<< logger should come before recoverer
 	r.Use(chimiddleware.Recoverer)
@@ -82,4 +85,28 @@ func SetupRoutes(db database.Database, redisClient *redis.Client, conf config.Co
 	})
 
 	return r
+}
+
+func corsOptions() cors.Options {
+	const corsMaxAgeInSeconds = 300 // 5 minutes
+
+	return cors.Options{
+		AllowOriginFunc: func(r *http.Request, origin string) bool {
+			// allow exact match
+			if origin == "https://camelhr.com" {
+				return true
+			}
+			// allow any subdomain of camelhr.com
+			if strings.HasSuffix(origin, ".camelhr.com") {
+				return true
+			}
+
+			return false
+		},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           corsMaxAgeInSeconds,
+	}
 }

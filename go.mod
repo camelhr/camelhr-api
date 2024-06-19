@@ -7,6 +7,7 @@ require (
 	github.com/brianvoe/gofakeit/v7 v7.0.2
 	github.com/camelhr/log v0.0.0-20240520183506-551f8c29392d
 	github.com/go-chi/chi/v5 v5.0.12
+	github.com/go-chi/cors v1.2.1
 	github.com/go-playground/locales v0.14.1
 	github.com/go-playground/universal-translator v0.18.1
 	github.com/go-playground/validator/v10 v10.19.0
